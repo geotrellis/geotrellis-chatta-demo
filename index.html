@@ -32,6 +32,7 @@
 		<link rel="stylesheet" href="../dist/leaflet.ie.css" />
 	<![endif]-->
 	
+	<link href="css/jquery-ui.css" rel="stylesheet">
 	<link href="css/application.css" rel="stylesheet">
 	
 	<script src="js/leaflet-src.js"></script>
@@ -39,6 +40,7 @@
     <!--[if lt IE 9]>
       <script src="../assets/js/html5shiv.js"></script>
     <![endif]-->
+
   </head>
 
   <body>
@@ -67,38 +69,80 @@
 			<div id="map"></div>
         </div><!--/map-->
         <div class="span3">
-          <div class="well sidebar-nav">
-            <ul class="nav nav-list">
-              <li class="nav-header">Sidebar</li>
-              <li class="active"><a href="#">Link</a></li>
-              <li><a href="#">Link</a></li>
-              <li><a href="#">Link</a></li>
-              <li><a href="#">Link</a></li>
-              <li class="nav-header">Sidebar</li>
-              <li><a href="#">Link</a></li>
-              <li><a href="#">Link</a></li>
-              <li><a href="#">Link</a></li>
-              <li><a href="#">Link</a></li>
-              <li><a href="#">Link</a></li>
-              <li><a href="#">Link</a></li>
-              <li class="nav-header">Sidebar</li>
-              <li><a href="#">Link</a></li>
-              <li><a href="#">Link</a></li>
-              <li><a href="#">Link</a></li>
-            </ul>
-          </div><!--/.well -->
+		
+		<ul class="nav nav-tabs">
+			<li><a href="#parameters" data-toggle="tab">Parameters</a></li>
+			<li><a href="#summary" data-toggle="tab">Summary</a></li>
+		</ul>
+		
+		
+		<div class="tab-content">
+		
+			<div class="tab-pane active" id="parameters">
+			<!-- Parameter 1 -->
+			  <div class="well" id="tools">
+				<h4 class="slider-label">Parameter 1</h4>
+				<span class="weight">
+					<input type="text" id="amount">
+				</span>
+				<div class="slider"></div>	
+			  </div>
+			  
+			<!-- Parameter 2 -->
+			  <div class="well" id="tools">
+				<h4 class="slider-label">Parameter 2</h4>
+				<span class="weight">
+					<input type="text" id="amount">
+				</span>
+				<div class="slider"></div>	
+			  </div>
+			  
+			<!-- Parameter 3 -->
+			  <div class="well" id="tools">
+				<h4 class="slider-label">Parameter 3</h4>
+				<span class="weight">
+					<input type="text" id="amount">
+				</span>
+				<div class="slider"></div>	
+			  </div>
+			  
+			<!-- Parameter 4 -->
+			  <div class="well" id="tools">
+				<h4 class="slider-label">Parameter 4</h4>
+				<span class="weight">
+					<input type="text" id="amount">
+				</span>
+				<div class="slider"></div>	
+			  </div>
+			  
+			<!-- Parameter 5 -->
+			  <div class="well" id="tools">
+				<h4 class="slider-label">Parameter 5</h4>
+				<span class="weight">
+					<input type="text" id="amount">
+				</span>
+				<div class="slider"></div>	
+			  </div>
+			  
+			  <a class="btn btn-primary btn-large" href="#">Run Model</a>
+			  <a class="btn btn-danger btn-large" href="#">Reset</a>
+		  
+		  </div>
+		  
+		  <div class="tab-pane" id="summary">
+			<h3>Summary</h3>
+			<p>Summary data goes here.</p>
+		  </div>
+		  
+		  </div> <!--/tab-content -->
+		  
         </div><!--/span-->
       </div><!--/row-->
-
-      <hr>
-
-      <footer>
-        <p>&copy; Company 2013</p>
-      </footer>
 
     </div><!--/.fluid-container-->
 
     <script src="js/jquery-1.9.1.min.js"></script>
+    <script src="js/jquery-ui-1.10.0.min.js"></script>
 	<script src="js/bootstrap.min.js"></script>
 	<script src="js/application.js"></script>
 
