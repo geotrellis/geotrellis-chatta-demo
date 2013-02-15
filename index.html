@@ -13,7 +13,16 @@
         padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
       }
     </style>
+	
+	<script src="js/leaflet-src.js"></script>
+	
     <link href="css/bootstrap-responsive.css" rel="stylesheet">
+	<link href="css/leaflet.css" rel="stylesheet">
+	<!--[if lte IE 8]>
+		<link rel="stylesheet" href="../dist/leaflet.ie.css" />
+	<![endif]-->
+	
+	<link href="css/application.css" rel="stylesheet">
 
     <!--[if lt IE 9]>
       <script src="../assets/js/html5shiv.js"></script>
@@ -37,17 +46,17 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="brand" href="#">Project name</a>
+          <a class="brand" href="#">Demo</a>
           <div class="nav-collapse collapse">
-            <ul class="nav">
-              <li class="active"><a href="#">Home</a></li>
+            <ul class="nav pull-right">
               <li><a href="#about">About</a></li>
-              <li><a href="#contact">Contact</a></li>
             </ul>
           </div><!--/.nav-collapse -->
         </div>
       </div>
     </div>
+	
+	<div id="map"></div>
 
     <div class="container">
 
@@ -58,6 +67,6 @@
 
     <script src="js/jquery-1.9.1.min.js"></script>
 	<script src="js/bootstrap.min.js"></script>
-
+	<script src="js/application.js"></script>
   </body>
 </html>
