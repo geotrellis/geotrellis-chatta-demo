@@ -14,8 +14,14 @@ L.tileLayer('http://{s}.tiles.mapbox.com/v3/azavea.map-zbompf85/{z}/{x}/{y}.png'
       max: 10,
       step: 1,
       slide: function( event, ui ) {
-        $( "#amount" ).val( "+" + ui.value );
+        $( this ).prev('.weight').text( "+" + ui.value );
       }
     });
-    $( "#amount" ).val( "+" + $( ".slider" ).slider( "value" ) );
+    $( '.weight' ).text( "+0" );
   });
+  
+ // Reset
+$('.reset').on("click", function() {
+	$( ".slider" ).slider( "value", 0 );
+	$( '.weight' ).text( "+0" );
+});
