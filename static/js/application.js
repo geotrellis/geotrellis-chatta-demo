@@ -17,9 +17,9 @@ var drawControl = new L.Control.Draw({
         marker: false,
         polyline: false,
         rectangle: false,
-//        circle: ,
+        circle: false,
 	polygon: {
-	    title: 'Draw a sexy polygon!',
+	    title: 'Draw a polygon.',
 	    allowIntersection: false,
 	    drawError: {
 		color: '#b00b00',
@@ -41,7 +41,12 @@ map.on('draw:created', function (e) {
     layer = e.layer;
 
     if (type === 'polygon') {
-        alert(GJ.fromPolygon(layer))
+        // Perform call to GeoTrellis
+        var geoJson = GJ.fromPolygon(layer);
+        $.post('gt/sum', geoJson,
+               function(data) {
+                   alert("Data loaded:" + JSON.stringify(data));
+               }, "json");
     }
 
     drawnItems.addLayer(layer);

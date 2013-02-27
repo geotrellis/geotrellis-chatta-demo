@@ -1,0 +1,13 @@
+{
+ "catalog": "Catalog of Chattanooga data",
+ "stores": [
+  {
+   "store": "chatta:fs",
+   "params": {
+     "type": "fs",
+     "path": "/home/rob/data/chatta/arg",
+     "cacheAll": "no"
+    }
+  }
+ ]
+}

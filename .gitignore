@@ -1,1 +1,13 @@
 *~
+project/boot
+project/plugins/project
+project/plugins/target
+project/target
+target
+.ensime
+TAGS
+\#*#
+*~
+.#*
+.lib
+*.aux.xml
