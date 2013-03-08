@@ -21,7 +21,7 @@ object Model {
   def run(rasterExtent:Op[RasterExtent], crs:String = "wm") = {
     val ops = for((name,weight) <- weights) yield {
       val rast = io.LoadRaster(s"${crs}_${name}",rasterExtent)
-      val converted = Force(rast.map { r => r.convert(TypeShort) })
+      val converted = Force(rast.map { r => r.convert(TypeByte) })
       local.Multiply(weight, converted)
     }
     local.IfCell(local.Add(ops.toSeq:_*),_ == 0, NODATA)

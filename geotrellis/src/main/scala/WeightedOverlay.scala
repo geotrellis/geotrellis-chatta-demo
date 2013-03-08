@@ -35,11 +35,14 @@ class WeightedOverlay {
     @DefaultValue(defaultColors) @QueryParam("palette") palette:String,
     @DefaultValue("4") @QueryParam("colors") numColors:String,
     @DefaultValue("image/png") @QueryParam("format") format:String,
+    @DefaultValue("") @QueryParam("breaks") breaks:String,
     @Context req:HttpServletRequest
   ) = {
+    val extentOp = string.ParseExtent(bbox)
+
     val colsOp = string.ParseInt(cols)
     val rowsOp = string.ParseInt(rows)
-    val extentOp = string.ParseExtent(bbox)
+
     val reOp = extent.GetRasterExtent(extentOp, colsOp, rowsOp)
 
     val layerOps = 
@@ -51,7 +54,10 @@ class WeightedOverlay {
     val overlayOp = Model.run(reOp,"wm")
     //val overlayOp = WeightedOverlayArray(layerOps, weightOps)
 
-    val png = io.SimpleRenderPng(overlayOp, BlueToRed)
+    val breaksOp = 
+      logic.ForEach(string.SplitOnComma(breaks))(string.ParseInt(_))
+
+    val png = Render.operation(overlayOp,BlueToRed,breaksOp)
 
     Main.server.getResult(png) match {
       case process.Complete(img,h) =>
