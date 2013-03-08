@@ -2,10 +2,18 @@
  "catalog": "Catalog of Chattanooga data",
  "stores": [
   {
-   "store": "chatta:fs",
+   "store": "chatta:albers",
    "params": {
      "type": "fs",
-     "path": "/home/rob/data/chatta/arg",
+     "path": "data/arg_albers",
+     "cacheAll": "no"
+    }
+  },
+  {
+   "store": "chatta:wm",
+   "params": {
+     "type": "fs",
+     "path": "data/arg_wm",
      "cacheAll": "no"
     }
   }

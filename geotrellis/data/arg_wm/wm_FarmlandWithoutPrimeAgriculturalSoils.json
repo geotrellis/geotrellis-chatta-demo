@@ -1,0 +1,16 @@
+{
+  "layer": "wm_FarmlandWithoutPrimeAgriculturalSoils",
+  "datatype": "bool", 
+  "type": "arg",
+  "xmin": -9660167.558407,
+  "xmax": -9332477.558407,
+  "ymin": 4005130.382678,
+  "ymax": 4326430.382678,
+  "cols": 10923,
+  "rows": 10710,
+  "cellwidth": 30.000000,
+  "cellheight": 30.000000,
+  "epsg": 3785,
+  "yskew": 0.0,
+  "xskew": 0.0
+}

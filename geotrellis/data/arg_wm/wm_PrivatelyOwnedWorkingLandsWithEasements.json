@@ -1,0 +1,16 @@
+{
+  "layer": "wm_PrivatelyOwnedWorkingLandsWithEasements",
+  "datatype": "bool", 
+  "type": "arg",
+  "xmin": -9662757.411390,
+  "xmax": -9329847.411390,
+  "ymin": 4002574.135304,
+  "ymax": 4329214.135304,
+  "cols": 11097,
+  "rows": 10888,
+  "cellwidth": 30.000000,
+  "cellheight": 30.000000,
+  "epsg": 3785,
+  "yskew": 0.0,
+  "xskew": 0.0
+}

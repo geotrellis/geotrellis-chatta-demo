@@ -1,0 +1,16 @@
+{
+  "layer": "wm_Non-workingProtectedOrPublicLands",
+  "datatype": "bool", 
+  "type": "arg",
+  "xmin": -9660167.889919,
+  "xmax": -9332507.889919,
+  "ymin": 4005126.931521,
+  "ymax": 4326426.931521,
+  "cols": 10922,
+  "rows": 10710,
+  "cellwidth": 30.000000,
+  "cellheight": 30.000000,
+  "epsg": 3785,
+  "yskew": 0.0,
+  "xskew": 0.0
+}

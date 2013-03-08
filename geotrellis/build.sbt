@@ -10,5 +10,3 @@ libraryDependencies ++= Seq(
   "org.geotools" % "gt-coverage" % "8.0-M4",
   "org.geotools" % "gt-coveragetools" % "8.0-M4"
 )
-
-

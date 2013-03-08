@@ -20,7 +20,6 @@ import scala.collection.JavaConversions._
  */
 @Path("/gt/sum")
 class Sum {
-  
   @POST
   def sumPost(
     polygonJson : String
@@ -47,8 +46,6 @@ class Sum {
     cached:String
 
   ):Any = {
-//    val data = "{ \"sum\": 5, \"elapsed\": 1000 }"
-//    Response.ok(data).`type`("application/json").build()
     val start = System.currentTimeMillis()
     val server = Main.server
 
