@@ -21,7 +21,6 @@ import scala.collection.JavaConversions._
 @Path("/gt/wo")
 class WeightedOverlay {
   final val defaultBox = "-9634947.090,4030964.877,-9359277.090,4300664.877"
-  //final val defaultBox = "-9470853.552646479,4128822.5198520804,-9451285.673405472,4148390.3990930878"
   final val defaultColors = "ff0000,ffff00,00ff00,0000ff"
 
   @GET
@@ -45,15 +44,12 @@ class WeightedOverlay {
 
     val reOp = extent.GetRasterExtent(extentOp, colsOp, rowsOp)
 
-    val layerOps = 
-      logic.ForEach(string.SplitOnComma(layers))(io.LoadRaster(_, reOp))
+    val layerOps = string.SplitOnComma(layers)
     val weightOps = 
       logic.ForEach(string.SplitOnComma(weights))(string.ParseInt(_))
 
-    // Do the actual weighted overlay operation
-    val overlayOp = Model.run(reOp,"wm")
-    //val overlayOp = WeightedOverlayArray(layerOps, weightOps)
-
+    val overlayOp = Model(layerOps,weightOps,reOp)
+ 
     val breaksOp = 
       logic.ForEach(string.SplitOnComma(breaks))(string.ParseInt(_))
 
@@ -68,7 +64,6 @@ class WeightedOverlay {
             val ms = h.elapsedTime
             val query = req.getQueryString
             val url = "/gt/wo?format=image/png&" + query
-            println(url)
             val html = InfoPage.infoPage(cols,rows,ms,url,
 s"""
 <p>$h</p>
@@ -76,7 +71,7 @@ s"""
 <p>${t}</p>
 """)
             Response.ok(html)
-                    .`type`("text/html")
+
                     .build()
           case _ => 
             Response.ok(img)
@@ -91,3 +86,17 @@ s"""
     }
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+

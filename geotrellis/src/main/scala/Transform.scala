@@ -56,15 +56,10 @@ object Transformer {
 
   initCache()
 
-  def transform[G <: jts.Geometry,D](feature:SingleGeometry[G,D],fromCRS:Crs,toCRS:Crs) = {
+  def transform[D](feature:Geometry[D],fromCRS:Crs,toCRS:Crs):Geometry[D] = {
     if(!transformCache.contains((fromCRS,toCRS))) { cacheTransform(fromCRS,toCRS) }
     feature.mapGeom( geom => 
       JTS.transform(feature.geom, transformCache((fromCRS,toCRS)))
     )
   }
-
-  // def transform(extent:Extent,fromCRS:Crs,toCRS:Crs):Extent = {
-  //   val poly = transform(extent.asFeature,fromCRS,toCRS)
-  //   poly.geom.getCoordinates()
-  // }
 }

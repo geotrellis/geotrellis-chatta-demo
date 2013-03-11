@@ -10,8 +10,8 @@ import geotrellis.feature.Polygon
 import geotrellis.process._
 import geotrellis.raster.op._
 import geotrellis.statistics.op._
-import geotrellis.raster._
 import geotrellis.feature.op.geometry.AsPolygonSet
+import geotrellis.rest.op._
 
 import scala.collection.JavaConversions._
 
@@ -22,7 +22,11 @@ import scala.collection.JavaConversions._
 class Sum {
   @POST
   def sumPost(
-    polygonJson : String
+    polygonJson : String,
+    @DefaultValue("ForestedLands") @QueryParam("layers") layers:String,
+    @DefaultValue("1") @QueryParam("weights") weights:String,
+    @DefaultValue("") @QueryParam("mask") mask:String,
+    @Context req:HttpServletRequest
   ) = {
     if (polygonJson == null) {
       Response.serverError()
@@ -32,7 +36,7 @@ class Sum {
     } else {
       println("received json: " + polygonJson)
       println("received POST request.")
-      sumGet(polygonJson, "true")
+      sumGet(polygonJson, layers, weights, mask, req)
     }
   }
 
@@ -40,45 +44,40 @@ class Sum {
   def sumGet(
     @QueryParam("polygon")
     polygonJson:String,
-    
-    @DefaultValue("true")
-    @QueryParam("cached")
-    cached:String
-
+    @DefaultValue("ForestedLands") @QueryParam("layers") layers:String,
+    @DefaultValue("1") @QueryParam("weights") weights:String,
+    @DefaultValue("") @QueryParam("mask") mask:String,
+    @Context req:HttpServletRequest
   ):Any = {
     val start = System.currentTimeMillis()
-    val server = Main.server
+    val polygon = io.LoadGeoJsonFeature(polygonJson)
 
-//    val raster = if (cached == "true") Main.tiled_raster else Main.uncachedRaster
+    val reOp = Main.getRasterExtent(polygon)
 
-//    var preCount = System.currentTimeMillis
+    val layerOps = string.SplitOnComma(layers)
+    val weightOps = 
+      logic.ForEach(string.SplitOnComma(weights))(string.ParseInt(_))
 
-    try {
-      val area = io.LoadGeoJson.parse(polygonJson)
-                 .get
-                 .map( geo => geo.geom.getArea )
-                 .foldLeft( 0.0 ) ( (s, d) => s + d)
-      // val polygonSetOp = logic.ForEach(AsPolygonSet(featureOp))
-      // val plist = Main.server.run(polygonSetOp)
-      // val count = plist.foldLeft( 0L ) ( (sum:Long, p) => sum + zonalSum(p, raster))
+    val overlayOp = Model(layerOps,weightOps,reOp
+                          ,"albers")
 
-       val elapsedTotal = System.currentTimeMillis - start
-      // println ("Request duration: " + elapsedTotal)
+    val reprojected = polygon.map {
+      p =>
+        Transformer.transform(p,Projections.LatLong,Projections.ChattaAlbers)
+    }
+    val p = AsPolygon(reprojected)
+    val summary = zonal.summary.Sum(overlayOp,p,Map[RasterExtent,Long]())
 
-      val data = "{ \"area\": %f, \"elapsed\": %d }".format(area,elapsedTotal)
-      Response.ok(data).`type`("application/json").build()
-    } catch {
-      case e: Exception => { 
+    Main.server.getResult(summary) match {
+      case process.Complete(result,h) =>
+        val elapsedTotal = System.currentTimeMillis - start
+        val data = "{ \"sum\": %d, \"elapsed\": %d }".format(result,elapsedTotal)
+        Response.ok(data).`type`("application/json").build()
+      case process.Error(message,trace) =>
         Response.serverError()
-                .entity("{ \"error\" => 'Polygon request was invalid.' }")
-                .`type`("application/json")
+                .entity(message + " " + trace)
+                .`type`("text/plain")
                 .build()
-      }
-    } 
+    }
   }
-
-  // def zonalSum(p:Polygon[_], raster:Raster) = {
-  //   val sumOp = zonal.summary.Sum(raster, p, Main.tileSums) 
-  //   Main.server.run(sumOp)
-  // }
 }

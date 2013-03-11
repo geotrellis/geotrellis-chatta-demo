@@ -38,6 +38,7 @@ class GetBreaks {
     @DefaultValue("10") @QueryParam("numBreaks") numBreaks:String,
     @Context req:HttpServletRequest
   ) = {
+    println(s"$weights\n$layers")
     val extentOp = string.ParseExtent(bbox)
     
     val colsOp = string.ParseInt(cols)
@@ -45,12 +46,11 @@ class GetBreaks {
 
     val reOp = extent.GetRasterExtent(extentOp, colsOp, rowsOp)
 
-    val layerOps = 
-      logic.ForEach(string.SplitOnComma(layers))(io.LoadRaster(_, reOp))
+    val layerOps = string.SplitOnComma(layers)
     val weightOps = 
       logic.ForEach(string.SplitOnComma(weights))(string.ParseInt(_))
 
-    val overlay = Model.run(reOp,"wm")
+    val overlay = Model(layerOps,weightOps,reOp)
 
     val numBreaksOp = string.ParseInt(numBreaks)
     val histo = stat.GetHistogram(overlay)
