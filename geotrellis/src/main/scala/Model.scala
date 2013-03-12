@@ -12,7 +12,7 @@ object Model {
       val converted = Force(rast.map { r => r.convert(TypeByte) })
       local.Multiply(weight, converted)
     }
-    local.IfCell(local.Add(ops.toSeq:_*),_ == 0, NODATA)
+    local.IfCell(local.Add(ops.toSeq:_*), (x:Int) => x == 0, NODATA)
   }
 
   def apply(layers:Op[Array[String]], weights:Op[Array[Int]],rasterExtent:Op[RasterExtent], prefix:String = "wm") = {
@@ -22,7 +22,7 @@ object Model {
         val fR = Force(r)
         local.Multiply(weight,fR)
     }
-    local.IfCell(local.AddArray(weighted),_ == 0, NODATA)
+    local.IfCell(local.AddArray(weighted), (x:Int) => x == 0, NODATA)
   }
   
   private def makeSummary(layer:String,polygon:Op[Polygon[Int]]) = {
