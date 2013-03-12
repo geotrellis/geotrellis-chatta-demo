@@ -62,6 +62,8 @@ class GetBreaks {
       case process.Complete(json,h) =>
         Response.ok(json)
                 .`type`("application/json")
+                .header("Access-Control-Allow-Origin", "*")
+                .header("Access-Control-Allow-Credentials", "true")
                 .build()        
       case process.Error(message,trace) =>
         Response.serverError()

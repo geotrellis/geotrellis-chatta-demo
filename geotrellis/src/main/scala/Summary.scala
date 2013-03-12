@@ -67,7 +67,12 @@ class Sum {
       case process.Complete(result,h) =>
         val elapsedTotal = System.currentTimeMillis - start
         val data = "{ \"sum\": %d, \"elapsed\": %d }".format(result,elapsedTotal)
-        Response.ok(data).`type`("application/json").build()
+        Response
+          .ok(data)
+          .`type`("application/json")
+          .header("Access-Control-Allow-Origin", "*")
+          .header("Access-Control-Allow-Credentials", "true")
+          .build()
       case process.Error(message,trace) =>
         Response.serverError()
                 .entity(message + " " + trace)
