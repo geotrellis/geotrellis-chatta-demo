@@ -9,6 +9,7 @@ import geotrellis.raster.op._
 import geotrellis.statistics.op._
 import geotrellis.rest.op._
 import geotrellis.raster._
+import geotrellis.feature._
 import geotrellis.feature.op.geometry.AsPolygonSet
 import geotrellis.feature.rasterize.{Rasterizer, Callback}
 import geotrellis.data.ColorRamps._
@@ -48,12 +49,27 @@ class WeightedOverlay {
     val weightOps = 
       logic.ForEach(string.SplitOnComma(weights))(string.ParseInt(_))
 
-    val overlayOp = Model(layerOps,weightOps,reOp)
+    val modelOp = Model(layerOps,weightOps,reOp)
+
+    val overlayOp = if(mask == "") { 
+      modelOp
+    } else {
+      val polyOp = io.LoadGeoJsonFeature(mask)
+      val feature = Main.server.run(polyOp)
+      val re = Main.server.run(reOp)
+      println(s"$re")
+      val reproj = Transformer.transform(feature,Projections.LatLong,Projections.WebMercator)
+      val polygon = Polygon(reproj.geom,0)
+      println(s"${polygon.geom}")
+      val maskRaster = Rasterizer.rasterizeWithValue(polygon,re) { x => 1 }
+      local.Mask(modelOp,maskRaster,NODATA,-1000)
+    }
  
     val breaksOp = 
       logic.ForEach(string.SplitOnComma(breaks))(string.ParseInt(_))
-
+    
     val png = Render.operation(overlayOp,BlueToRed,breaksOp)
+    
 
     Main.server.getResult(png) match {
       case process.Complete(img,h) =>

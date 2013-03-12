@@ -1,0 +1,19 @@
+;; This buffer is for notes you don't want to save, and for Lisp evaluation.
+;; If you want to create a file, visit that file with C-x C-f,
+;; then enter the text in that file's own buffer.
+
+
+DevelopedLand.tif                                                       ('6764', '6684')
+ExampleOfWeightedSumOutput.tif                                          ('6764', '6684')
+FarmlandOrForestedLandsWithPrimeAgriculturalSoils.tif                   ('6764', '6684')
+ImperviousSurfaces_Barren Lands_Open Water.tif                          ('6764', '6684')
+PrimeAgriculturalSoilsNotForestedOrFarmland.tif                         ('6764', '6684')
+ForestedLands.tif                                                       ('6764', '6684')
+Wetlands.tif                                                            ('6764', '6684')
+FarmlandWithoutPrimeAgriculturalSoils.tif                               ('8038', '7965')
+PublicallyOwnedWorkingLands.tif                                         ('8037', '7965')
+Non-workingProtectedOrPublicLands.tif                                   ('8037', '7965')
+PrivatelyOwnedWorkingLandsWithEasements1.tif                            ('8165', '8098')
+
+Tile Size: 615 x 557
+                         11 x 12

@@ -1,0 +1,16 @@
+{
+  "layer": "albers_Non-workingProtectedOrPublicLands_18_0",
+  "datatype": "bool", 
+  "type": "arg",
+  "xmin": 981771.651484,
+  "xmax": 989451.651484,
+  "ymin": 1494147.959009,
+  "ymax": 1501827.959009,
+  "cols": 256,
+  "rows": 256,
+  "cellwidth": 30.000000,
+  "cellheight": 30.000000,
+  "epsg": 3785,
+  "yskew": 0.0,
+  "xskew": 0.0
+}

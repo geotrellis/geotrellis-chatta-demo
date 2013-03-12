@@ -65,6 +65,11 @@ demo.updateWMS = function() {
     var layers = demo.getLayers();
     if(layers == "") return;
 
+    var geoJson = "";
+    if(poly != null) {
+        geoJson = GJ.fromPolygon(poly);
+    }
+
     demo.WOLayer = new L.TileLayer.WMS("gt/wo", {
         layers: 'default',
         format: 'image/png',
@@ -73,6 +78,7 @@ demo.updateWMS = function() {
         layers: layers,
         weights: demo.getWeights(),
         attribution: 'Azavea',
+        mask: geoJson
     })
 
     demo.WOLayer.setOpacity(.5);
@@ -134,12 +140,14 @@ var drawControl = new L.Control.Draw({
 });
 map.addControl(drawControl);
 
+var poly = null
 map.on('draw:created', function (e) {
     var type = e.layerType,
     layer = e.layer;
 
     if (type === 'polygon') {
         // Perform call to GeoTrellis
+        poly = layer;
         var geoJson = GJ.fromPolygon(layer);
         $.ajax({        
             url: 'gt/sum',
@@ -150,6 +158,7 @@ map.on('draw:created', function (e) {
             dataType: "json",
             success : function(data) {
                 alert("Data loaded:" + JSON.stringify(data));
+                demo.updateWO();
             }});
     }
 

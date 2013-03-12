@@ -1,0 +1,16 @@
+{
+  "layer": "albers_PublicallyOwnedWorkingLands_17_19",
+  "datatype": "bool", 
+  "type": "arg",
+  "xmin": 974091.651484,
+  "xmax": 981771.651484,
+  "ymin": 1348227.959009,
+  "ymax": 1355907.959009,
+  "cols": 256,
+  "rows": 256,
+  "cellwidth": 30.000000,
+  "cellheight": 30.000000,
+  "epsg": 3785,
+  "yskew": 0.0,
+  "xskew": 0.0
+}

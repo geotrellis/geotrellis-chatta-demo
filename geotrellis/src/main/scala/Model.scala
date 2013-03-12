@@ -2,24 +2,12 @@ package chatta
 
 import geotrellis._
 import geotrellis.raster.op._
+import geotrellis.feature._
 import geotrellis.Implicits._
 
 object Model {
-  val weights = Map(
-    "ImperviousSurfaces_Barren Lands_Open Water" -> 1,
-    "DevelopedLand" -> 2,
-    "Wetlands" -> 3,
-    "ForestedLands" -> 4,
-    "Non-workingProtectedOrPublicLands" -> 5,
-    "PrimeAgriculturalSoilsNotForestedOrFarmland" -> 6,
-    "PublicallyOwnedWorkingLands" -> 7,
-    "PrivatelyOwnedWorkingLandsWithEasements" -> 8,
-    "FarmlandWithoutPrimeAgriculturalSoils" -> 9,
-    "FarmlandOrForestedLandsWithPrimeAgriculturalSoils" -> 10
-  )
-
   def applyDefault(rasterExtent:Op[RasterExtent]) = {
-    val ops = for((name,weight) <- weights) yield {
+    val ops = for((name,weight) <- Main.weights) yield {
       val rast = io.LoadRaster(s"wm_${name}",rasterExtent)
       val converted = Force(rast.map { r => r.convert(TypeByte) })
       local.Multiply(weight, converted)
@@ -28,13 +16,30 @@ object Model {
   }
 
   def apply(layers:Op[Array[String]], weights:Op[Array[Int]],rasterExtent:Op[RasterExtent], prefix:String = "wm") = {
-    var weighted = logic.ForEach(layers,weights)({
+    var weighted = logic.ForEach(layers,weights) {
       (layer,weight) =>
         val r = io.LoadRaster(s"${prefix}_${layer}",rasterExtent).map { r => r.convert(TypeByte) }
         val fR = Force(r)
         local.Multiply(weight,fR)
-    })
+    }
     local.IfCell(local.AddArray(weighted),_ == 0, NODATA)
+  }
+  
+  private def makeSummary(layer:String,polygon:Op[Polygon[Int]]) = {
+    val tileLayer = Main.getTileLayer(layer)
+    zonal.summary.Sum(tileLayer.raster,polygon,tileLayer.tileSums)
+                 .map { l => l.toInt }
+  }
+
+  def summary(layers:Op[Array[String]], weights:Op[Array[Int]], polygon:Op[Polygon[Int]]) = {
+    val sums = logic.ForEach(layers,weights) {
+      (layer,weight) =>
+        val tileLayer = Main.getTileLayer(layer)
+        zonal.summary.Sum(tileLayer.raster,polygon,tileLayer.tileSums)
+                     .map { l => l.toInt }
+        local.Multiply(weight,makeSummary(layer,polygon))
+    }
+    sums.map { a => (0 /: a)(_ + _) }
   }
 }
 

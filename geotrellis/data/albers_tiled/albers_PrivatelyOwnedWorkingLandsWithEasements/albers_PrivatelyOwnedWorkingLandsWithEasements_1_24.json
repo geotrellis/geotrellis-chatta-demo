@@ -1,0 +1,16 @@
+{
+  "layer": "albers_PrivatelyOwnedWorkingLandsWithEasements_1_24",
+  "datatype": "bool", 
+  "type": "arg",
+  "xmin": 849255.911750,
+  "xmax": 856935.911750,
+  "ymin": 1311906.638170,
+  "ymax": 1319586.638170,
+  "cols": 256,
+  "rows": 256,
+  "cellwidth": 30.000000,
+  "cellheight": 30.000000,
+  "epsg": 3785,
+  "yskew": 0.0,
+  "xskew": 0.0
+}

@@ -52,6 +52,7 @@ object Transformer {
     cacheTransform(Projections.ChattaAlbers,Projections.LatLong)
     cacheTransform(Projections.LatLong,Projections.WebMercator)
     cacheTransform(Projections.WebMercator,Projections.LatLong)
+    cacheTransform(Projections.WebMercator,Projections.ChattaAlbers)
   }
 
   initCache()

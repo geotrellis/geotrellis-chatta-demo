@@ -50,7 +50,10 @@ class Sum {
     @Context req:HttpServletRequest
   ):Any = {
     val start = System.currentTimeMillis()
-    val polygon = io.LoadGeoJsonFeature(polygonJson)
+    val polyOp = io.LoadGeoJsonFeature(polygonJson)
+    val feature = Main.server.run(polyOp)
+    val reproj = Transformer.transform(feature,Projections.LatLong,Projections.ChattaAlbers)
+    val polygon = Polygon(reproj.geom,0)
 
     val reOp = Main.getRasterExtent(polygon)
 
@@ -58,15 +61,7 @@ class Sum {
     val weightOps = 
       logic.ForEach(string.SplitOnComma(weights))(string.ParseInt(_))
 
-    val overlayOp = Model(layerOps,weightOps,reOp
-                          ,"albers")
-
-    val reprojected = polygon.map {
-      p =>
-        Transformer.transform(p,Projections.LatLong,Projections.ChattaAlbers)
-    }
-    val p = AsPolygon(reprojected)
-    val summary = zonal.summary.Sum(overlayOp,p,Map[RasterExtent,Long]())
+    val summary = Model.summary(layerOps,weightOps,polygon)
 
     Main.server.getResult(summary) match {
       case process.Complete(result,h) =>

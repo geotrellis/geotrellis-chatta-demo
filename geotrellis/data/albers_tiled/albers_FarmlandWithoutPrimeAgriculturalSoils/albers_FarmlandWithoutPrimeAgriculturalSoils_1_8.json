@@ -1,0 +1,16 @@
+{
+  "layer": "albers_FarmlandWithoutPrimeAgriculturalSoils_1_8",
+  "datatype": "bool", 
+  "type": "arg",
+  "xmin": 851211.651484,
+  "xmax": 858891.651484,
+  "ymin": 1432710.775380,
+  "ymax": 1440390.775380,
+  "cols": 256,
+  "rows": 256,
+  "cellwidth": 30.000000,
+  "cellheight": 30.000000,
+  "epsg": 3785,
+  "yskew": 0.0,
+  "xskew": 0.0
+}
