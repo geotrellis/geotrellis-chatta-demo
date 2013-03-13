@@ -190,7 +190,6 @@ var summary = (function() {
                 success : function(data) {
                     var sdata = $("#summary-data");
                     sdata.empty();
-                    
 
                     _.map(data.layerSummaries, function(ls) {
                         var l = $("#summaryTemplate").clone();
@@ -217,6 +216,7 @@ var summary = (function() {
         getPolygon: function() { return polygon; },
         setPolygon: function(p) { 
             polygon = p; 
+            weightedOverlay.update();
             update(true);
         },
         setLayers: function(ls) {

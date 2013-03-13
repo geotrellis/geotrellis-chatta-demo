@@ -52,18 +52,17 @@ class WeightedOverlay {
 
     val modelOp = Model(layerOps,weightOps,reOp)
 
-    val overlayOp = if(mask == "" || true) { 
+    val overlayOp = if(mask == "") { 
       modelOp
     } else {
       val polyOp = io.LoadGeoJsonFeature(mask)
       val feature = Main.server.run(polyOp)
       val re = Main.server.run(reOp)
-      println(s"$re")
       val reproj = Transformer.transform(feature,Projections.LatLong,Projections.WebMercator)
       val polygon = Polygon(reproj.geom,0)
-      println(s"${polygon.geom}")
+
       val maskRaster = Rasterizer.rasterizeWithValue(polygon,re) { x => 1 }
-      local.Mask(modelOp,maskRaster,NODATA,-1000)
+      local.Mask(modelOp,maskRaster,NODATA,NODATA)
     }
  
     val breaksOp = 
