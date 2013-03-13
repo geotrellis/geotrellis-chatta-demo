@@ -1,49 +1,47 @@
+var getLayer = function(url,attrib) {
+    return L.tileLayer(url, { maxZoom: 18, attribution: attrib });
+};
+
+var Layers = {
+    stamen: { 
+        toner:  'http://{s}.tile.stamen.com/toner/{z}/{x}/{y}.png',   
+        terrain: 'http://{s}.tile.stamen.com/terrain/{z}/{x}/{y}.png',
+        watercolor: 'http://{s}.tile.stamen.com/watercolor/{z}/{x}/{y}.png',
+        attrib: 'Map data &copy;2013 OpenStreetMap contributors, Tiles &copy;2013 Stamen Design'
+    },
+    mapBox: {
+        azavea:     'http://{s}.tiles.mapbox.com/v3/azavea.map-zbompf85/{z}/{x}/{y}.png',
+        worldLight: 'http://c.tiles.mapbox.com/v3/mapbox.world-light/{z}/{x}/{y}.png',
+        attrib: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery &copy; <a href="http://mapbox.com">MapBox</a>'
+    }
+};
+
 var map = (function() {
+    var selected = getLayer(Layers.stamen.toner,Layers.stamen.attrib);
+    var baseLayers = {
+        "Azavea" : getLayer(Layers.mapBox.azavea,Layers.mapBox.attrib),
+        "World Light" : getLayer(Layers.mapBox.worldLight,Layers.mapBox.attrib),
+        "Terrain" : getLayer(Layers.stamen.terrain,Layers.stamen.attrib),
+        "Watercolor" : getLayer(Layers.stamen.watercolor,Layers.stamen.attrib),
+        "Toner" : selected,
+    };
+
     var m = L.map('map').setView([34.76192255039478,-85.35140991210938], 9);
 
-    L.tileLayer('http://{s}.tiles.mapbox.com/v3/azavea.map-zbompf85/{z}/{x}/{y}.png', {
-	maxZoom: 18,
-	attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery &copy; <a href="http://mapbox.com">MapBox</a>'
-}).addTo(m);
+    selected.addTo(m);
+
+    m.lc = L.control.layers(baseLayers).addTo(m);
     return m;
 })()
 
 var weightedOverlay = (function() {
-    layers = [ { name : "ImperviousSurfaces_Barren Lands_Open Water", 
-                 weight : 1,
-                 display : "Impervious Surfaces" },
-               { name: "DevelopedLand",
-                 weight: "2",  
-                 display: "Developed Land"},
-               { name: "Wetlands",
-                 weight: "3",  
-                 display: "Wetlands"},
-               { name: "ForestedLands",
-                 weight: "4",  
-                 display: "Forested Lands"},
-               { name: "Non-workingProtectedOrPublicLands",
-                 weight: "5",  
-                 display: "Non-working Protected or Public Lands"},
-               { name: "PrimeAgriculturalSoilsNotForestedOrFarmland",
-                 weight: "6",  
-                 display: "Prime Agricultural Soils, Not Forested or Farmland"},
-               { name: "PublicallyOwnedWorkingLands",
-                 weight: "7",  
-                 display: "Publically Owned Working Lands"},
-               { name: "PrivatelyOwnedWorkingLandsWithEasements", 
-                 weight: "8",  
-                 display: "Privately Owned Working Lands, with Easements"},
-               { name: "FarmlandWithoutPrimeAgriculturalSoils",  
-                 weight: "9",  
-                 display: "Farmland, without prime Agricultural Soils"},
-               { name: "FarmlandOrForestedLandsWithPrimeAgriculturalSoils",
-                 weight: "10",  
-                 display: "Farmland or Forested Lands, with prime Agricultural Soils"}
-             ];
+    var layers = [];
 
-    breaks = null;
-    WOLayer = null;
-    opacity = 0.5;
+    var breaks = null;
+    var WOLayer = null;
+    var opacity = 0.5;
+    var colorRamp = "blue-to-red";
+    var numBreaks = 10;
 
     getLayers   = function() {
         var notZeros = _.filter(layers, function(l) { return l.weight != 0 });
@@ -55,43 +53,48 @@ var weightedOverlay = (function() {
         return _.map(notZeros, function(l) { return l.weight; }).join(",");
     };
 
-    updateLayer = function() {
-        if (WOLayer) {
-            map.removeLayer(WOLayer);
-        }
+    update = function() {
+        if(layers.length == 0) { return; };
 
-        var layers = getLayers();
-        if(layers == "") return;
-
-        var geoJson = "";
-        if(summary.polygon != null) {
-            geoJson = GJ.fromPolygon(summary.polygon);
-        }
-
-        WOLayer = new L.TileLayer.WMS("gt/wo", {
-            layers: 'default',
-            format: 'image/png',
-            breaks: breaks,
-            transparent: true,
-            layers: layers,
-            weights: getWeights(),
-            colorRamp: colorRamp,
-            mask: geoJson,
-            attribution: 'Azavea'
-        })
-
-        WOLayer.setOpacity(opacity);
-        WOLayer.addTo(map);
-    }
-
-    updateBreaks = function() {
         $.ajax({
             url: 'gt/breaks',
-            data: { 'layers' : getLayers(), 'weights' : getWeights() },
+            data: { 'layers' : getLayers(), 
+                    'weights' : getWeights(),
+                    'numBreaks': 10 },
             dataType: "json",
             success: function(r) {
                 breaks = r.classBreaks;
-                updateLayer();
+
+                if (WOLayer) {
+                    map.lc.removeLayer(WOLayer);
+                    map.removeLayer(WOLayer);
+                }
+
+                var layerNames = getLayers();
+                if(layerNames == "") return;
+
+                var geoJson = "";
+                var polygon = summary.getPolygon();
+                if(polygon != null) {
+                    geoJson = GJ.fromPolygon(polygon);
+                }
+
+                WOLayer = new L.TileLayer.WMS("gt/wo", {
+                    layers: 'default',
+                    format: 'image/png',
+                    breaks: breaks,
+                    transparent: true,
+                    layers: layerNames,
+                    weights: getWeights(),
+                    colorRamp: colorRamp,
+                    mask: geoJson,
+                    attribution: 'Azavea'
+                })
+
+                WOLayer.setOpacity(opacity);
+                WOLayer.addTo(map);
+                map.lc.addOverlay(WOLayer, "Weighted Overlay");
+
             }
         });
     };
@@ -106,65 +109,123 @@ var weightedOverlay = (function() {
             change: function( event, ui ) {
                 $( this ).prev('.weight').text( "+" + ui.value );
                 layer.weight = ui.value;
-                weightedOverlay.update();
+                update();
+                summary.update(false);
             }
         });
         div.find( '.weight' ).text( "+" + layer.weight );
     };
 
-    // Color Ramp
-    var colorRamp = "blue-to-red"
-    var setColorRamp = function(key) { colorRamp = key }
+    var bindSliders = function() {
+        var pList = $("#parameters");
+        pList.empty();
+        
+        _.map(layers, function(l) {
+            var p = $("#parameterSlider").clone();
+            p.find(".slider-label").text(l.display);
+            p.show();
+            pList.append(p);
+            makeSlider(p,l);
+        });
+
+        update();
+    };
 
     // Opacity
-    $("#opacity-slider").slider({
+    var opacitySlider = $("#opacity-slider").slider({
         value: opacity,
         min: 0,
         max: 1,
         step: .02,
-      slide: function( event, ui ) {
-          WOLayer.setOpacity(ui.value);
+        slide: function( event, ui ) {
+          opacity = ui.value;
+          WOLayer.setOpacity(opacity);
         }
     });
 
     return {
-        update: updateBreaks,
-        layers: layers,
         activeLayers: getLayers,
         activeWeights: getWeights,
-        makeSlider: makeSlider,
-        setColorRamp: setColorRamp,
+        
+        bindSliders : bindSliders,
+
+        setLayers: function(ls) { 
+            layers = ls; 
+            bindSliders();
+            update(); 
+        },
+        setNumBreaks: function(nb) {
+            numBreaks = nb;
+            update();
+        },
+        setOpacity: function(o) {
+            opacity = o;
+            opacitySlider.slider('value', o);
+        },
+        setColorRamp: function(key) { 
+            colorRamp = key;
+            update();
+        },
+
+        update: update,
+
         getMapLayer: function() { return WOLayer; }
     };
 
 })();
 
 var summary = (function() {
-    var o = { polygon: null }
-    o.fetchSummary = function() {
-            if(o.polygon != null) {
-                var geoJson = GJ.fromPolygon(o.polygon);
-                $.ajax({        
-                    url: 'gt/sum',
-                    data: { polygon : geoJson, 
-                            layers  : weightedOverlay.activeLayers(), 
-                            weights : weightedOverlay.activeWeights() 
-                          },
-                    dataType: "json",
-                    success : function(data) {
-                        var sdata = $("#summary-data");
-                        sdata.empty();
-                        
-                        var p = $("#summaryTemplate").clone();
-                        p.find("#summary-score").text(data.sum);
-                        p.show();
-                        sdata.append(p);
-                        $('a[href=#summary]').tab('show');
-                    }
-                });
-            }
+    var polygon = null;
+    var layers = {};
+    var update = function(switchTab) {
+        if(polygon != null) {
+            var geoJson = GJ.fromPolygon(polygon);
+            $.ajax({        
+                url: 'gt/sum',
+                data: { polygon : geoJson, 
+                        layers  : weightedOverlay.activeLayers(), 
+                        weights : weightedOverlay.activeWeights() 
+                      },
+                dataType: "json",
+                success : function(data) {
+                    var sdata = $("#summary-data");
+                    sdata.empty();
+                    
+
+                    _.map(data.layerSummaries, function(ls) {
+                        var l = $("#summaryTemplate").clone();
+                        if(layers.hasOwnProperty(ls.layer)) {
+                            l.find("#summary-label").text(layers[ls.layer] + ":");
+                        } else {
+                            l.find("#summary-label").text("Layer:");
+                        }
+                        l.find("#summary-score").text(ls.total);
+                        l.show();
+                        sdata.append(l);
+                    });
+                    var p = $("#summaryTemplate").clone();
+                    p.find("#summary-label").text("Total:");
+                    p.find("#summary-score").text(data.total);
+                    p.show();
+                    sdata.append(p);
+                    if(switchTab) { $('a[href=#summary]').tab('show'); };
+                }
+            });
+        }
     };
-    return o;
+    return {
+        getPolygon: function() { return polygon; },
+        setPolygon: function(p) { 
+            polygon = p; 
+            update(true);
+        },
+        setLayers: function(ls) {
+            _.map(ls, function(l) {
+                layers[l.name] = l.display;
+            });
+        },
+        update: update
+    };
 })();
 
 var drawing = (function() {
@@ -198,29 +259,26 @@ var drawing = (function() {
     map.addControl(drawControl);
 
     map.on('draw:created', function (e) {
-        var type = e.layerType,
-        layer = e.layer;
-
-        if (type === 'polygon') {
-            // Perform call to GeoTrellis
-            summary.polygon = layer;
-            summary.fetchSummary(summary.polygon);
+        if (e.layerType === 'polygon') {
+            summary.setPolygon(e.layer);
         }
     });
 
     map.on('draw:edited', function(e) {
-        if(summary.polygon != null && summary.polygon == e.layer) {
+        var polygon = summary.getPolygon();
+        if(polygon != null && polygon == e.layer) {
             weightedOverlay.update();
-            summary.fetchSummary(summary.polygon);
+            summary.setPolygon(e.layer);
         }
     });
 
     map.on('draw:drawstart', function(e) {
-        if(summary.polygon != null) { drawnItems.removeLayer(summary.polygon); }
+        var polygon = summary.getPolygon();
+        if(polygon != null) { drawnItems.removeLayer(polygon); }
     });
 
     map.on('draw:drawstop', function(e) {
-        drawnItems.addLayer(summary.polygon);
+        drawnItems.addLayer(summary.getPolygon());
     });
 
 })();
@@ -228,40 +286,40 @@ var drawing = (function() {
 var colorRamps = (function() {
     var makeColorRamp = function(colorDef) {
         var ramps = $("#color-ramp-menu");
-        
+        p
         var p = $("#colorRampTemplate").clone();
-        var img = p.find('img');
-        img.attr("src",colorDef.image);
-        img.click(function() {
+        p.find('img').attr("src",colorDef.image);
+        p.click(function() {
             weightedOverlay.setColorRamp(colorDef.key);
-            weightedOverlay.update();
+
         });
         p.show();
         ramps.append(p);
     }
 
-    $.ajax({
-        url: 'gt/colors',
-        dataType: 'json',
-        success: function(data) {
-            _.map(data.colors, makeColorRamp)
-        }
-    });
+    var bindColorRamps = function() {
+        $.ajax({
+            url: 'gt/colors',
+            dataType: 'json',
+            success: function(data) {
+                _.map(data.colors, makeColorRamp)
+            }
+        });
+    };
+    return { bindColorRamps: bindColorRamps }
 })();
 
+// Set up from config
+$.getJSON('config.json', function(data) {
+    summary.setLayers(data.weightedOverlay.layers);
+    weightedOverlay.setLayers(data.weightedOverlay.layers);
+    weightedOverlay.setNumBreaks(data.weightedOverlay.numBreaks);
+    weightedOverlay.setOpacity(data.weightedOverlay.opacity);
+    weightedOverlay.setColorRamp(data.weightedOverlay.ramp);
+});
 
 // On page load
 $(document).ready(function() {
-    var pList = $("#parameters");
-    pList.empty();
-    
-    _.map(weightedOverlay.layers, function(l) {
-        var p = $("#parameterSlider").clone();
-        p.find(".slider-label").text(l.display);
-        p.show();
-        pList.append(p);
-        weightedOverlay.makeSlider(p,l);
-    });
-
-    weightedOverlay.update();
+    weightedOverlay.bindSliders();
+    colorRamps.bindColorRamps();
 });

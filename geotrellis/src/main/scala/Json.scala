@@ -40,7 +40,7 @@ object JsonParser {
               case "bbox" =>
                 parser.nextToken()
                 bbox = parseExtent(parser.getText())
-              case "rows" =>
+n              case "rows" =>
                 parser.nextToken()
                 rows = parser.getText().toInt
               case "cols" =>

@@ -5,6 +5,9 @@ import geotrellis.raster.op._
 import geotrellis.feature._
 import geotrellis.Implicits._
 
+case class LayerSummary(name:String,total:Int)
+case class SummaryResult(layerSummaries:List[LayerSummary],total:Int)
+
 object Model {
   def applyDefault(rasterExtent:Op[RasterExtent]) = {
     val ops = for((name,weight) <- Main.weights) yield {
@@ -22,7 +25,8 @@ object Model {
         val fR = Force(r)
         local.Multiply(weight,fR)
     }
-    local.IfCell(local.AddArray(weighted), (x:Int) => x == 0, NODATA)
+    val mask = io.LoadRaster("mask",rasterExtent)
+    local.Mask(local.AddArray(weighted),mask,NODATA,NODATA)
   }
   
   private def makeSummary(layer:String,polygon:Op[Polygon[Int]]) = {
@@ -37,9 +41,17 @@ object Model {
         val tileLayer = Main.getTileLayer(layer)
         zonal.summary.Sum(tileLayer.raster,polygon,tileLayer.tileSums)
                      .map { l => l.toInt }
-        local.Multiply(weight,makeSummary(layer,polygon))
+        local.Multiply(weight,makeSummary(layer,polygon)).map { total =>
+          LayerSummary(layer,total)
+        }
     }
-    sums.map { a => (0 /: a)(_ + _) }
+    sums.map {
+      s => s.foldLeft(SummaryResult(List[LayerSummary](),0)) {
+        (result,layerSummary) => 
+          SummaryResult((layerSummary :: result.layerSummaries).reverse, 
+                        result.total + layerSummary.total )
+      }
+    }
   }
 }
 

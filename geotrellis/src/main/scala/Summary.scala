@@ -66,7 +66,18 @@ class Sum {
     Main.server.getResult(summary) match {
       case process.Complete(result,h) =>
         val elapsedTotal = System.currentTimeMillis - start
-        val data = "{ \"sum\": %d, \"elapsed\": %d }".format(result,elapsedTotal)
+
+        val layerSummaries = 
+          "[" + result.layerSummaries.map {
+            ls => s"""{ "layer": "${ls.name}", "total": "${ls.total}" }"""
+          }.mkString(",") + "]"
+
+        val data = s"""{ 
+          "layerSummaries": $layerSummaries,
+          "total": "${result.total}", 
+          "elapsed": "$elapsedTotal"
+        }"""
+
         Response
           .ok(data)
           .`type`("application/json")

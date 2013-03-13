@@ -69,7 +69,12 @@ class WeightedOverlay {
     val breaksOp = 
       logic.ForEach(string.SplitOnComma(breaks))(string.ParseInt(_))
     
-    val ramp = Colors.rampMap.getOrElse(colorRampKey,BlueToRed)
+    val ramp = breaksOp.map { b => 
+      val cr = Colors.rampMap.getOrElse(colorRampKey,BlueToRed)
+      if(cr.toArray.length < b.length) { cr.interpolate(b.length) }
+      else { cr }
+    }
+
     val png = Render.operation(overlayOp,ramp,breaksOp)
     
 
