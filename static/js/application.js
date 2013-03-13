@@ -60,7 +60,7 @@ var weightedOverlay = (function() {
             url: 'gt/breaks',
             data: { 'layers' : getLayers(), 
                     'weights' : getWeights(),
-                    'numBreaks': 10 },
+                    'numBreaks': numBreaks },
             dataType: "json",
             success: function(r) {
                 breaks = r.classBreaks;
@@ -192,21 +192,19 @@ var summary = (function() {
                     sdata.empty();
 
                     _.map(data.layerSummaries, function(ls) {
-                        var l = $("#summaryTemplate").clone();
                         if(layers.hasOwnProperty(ls.layer)) {
-                            l.find("#summary-label").text(layers[ls.layer] + ":");
+                            var layerName = layers[ls.layer] + ":";
                         } else {
-                            l.find("#summary-label").text("Layer:");
+                            var layerName = "Layer:";
                         }
-                        l.find("#summary-score").text(ls.total);
-                        l.show();
-                        sdata.append(l);
+
+                        sdata.append($('<dt>' + layerName + '</dt>'));
+                        sdata.append($('<dd>' + ls.total + '</dd>'));
                     });
-                    var p = $("#summaryTemplate").clone();
-                    p.find("#summary-label").text("Total:");
-                    p.find("#summary-score").text(data.total);
-                    p.show();
-                    sdata.append(p);
+
+                    sdata.append($('<dt><b>Total:</b></dt>'));
+                    sdata.append($('<dd>' + data.total + '</dd>'));
+
                     if(switchTab) { $('a[href=#summary]').tab('show'); };
                 }
             });
@@ -224,7 +222,16 @@ var summary = (function() {
                 layers[l.name] = l.display;
             });
         },
-        update: update
+        update: update,
+        clear: function() {
+            if(polygon) {
+                drawing.clear(polygon);
+                polygon = null;
+                weightedOverlay.update();
+                $('a[href=#parameters]').tab('show');
+                $("#summary-data").empty();
+            }
+        }
     };
 })();
 
@@ -281,6 +288,11 @@ var drawing = (function() {
         drawnItems.addLayer(summary.getPolygon());
     });
 
+    return {
+        clear: function(polygon) {
+            drawnItems.removeLayer(polygon);
+        }
+    }
 })();
 
 var colorRamps = (function() {
@@ -297,16 +309,17 @@ var colorRamps = (function() {
         ramps.append(p);
     }
 
-    var bindColorRamps = function() {
-        $.ajax({
-            url: 'gt/colors',
-            dataType: 'json',
-            success: function(data) {
-                _.map(data.colors, makeColorRamp)
-            }
-        });
-    };
-    return { bindColorRamps: bindColorRamps }
+    return { 
+        bindColorRamps: function() {
+            $.ajax({
+                url: 'gt/colors',
+                dataType: 'json',
+                success: function(data) {
+                    _.map(data.colors, makeColorRamp)
+                }
+            });
+        }
+    }
 })();
 
 // Set up from config
@@ -322,4 +335,10 @@ $.getJSON('config.json', function(data) {
 $(document).ready(function() {
     weightedOverlay.bindSliders();
     colorRamps.bindColorRamps();
+
+    $('#clearButton').click( function() {
+        summary.clear();
+        return false;
+    });
+
 });
