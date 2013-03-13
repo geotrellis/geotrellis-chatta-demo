@@ -36,6 +36,7 @@ class WeightedOverlay {
     @DefaultValue("4") @QueryParam("colors") numColors:String,
     @DefaultValue("image/png") @QueryParam("format") format:String,
     @DefaultValue("") @QueryParam("breaks") breaks:String,
+    @DefaultValue("blue-to-red") @QueryParam("colorRamp") colorRampKey:String,
     @Context req:HttpServletRequest
   ) = {
     val extentOp = string.ParseExtent(bbox)
@@ -51,7 +52,7 @@ class WeightedOverlay {
 
     val modelOp = Model(layerOps,weightOps,reOp)
 
-    val overlayOp = if(mask == "") { 
+    val overlayOp = if(mask == "" || true) { 
       modelOp
     } else {
       val polyOp = io.LoadGeoJsonFeature(mask)
@@ -68,7 +69,8 @@ class WeightedOverlay {
     val breaksOp = 
       logic.ForEach(string.SplitOnComma(breaks))(string.ParseInt(_))
     
-    val png = Render.operation(overlayOp,BlueToRed,breaksOp)
+    val ramp = Colors.rampMap.getOrElse(colorRampKey,BlueToRed)
+    val png = Render.operation(overlayOp,ramp,breaksOp)
     
 
     Main.server.getResult(png) match {

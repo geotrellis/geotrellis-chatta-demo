@@ -17,6 +17,20 @@
         padding: 9px 0;
       }
 
+      .options {
+        float: right;
+      }
+
+      #opacitySlider {
+        float:right;
+        width:200px;
+        padding-left: 20px;
+      }
+
+      #colorChooser {
+        float:left;
+      }
+
       @media (max-width: 980px) {
         /* Enable use of floated navbar text */
         .navbar-text.pull-right {
@@ -57,7 +71,7 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="brand" href="#">Demo</a>
+          <a class="brand" href="#">Chattanooga Agriculture & Forestry Value Model</a>
           <div class="nav-collapse collapse">
             <ul class="nav pull-right">
               <li><a href="#about">About</a></li>
@@ -69,8 +83,21 @@
 
     <div class="container-fluid">
       <div class="row-fluid">
-	    <div class="span9">
-			<div id="map"></div>
+	<div class="span9">
+          <div class="options">
+            <ul id="colorChooser" class="nav nav-pills">
+              <li class="dropdown">
+                <a class="dropdown-toggle" id="drop5" role="button" data-toggle="dropdown" href="#">Color Ramps<b class="caret"></b></a>
+                <ul id="color-ramp-menu" class="dropdown-menu" role="menu" aria-labelledby="drop5">
+                </ul>
+              </li>
+            </ul> <!-- /tabs -->
+            <div id="opacitySlider">
+                <span class="slider-label">Opacity</span>
+                <div id="opacity-slider"></div>
+            </div>
+            </div>
+	  <div id="map"></div>
         </div><!--/map-->
         <div class="span3">
 		
@@ -121,16 +148,14 @@
 				<span class="weight">
 				</span>
 				<div class="slider"></div>	
-			  </div>
-			  
-			  <a class="btn btn-primary btn-large" href="#">Run Model</a>
-			  <a class="btn btn-danger btn-large reset" href="#">Reset</a>
-		  
+			  </div>		  
 		  </div>
 		  
 		  <div class="tab-pane" id="summary">
 			<h3>Summary</h3>
-			<p>Summary data goes here.</p>
+			<div id="summary-data">
+
+                        </div>
 		  </div>
 		  
 		  </div> <!--/tab-content -->
@@ -145,6 +170,8 @@
 	<script src="js/bootstrap.min.js"></script>
 	<script src="js/application.js"></script>
 
+    <!-- Templates -->
+
     <div id="parameterSlider" style="display:none">
       <div class="well">
         <h4 class="slider-label">Parameter 1</h4>
@@ -153,5 +180,16 @@
         <div class="slider"></div>
       </div>
     </div>
+
+    <div id="summaryTemplate" style="display:none">
+      <p>Total Score for Region: <span id="summary-score"></span></p>
+    </div>
+
+    <li id="colorRampTemplate" role="presentation" style="display:none">
+      <a role="menuitem" tabindex="-1" href="#" onclick="return false;">
+        <img role="menuitem" tabindex="-1" src="img/ramps/blue-to-orange.png"></img>
+      </a>
+    </li>
+
   </body>
 </html>
