@@ -1,7 +1,7 @@
 {
     "title" : "Chattanooga Agriculture & Forestry Value Model",
     "weightedOverlay": {
-        "numBreaks" : "20",
+        "numBreaks" : "10",
         "opacity"   : "0.75",
         "ramp"      : "yellow-to-red-heatmap",
         "layers" : [ { "name" : "ImperviousSurfaces_Barren Lands_Open Water", 

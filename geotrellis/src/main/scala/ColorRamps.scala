@@ -38,7 +38,7 @@ class ColorRampsService {
   ):Any = {
     // Return JSON with information on color ramps.
     val c = for(key <- Colors.rampMap.keys) yield {
-      s"""{ "key": "$key", "image": "/img/ramps/${key}.png" }"""
+      s"""{ "key": "$key", "image": "img/ramps/${key}.png" }"""
     }
     val arr = "[" + c.mkString(",") + "]"
     Response.ok(s"""{ "colors": $arr }""")
