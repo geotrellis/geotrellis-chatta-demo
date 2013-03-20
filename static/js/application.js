@@ -17,13 +17,13 @@ var Layers = {
 };
 
 var map = (function() {
-    var selected = getLayer(Layers.stamen.toner,Layers.stamen.attrib);
+    var selected = getLayer(Layers.mapBox.azavea,Layers.mapBox.attrib);
     var baseLayers = {
-        "Azavea" : getLayer(Layers.mapBox.azavea,Layers.mapBox.attrib),
+		"Azavea" : selected,
         "World Light" : getLayer(Layers.mapBox.worldLight,Layers.mapBox.attrib),
         "Terrain" : getLayer(Layers.stamen.terrain,Layers.stamen.attrib),
         "Watercolor" : getLayer(Layers.stamen.watercolor,Layers.stamen.attrib),
-        "Toner" : selected,
+        "Toner" : getLayer(Layers.stamen.toner,Layers.stamen.attrib),
     };
 
     var m = L.map('map').setView([34.76192255039478,-85.35140991210938], 9);
@@ -57,7 +57,7 @@ var weightedOverlay = (function() {
         if(layers.length == 0) { return; };
 
         $.ajax({
-            url: 'gt/breaks',
+            url: 'http://207.245.89.238/chatta/gt/breaks',
             data: { 'layers' : getLayers(), 
                     'weights' : getWeights(),
                     'numBreaks': numBreaks },
@@ -79,7 +79,7 @@ var weightedOverlay = (function() {
                     geoJson = GJ.fromPolygon(polygon);
                 }
 
-                WOLayer = new L.TileLayer.WMS("gt/wo", {
+                WOLayer = new L.TileLayer.WMS("http://207.245.89.238/chatta/gt/wo", {
                     layers: 'default',
                     format: 'image/png',
                     breaks: breaks,
@@ -181,7 +181,7 @@ var summary = (function() {
         if(polygon != null) {
             var geoJson = GJ.fromPolygon(polygon);
             $.ajax({        
-                url: 'gt/sum',
+                url: 'http://207.245.89.238/chatta/gt/sum',
                 data: { polygon : geoJson, 
                         layers  : weightedOverlay.activeLayers(), 
                         weights : weightedOverlay.activeWeights() 
@@ -198,12 +198,10 @@ var summary = (function() {
                             var layerName = "Layer:";
                         }
 
-                        sdata.append($('<dt>' + layerName + '</dt>'));
-                        sdata.append($('<dd>' + ls.total + '</dd>'));
+                        sdata.append($('<tr><td>' + layerName + '</td>' + '<td class="bold">' + ls.total + '</td></tr>'));
                     });
 
-                    sdata.append($('<dt><b>Total:</b></dt>'));
-                    sdata.append($('<dd>' + data.total + '</dd>'));
+                    sdata.append($('<tr class="warning"><td class="bold">Total:</td>' + '<td class="bold">' + data.total + '</td></tr>'));
 
                     if(switchTab) { $('a[href=#summary]').tab('show'); };
                 }
@@ -312,7 +310,7 @@ var colorRamps = (function() {
     return { 
         bindColorRamps: function() {
             $.ajax({
-                url: 'gt/colors',
+                url: 'http://207.245.89.238/chatta/gt/colors',
                 dataType: 'json',
                 success: function(data) {
                     _.map(data.colors, makeColorRamp)

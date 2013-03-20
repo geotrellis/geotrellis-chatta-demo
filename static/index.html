@@ -7,6 +7,7 @@
     <meta name="description" content="GeoTrellis features demo.">
     <meta name="author" content="Azavea">
 
+	<link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
     <link href="css/bootstrap.css" rel="stylesheet">
     <style type="text/css">
       body {
@@ -19,6 +20,7 @@
 
       .options {
         float: right;
+		z-index: 999;
       }
 
       #opacitySlider {
@@ -63,6 +65,8 @@
 
   <body>
 
+  <div id="main">
+  
     <div class="navbar navbar-inverse navbar-fixed-top">
       <div class="navbar-inner">
         <div class="container-fluid">
@@ -85,12 +89,14 @@
       <div class="row-fluid">
 
 	<div class="span9">
-          <a class="btn btn-small" id="clearButton" href="#">Clear Polygon</a>
+	<div class="well pull-left">
+		<strong>Legend</strong> <br>
+	</div>
           <div class="options">
             <ul id="colorChooser" class="nav nav-pills">
               <li class="dropdown">
-                <a class="dropdown-toggle btn-primary btn-small" id="drop5" role="button" data-toggle="dropdown" href="#">
-                  Color Ramps
+                <a class="btn dropdown-toggle" id="drop5" role="button" data-toggle="dropdown" href="#">
+                  Color Ramps <i class="icon-chevron-down"></i>
                 </a>
                 <ul id="color-ramp-menu" class="dropdown-menu" role="menu" aria-labelledby="drop5">
                 </ul>
@@ -101,10 +107,12 @@
                 <div id="opacity-slider"></div>
             </div>
             </div>
-	  <div id="map"></div>
+	  <div id="map">
+	  <a class="btn btn-inverse" id="clearButton" href="#">Clear Polygon</a>
+	  </div>
         </div><!--/map-->
 
-        <div class="span3">
+        <div class="span3" id="sidebar">
 		
 		<ul class="nav nav-tabs">
 			<li class="active"><a href="#parameters" data-toggle="tab">Parameters</a></li>
@@ -158,9 +166,11 @@
 		  
 		  <div class="tab-pane" id="summary">
 			<h3>Summary</h3>
-			<div>
-                          <dl id="summary-data" class="dl-horizontal"></dl>
-                        </div>
+            <table id="summary-data" class="table table-striped summary-table">
+				<tbody>
+					<tr></tr>
+				</tbody>
+			</table>
 		  </div>
 		  
 		  </div> <!--/tab-content -->
@@ -169,6 +179,8 @@
       </div><!--/row-->
 
     </div><!--/.fluid-container-->
+	
+	</div>
     
     <!-- Modal -->
     <div id="aboutModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
@@ -189,6 +201,8 @@
     <script src="js/jquery-ui-1.10.0.min.js"></script>
 	<script src="js/bootstrap.min.js"></script>
 	<script src="js/application.js"></script>
+	
+
 
     <!-- Templates -->
 
