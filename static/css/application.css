@@ -62,11 +62,6 @@ span.weight input {
 	font-size: 18px;
 }
 
-#sidebar {
-	max-height: 710px;
-	overflow-y: scroll;
-}
-
 .nav-tabs {
 	width: 96%;
 }

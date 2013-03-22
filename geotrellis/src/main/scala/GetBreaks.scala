@@ -21,11 +21,9 @@ case class ClassBreaksToJson(b:Op[Array[Int]]) extends Op1(b)({
     Result(s"""{ "classBreaks" : $breaksArray }""")
 })
 
-@Path("/gt/breaks") 
+@Path("/breaks") 
 class GetBreaks {
   final val defaultBox = "-9634947.090,4030964.877,-9359277.090,4300664.877"
-
-
 
   @GET
   def get(

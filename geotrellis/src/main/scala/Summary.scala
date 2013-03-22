@@ -18,7 +18,7 @@ import scala.collection.JavaConversions._
 /**
  * Sum values under polygon provided via geojson
  */
-@Path("/gt/sum")
+@Path("/sum")
 class Sum {
   @POST
   def sumPost(

@@ -19,7 +19,7 @@ import scala.collection.JavaConversions._
 /**
  * Create a weighted overlay of the Chattanooga model.
  */
-@Path("/gt/wo")
+@Path("/wo")
 class WeightedOverlay {
   final val defaultBox = "-9634947.090,4030964.877,-9359277.090,4300664.877"
   final val defaultColors = "ff0000,ffff00,00ff00,0000ff"
@@ -85,7 +85,7 @@ class WeightedOverlay {
             val t = Main.server.run(overlayOp).data.getType.toString
             val ms = h.elapsedTime
             val query = req.getQueryString
-            val url = "/gt/wo?format=image/png&" + query
+            val url = "/wo?format=image/png&" + query
             val html = InfoPage.infoPage(cols,rows,ms,url,
 s"""
 <p>$h</p>

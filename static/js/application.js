@@ -19,14 +19,16 @@ var Layers = {
 var map = (function() {
     var selected = getLayer(Layers.mapBox.azavea,Layers.mapBox.attrib);
     var baseLayers = {
-		"Azavea" : selected,
+	"Azavea" : selected,
         "World Light" : getLayer(Layers.mapBox.worldLight,Layers.mapBox.attrib),
         "Terrain" : getLayer(Layers.stamen.terrain,Layers.stamen.attrib),
         "Watercolor" : getLayer(Layers.stamen.watercolor,Layers.stamen.attrib),
         "Toner" : getLayer(Layers.stamen.toner,Layers.stamen.attrib),
     };
 
-    var m = L.map('map').setView([34.76192255039478,-85.35140991210938], 9);
+    var m = L.map('map');
+
+    m.setView([34.76192255039478,-85.35140991210938], 9);
 
     selected.addTo(m);
 
@@ -54,10 +56,17 @@ var weightedOverlay = (function() {
     };
 
     update = function() {
-        if(layers.length == 0) { return; };
+        if(getLayers().length == 0) { 
+            if (WOLayer) {
+                map.lc.removeLayer(WOLayer);
+                map.removeLayer(WOLayer);
+                WOLayer = null;
+            }
+            return; 
+        };
 
         $.ajax({
-            url: 'http://207.245.89.238/chatta/gt/breaks',
+            url: 'gt/breaks',
             data: { 'layers' : getLayers(), 
                     'weights' : getWeights(),
                     'numBreaks': numBreaks },
@@ -79,7 +88,7 @@ var weightedOverlay = (function() {
                     geoJson = GJ.fromPolygon(polygon);
                 }
 
-                WOLayer = new L.TileLayer.WMS("http://207.245.89.238/chatta/gt/wo", {
+                WOLayer = new L.TileLayer.WMS("gt/wo", {
                     layers: 'default',
                     format: 'image/png',
                     breaks: breaks,
@@ -166,6 +175,7 @@ var weightedOverlay = (function() {
             colorRamp = key;
             update();
         },
+        getColorRamp: function() { return colorRamp; },
 
         update: update,
 
@@ -179,9 +189,14 @@ var summary = (function() {
     var layers = {};
     var update = function(switchTab) {
         if(polygon != null) {
+            if(weightedOverlay.activeLayers().length == 0) {
+                $("#summary-data").empty();                
+                return;
+            };
+
             var geoJson = GJ.fromPolygon(polygon);
             $.ajax({        
-                url: 'http://207.245.89.238/chatta/gt/sum',
+                url: 'gt/sum',
                 data: { polygon : geoJson, 
                         layers  : weightedOverlay.activeLayers(), 
                         weights : weightedOverlay.activeWeights() 
@@ -271,9 +286,9 @@ var drawing = (function() {
 
     map.on('draw:edited', function(e) {
         var polygon = summary.getPolygon();
-        if(polygon != null && polygon == e.layer) {
+        if(polygon != null) { 
+            summary.update();
             weightedOverlay.update();
-            summary.setPolygon(e.layer);
         }
     });
 
@@ -296,13 +311,15 @@ var drawing = (function() {
 var colorRamps = (function() {
     var makeColorRamp = function(colorDef) {
         var ramps = $("#color-ramp-menu");
-        p
         var p = $("#colorRampTemplate").clone();
         p.find('img').attr("src",colorDef.image);
         p.click(function() {
+            $("#activeRamp").attr("src",colorDef.image);
             weightedOverlay.setColorRamp(colorDef.key);
-
         });
+        if(colorDef.key == weightedOverlay.getColorRamp()) {
+            $("#activeRamp").attr("src",colorDef.image);
+        }
         p.show();
         ramps.append(p);
     }
@@ -310,7 +327,7 @@ var colorRamps = (function() {
     return { 
         bindColorRamps: function() {
             $.ajax({
-                url: 'http://207.245.89.238/chatta/gt/colors',
+                url: 'gt/colors',
                 dataType: 'json',
                 success: function(data) {
                     _.map(data.colors, makeColorRamp)
@@ -329,8 +346,32 @@ $.getJSON('config.json', function(data) {
     weightedOverlay.setColorRamp(data.weightedOverlay.ramp);
 });
 
+var setupSize = function() {
+    var bottomPadding = 10;
+
+    var resize = function(){
+        var pane = $('#main');
+        var height = $(window).height() - pane.offset().top - bottomPadding;
+        pane.css({'height': height +'px'});
+
+        var sidebar = $('#tabBody');
+        var height = $(window).height() - sidebar.offset().top - bottomPadding;
+        sidebar.css({'height': height +'px'});
+
+        var mapDiv = $('#map');
+        var height = $(window).height() - mapDiv.offset().top - bottomPadding;
+        mapDiv.css({'height': height +'px'});
+
+        map.invalidateSize();
+    };
+    resize();
+    $(window).resize(resize);
+};
+
 // On page load
 $(document).ready(function() {
+    // Set heights
+
     weightedOverlay.bindSliders();
     colorRamps.bindColorRamps();
 
@@ -338,5 +379,5 @@ $(document).ready(function() {
         summary.clear();
         return false;
     });
-
+    setupSize();
 });

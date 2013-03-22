@@ -29,7 +29,7 @@ object Colors {
 /**
  * Sum values under polygon provided via geojson
  */
-@Path("/gt/colors")
+@Path("/colors")
 class ColorRampsService {
   @GET
   def get(

@@ -4,7 +4,7 @@ import javax.servlet.http.HttpServletRequest
 import javax.ws.rs.{GET, Path}
 import javax.ws.rs.core.{Response,Context}
 
-@Path("/gt")
+@Path("/")
 class Hello {
   @GET
   def get(@Context req:HttpServletRequest) = {

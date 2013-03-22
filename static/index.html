@@ -42,24 +42,30 @@
         }
       }
     </style>
-    <link href="css/bootstrap-responsive.css" rel="stylesheet">
-	<link href="css/leaflet.css" rel="stylesheet">
-	<link href="css/leaflet.draw.css" rel="stylesheet">
-	<!--[if lte IE 8]>
-		<link rel="stylesheet" href="../dist/leaflet.ie.css" />
+
+    <link href="css/bootstrap-responsive.css" rel="stylesheet"/>
+    <link href="css/leaflet.css" rel="stylesheet"/>
+    <link href="css/leaflet.draw.css" rel="stylesheet"/>
+    <!--[if lte IE 8]>
+	<link rel="stylesheet" href="../dist/leaflet.ie.css" />
 	<![endif]-->
-	
-	<link href="css/jquery-ui.css" rel="stylesheet">
-	<link href="css/application.css" rel="stylesheet">
-	
-	<script src="js/leaflet-src.js"></script>
-	<script src="js/leaflet.draw.js"></script>
-        <script src="js/geojson.js"></script>
-        <script src="http://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.4.4/underscore-min.js"></script>
+    
+    <link href="css/jquery-ui.css" rel="stylesheet"/>
+    <link href="css/application.css" rel="stylesheet"/>
+    
+    <script src="js/leaflet-src.js"></script>
+    <script src="js/leaflet.draw.js"></script>
+    <script src="js/geojson.js"></script>
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.4.4/underscore-min.js"></script>
+
+    <script src="js/jquery-1.9.1.min.js"></script>
+    <script src="js/jquery-ui-1.10.0.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+
 
     <!--[if lt IE 9]>
-      <script src="../assets/js/html5shiv.js"></script>
-    <![endif]-->
+        <script src="../assets/js/html5shiv.js"></script>
+        <![endif]-->
 
   </head>
 
@@ -90,7 +96,11 @@
 
 	<div class="span9">
 	<div class="well pull-left">
-		<strong>Legend</strong> <br>
+          <table>
+	    <tbody class="legend">
+              <tr><td><strong>Legend<strong></td><td><img id="activeRamp"></img></td></tr>
+            </tbody>
+          </table>
 	</div>
           <div class="options">
             <ul id="colorChooser" class="nav nav-pills">
@@ -120,7 +130,7 @@
 		</ul>
 		
 		
-		<div class="tab-content">
+		<div class="tab-content" id="tabBody">
 		
 			<div class="tab-pane active" id="parameters">
 			<!-- Parameter 1 -->
@@ -197,10 +207,8 @@
       </div>
     </div>
 
-    <script src="js/jquery-1.9.1.min.js"></script>
-    <script src="js/jquery-ui-1.10.0.min.js"></script>
-	<script src="js/bootstrap.min.js"></script>
-	<script src="js/application.js"></script>
+
+    <script src="js/application.js"></script>
 	
 
 
