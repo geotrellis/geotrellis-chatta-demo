@@ -359,9 +359,9 @@ var setupSize = function() {
         sidebar.css({'height': height +'px'});
 
         var mapDiv = $('#map');
-        var height = $(window).height() - mapDiv.offset().top - bottomPadding;
+		var wrapDiv = $('#wrap');
+        var height = $(window).height() - mapDiv.offset().top - bottomPadding - wrapDiv.height();
         mapDiv.css({'height': height +'px'});
-
         map.invalidateSize();
     };
     resize();

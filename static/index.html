@@ -21,12 +21,14 @@
       .options {
         float: right;
 		z-index: 999;
+		margin-top: 22px;
       }
 
       #opacitySlider {
         float:right;
         width:200px;
         padding-left: 20px;
+		margin-top: -3px;
       }
 
       #colorChooser {
@@ -95,40 +97,45 @@
       <div class="row-fluid">
 
 	<div class="span9">
-	<div class="well pull-left">
-          <table>
-	    <tbody class="legend">
-              <tr>
-				<td><strong>Legend<strong></td>
-			  </tr>
-			  <tr>
-				<td><img id="activeRamp" style="text-align: middle;"></img></td>
-			  </tr>
-			  <tr>
-				<td>High</td>
-				<td style="position: absolute; margin-left: -28px;">Low</td>
-			  </tr>
-            </tbody>
-          </table>
-	</div>
-          <div class="options">
-            <ul id="colorChooser" class="nav">
-              <li class="dropdown">
-                <a class="btn dropdown-toggle" id="drop5" role="button" data-toggle="dropdown" href="#">
-                  Color Ramps <i class="icon-chevron-down"></i>
-                </a>
-                <ul id="color-ramp-menu" class="dropdown-menu" role="menu" aria-labelledby="drop5">
-                </ul>
-              </li>
-            </ul> <!-- /tabs -->
-            <div id="opacitySlider">
-                <span class="slider-label">Opacity</span>
-                <div id="opacity-slider"></div>
-            </div>
-            </div>
+
 	  <div id="map">
 	  <a class="btn btn-inverse" id="clearButton" href="#">Clear Polygon</a>
 	  </div>
+	  
+	  <div id="wrap">
+			<div class="well pull-left">
+			  <table>
+			<tbody class="legend">
+				  <tr>
+					<td><strong>Legend<strong></td>
+				  </tr>
+				  <tr>
+					<td><img id="activeRamp" style="text-align: middle;"></img></td>
+				  </tr>
+				  <tr>
+					<td>High</td>
+					<td style="position: absolute; margin-left: -28px;">Low</td>
+				  </tr>
+				</tbody>
+			  </table>
+			</div>
+			  <div class="options">
+				<ul id="colorChooser" class="nav">
+				  <li class="dropdown">
+					<a class="btn dropdown-toggle" id="drop5" role="button" data-toggle="dropdown" href="#">
+					  Color Ramps <i class="icon-chevron-down"></i>
+					</a>
+					<ul id="color-ramp-menu" class="dropdown-menu" role="menu" aria-labelledby="drop5">
+					</ul>
+				  </li>
+				</ul> <!-- /tabs -->
+				<div id="opacitySlider">
+					<span class="slider-label">Opacity</span>
+					<div id="opacity-slider"></div>
+				</div>
+			   </div>
+		   </div> <!-- end wrap -->
+	  
         </div><!--/map-->
 
         <div class="span3" id="sidebar">

@@ -26,6 +26,12 @@ body {
 	z-index: 999;
 }
 
+#wrap {
+	position: fixed;
+	bottom: 0;
+	width: 70%;
+	margin-top: 10px;
+}
 
 /* =======================================================
    Map
@@ -127,3 +133,4 @@ span.weight input {
 #clearButton {
 	color: #fff !important;
 }
+
