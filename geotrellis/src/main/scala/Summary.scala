@@ -69,12 +69,15 @@ class Sum {
 
         val layerSummaries = 
           "[" + result.layerSummaries.map {
-            ls => s"""{ "layer": "${ls.name}", "total": "${ls.total}" }"""
+            ls => 
+              val v = "%.2f".format(ls.score * 100)
+              s"""{ "layer": "${ls.name}", "total": "${v}" }"""
           }.mkString(",") + "]"
 
+        val totalVal = "%.2f".format(result.score * 100)
         val data = s"""{ 
           "layerSummaries": $layerSummaries,
-          "total": "${result.total}", 
+          "total": "${totalVal}", 
           "elapsed": "$elapsedTotal"
         }"""
 

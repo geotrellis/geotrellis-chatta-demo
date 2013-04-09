@@ -7,7 +7,7 @@ import geotrellis.raster._
 import geotrellis.raster.op._
 import geotrellis.feature._
 
-case class TiledLayer(raster:Raster,tileSums:Map[RasterExtent,Long])
+case class TiledLayer(raster:Raster,tileRatios:Map[RasterExtent,LayerRatio])
 
 object Main {
   val server = Server("tutorial-server",
@@ -28,7 +28,6 @@ object Main {
     "FarmlandOrForestedLandsWithPrimeAgriculturalSoils" -> 10
   )
 
-
   def main(args: Array[String]):Unit = {
     try {
       tiledLayers = { for(layer <- weights.keys) yield { 
@@ -36,8 +35,8 @@ object Main {
         println(s"LOADING TILE RASTER $tilePath")
         val r = Raster.loadTileSet(tilePath, server)
 
-        val tileSetRD = r.data.asInstanceOf[TileArrayRasterData] 
-        val tileSums = zonal.summary.Sum.createTileResults(tileSetRD, r.rasterExtent)
+        val tileSetRD = r.data.asInstanceOf[TileArrayRasterData]
+        val tileSums = RatioOfOnes.createTileResults(tileSetRD, r.rasterExtent)
         (layer,TiledLayer(r,tileSums))
       } }.toMap
     } catch {

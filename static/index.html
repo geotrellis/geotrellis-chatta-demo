@@ -107,14 +107,15 @@
 			  <table>
 			<tbody class="legend">
 				  <tr>
-					<td><strong>Legend<strong></td>
-				  </tr>
-				  <tr>
 					<td><img id="activeRamp" style="text-align: middle;"></img></td>
 				  </tr>
 				  <tr>
-					<td>High</td>
-					<td style="position: absolute; margin-left: -28px;">Low</td>
+					<td>
+                                          <small>Low</small>
+                                        </td>
+					<td style="position: absolute; margin-left: -28px;">
+                                          <small>High</small>
+                                        </td>
 				  </tr>
 				</tbody>
 			  </table>
@@ -226,8 +227,6 @@
 
     <script src="js/application.js"></script>
 	
-
-
     <!-- Templates -->
 
     <div id="parameterSlider" style="display:none">
@@ -237,10 +236,6 @@
         </span>
         <div class="slider"></div>
       </div>
-    </div>
-
-    <div id="summaryTemplate" style="display:none">
-      <p><span id="summary-label">Total Score for Region:</span> <span id="summary-score"></span></p>
     </div>
 
     <li id="colorRampTemplate" role="presentation" style="display:none">

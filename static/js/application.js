@@ -112,11 +112,12 @@ var weightedOverlay = (function() {
     var makeSlider = function(div,layer) {
         div.find( ".slider" ).slider({
             value:layer.weight,
-            min: 0,
-            max: 10,
+            min: -5,
+            max: 5,
             step: 1,
             change: function( event, ui ) {
-                $( this ).prev('.weight').text( "+" + ui.value );
+                var pn = ui.value > 0 ? "+" : "";
+                $( this ).prev('.weight').text( pn + ui.value );
                 layer.weight = ui.value;
                 update();
                 summary.update(false);
@@ -208,15 +209,15 @@ var summary = (function() {
 
                     _.map(data.layerSummaries, function(ls) {
                         if(layers.hasOwnProperty(ls.layer)) {
-                            var layerName = layers[ls.layer] + ":";
+                            var layerName = layers[ls.layer];
                         } else {
                             var layerName = "Layer:";
                         }
 
-                        sdata.append($('<tr><td>' + layerName + '</td>' + '<td class="bold">' + ls.total + '</td></tr>'));
+                        sdata.append($('<tr><td>' + layerName + '</td>' + '<td class="bold" style="text-align:right;">' + ls.total + '</td></tr>'));
                     });
 
-                    sdata.append($('<tr class="warning"><td class="bold">Total:</td>' + '<td class="bold">' + data.total + '</td></tr>'));
+                    sdata.append($('<tr class="warning"><td class="bold">Score:</td>' + '<td class="bold" style="text-align:right;">' + data.total + '</td></tr>'));
 
                     if(switchTab) { $('a[href=#summary]').tab('show'); };
                 }
