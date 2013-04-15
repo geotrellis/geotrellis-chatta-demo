@@ -1,19 +1,21 @@
 package chatta
 
 import javax.servlet.http.HttpServletRequest
-import javax.ws.rs.core.Response
 import javax.ws.rs._
-import javax.ws.rs.core.{Response, Context, MediaType, MultivaluedMap}
 import geotrellis._
 import geotrellis.raster.op._
 import geotrellis.statistics.op._
+import geotrellis.rest._
 import geotrellis.rest.op._
 import geotrellis.raster._
 import geotrellis.feature.op.geometry.AsPolygonSet
 import geotrellis.feature.rasterize.{Rasterizer, Callback}
 import geotrellis.data.ColorRamp
 
+import javax.ws.rs.core.Context
+
 import scala.collection.JavaConversions._
+import scala.language.implicitConversions
 
 case class ClassBreaksToJson(b:Op[Array[Int]]) extends Op1(b)({
   breaks => 
@@ -35,7 +37,7 @@ class GetBreaks {
     @DefaultValue("") @QueryParam("mask") mask:String,
     @DefaultValue("10") @QueryParam("numBreaks") numBreaks:String,
     @Context req:HttpServletRequest
-  ) = {
+  ):core.Response = {
     println(s"$weights\n$layers")
     val extentOp = string.ParseExtent(bbox)
     
@@ -55,19 +57,12 @@ class GetBreaks {
     val classBreaks = stat.GetClassBreaks(histo, numBreaksOp)
     val op = ClassBreaksToJson(classBreaks)
     
-
     Main.server.getResult(op) match {
       case process.Complete(json,h) =>
-        Response.ok(json)
-                .`type`("application/json")
-                .header("Access-Control-Allow-Origin", "*")
-                .header("Access-Control-Allow-Credentials", "true")
-                .build()        
+        OK.json(json)
+          .allowCORS()
       case process.Error(message,trace) =>
-        Response.serverError()
-                .entity(message + " " + trace)
-                .`type`("text/plain")
-                .build()
+        ERROR(message + " " + trace)
     }
   }
 }

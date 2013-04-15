@@ -1,16 +1,16 @@
 package chatta
 
+import geotrellis.rest._
+
 import javax.servlet.http.HttpServletRequest
-import javax.ws.rs.{GET, Path}
-import javax.ws.rs.core.{Response,Context}
+import javax.ws.rs.core.Context
+import javax.ws.rs._
 
 @Path("/")
 class Hello {
   @GET
-  def get(@Context req:HttpServletRequest) = {
+  def get(@Context req:HttpServletRequest):core.Response = {
     val message = "GeoTrellis is running."
-    Response.ok(message)
-            .`type`("text/plain")
-            .build()
+    OK(message)
   }
 }

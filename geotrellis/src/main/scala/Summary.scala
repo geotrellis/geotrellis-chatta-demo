@@ -1,11 +1,11 @@
 package chatta
 
 import javax.servlet.http.HttpServletRequest
-import javax.ws.rs.core.Response
 import javax.ws.rs.{GET, POST, Path, Consumes, DefaultValue, QueryParam}
 import javax.ws.rs._
-import javax.ws.rs.core.{Response, Context, MediaType, MultivaluedMap}
 import geotrellis._
+import javax.ws.rs.core.Context
+import geotrellis.rest._
 import geotrellis.feature.Polygon
 import geotrellis.process._
 import geotrellis.raster.op._
@@ -27,12 +27,9 @@ class Sum {
     @DefaultValue("1") @QueryParam("weights") weights:String,
     @DefaultValue("") @QueryParam("mask") mask:String,
     @Context req:HttpServletRequest
-  ) = {
+  ):core.Response = {
     if (polygonJson == null) {
-      Response.serverError()
-              .entity("{ \"error\" => 'GeoTrellis has received an empty request.' }")
-              .`type`("application/json")
-              .build() 
+      ERROR("{ \"error\" => 'GeoTrellis has received an empty request.' }")
     } else {
       println("received json: " + polygonJson)
       println("received POST request.")
@@ -48,7 +45,7 @@ class Sum {
     @DefaultValue("1") @QueryParam("weights") weights:String,
     @DefaultValue("") @QueryParam("mask") mask:String,
     @Context req:HttpServletRequest
-  ):Any = {
+  ):core.Response = {
     val start = System.currentTimeMillis()
     val polyOp = io.LoadGeoJsonFeature(polygonJson)
     val feature = Main.server.run(polyOp)
@@ -80,18 +77,9 @@ class Sum {
           "total": "${totalVal}", 
           "elapsed": "$elapsedTotal"
         }"""
-
-        Response
-          .ok(data)
-          .`type`("application/json")
-          .header("Access-Control-Allow-Origin", "*")
-          .header("Access-Control-Allow-Credentials", "true")
-          .build()
+        Response.ok(ResponseType.Json).data(data).allowCORS()
       case process.Error(message,trace) =>
-        Response.serverError()
-                .entity(message + " " + trace)
-                .`type`("text/plain")
-                .build()
+        ERROR(message + " " + trace)
     }
   }
 }

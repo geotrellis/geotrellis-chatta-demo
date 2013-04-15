@@ -1,11 +1,11 @@
 package chatta
 
 import javax.servlet.http.HttpServletRequest
-import javax.ws.rs.core.Response
 import javax.ws.rs.{GET, POST, Path, Consumes, DefaultValue, QueryParam}
 import javax.ws.rs._
 import javax.ws.rs.core.{Response, Context, MediaType, MultivaluedMap}
 import geotrellis._
+import geotrellis.rest._
 import geotrellis.data.ColorRamps
 
 import scala.collection.JavaConversions._
@@ -35,16 +35,13 @@ class ColorRampsService {
   def get(
     @DefaultValue("") @QueryParam("img") image:String,
     @Context req:HttpServletRequest
-  ):Any = {
+  ):core.Response = {
     // Return JSON with information on color ramps.
     val c = for(key <- Colors.rampMap.keys) yield {
       s"""{ "key": "$key", "image": "img/ramps/${key}.png" }"""
     }
     val arr = "[" + c.mkString(",") + "]"
-    Response.ok(s"""{ "colors": $arr }""")
-            .`type`("application/json")
-            .header("Access-Control-Allow-Origin", "*")
-            .header("Access-Control-Allow-Credentials", "true")
-            .build()
+    OK.json(s"""{ "colors": $arr }""")
+      .allowCORS()
   }
 }

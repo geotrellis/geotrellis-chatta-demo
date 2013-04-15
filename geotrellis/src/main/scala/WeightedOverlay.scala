@@ -1,18 +1,19 @@
 package chatta
 
 import javax.servlet.http.HttpServletRequest
-import javax.ws.rs.core.Response
 import javax.ws.rs._
-import javax.ws.rs.core.{Response, Context, MediaType, MultivaluedMap}
 import geotrellis._
 import geotrellis.raster.op._
 import geotrellis.statistics.op._
+import geotrellis.rest._
 import geotrellis.rest.op._
 import geotrellis.raster._
 import geotrellis.feature._
 import geotrellis.feature.op.geometry.AsPolygonSet
 import geotrellis.feature.rasterize.{Rasterizer, Callback}
 import geotrellis.data.ColorRamps._
+
+import javax.ws.rs.core.Context
 
 import scala.collection.JavaConversions._
 
@@ -38,7 +39,7 @@ class WeightedOverlay {
     @DefaultValue("") @QueryParam("breaks") breaks:String,
     @DefaultValue("blue-to-red") @QueryParam("colorRamp") colorRampKey:String,
     @Context req:HttpServletRequest
-  ) = {
+  ):core.Response = {
     val extentOp = string.ParseExtent(bbox)
 
     val colsOp = string.ParseInt(cols)
@@ -75,7 +76,6 @@ class WeightedOverlay {
     }
 
     val png = Render.operation(overlayOp,ramp,breaksOp)
-    
 
     Main.server.getResult(png) match {
       case process.Complete(img,h) =>
@@ -92,19 +92,12 @@ s"""
 <p>${histo.toJSON}</p>
 <p>${t}</p>
 """)
-            Response.ok(html)
-
-                    .build()
+            OK(html)
           case _ => 
-            Response.ok(img)
-                    .`type`("image/png")
-                    .build()        
+            OK.png(img)
         }
       case process.Error(message,trace) =>
-        Response.serverError()
-                .entity(message + " " + trace)
-                .`type`("text/plain")
-                .build()
+        ERROR(message + " " + trace)
     }
   }
 }

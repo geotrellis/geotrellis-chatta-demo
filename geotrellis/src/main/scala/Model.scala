@@ -71,7 +71,7 @@ object WeightedOverlayArray {
 
 object RatioOfOnes {
   def createTileResults(trd:TiledRasterData, re:RasterExtent) = {
-    val tiles = trd.getTileList(re)
+    val tiles = trd.getTiles(re)
     tiles map { r => (r.rasterExtent, rasterResult(r))} toMap
   }
 
