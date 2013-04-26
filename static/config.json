@@ -6,7 +6,7 @@
         "ramp"      : "yellow-to-red-heatmap",
         "layers" : [ { "name" : "ImperviousSurfaces_Barren Lands_Open Water", 
                        "weight" : "-5",
-                       "display" : "Impervious Surfaces" },
+                       "display" : "High Intensity Development, Impervious Surfaces, or Open Water" },
                      { "name": "DevelopedLand",
                        "weight": "-4",  
                        "display": "Developed Land"},

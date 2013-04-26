@@ -123,7 +123,7 @@ var weightedOverlay = (function() {
                 summary.update(false);
             }
         });
-        div.find( '.weight' ).text( "+" + layer.weight );
+        div.find( '.weight' ).text( (layer.weight > 0 ? "+" : "") + layer.weight );
     };
 
     var bindSliders = function() {
