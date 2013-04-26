@@ -6,7 +6,7 @@
    "params": {
      "type": "fs",
      "path": "data/arg_albers",
-     "cacheAll": "no"
+     "cacheAll": "yes"
     }
   },
   {
@@ -14,7 +14,7 @@
    "params": {
      "type": "fs",
      "path": "data/arg_wm",
-     "cacheAll": "no"
+     "cacheAll": "yes"
     }
   }
  ]
