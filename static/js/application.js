@@ -66,7 +66,7 @@ var weightedOverlay = (function() {
         };
 
         $.ajax({
-            url: 'gt/breaks',
+            url: 'http://207.245.89.238/gt/breaks',
             data: { 'layers' : getLayers(), 
                     'weights' : getWeights(),
                     'numBreaks': numBreaks },
@@ -88,7 +88,7 @@ var weightedOverlay = (function() {
                     geoJson = GJ.fromPolygon(polygon);
                 }
 
-                WOLayer = new L.TileLayer.WMS("gt/wo", {
+                WOLayer = new L.TileLayer.WMS("http://207.245.89.238/gt/wo", {
                     layers: 'default',
                     format: 'image/png',
                     breaks: breaks,
@@ -197,7 +197,7 @@ var summary = (function() {
 
             var geoJson = GJ.fromPolygon(polygon);
             $.ajax({        
-                url: 'gt/sum',
+                url: 'http://207.245.89.238/gt/sum',
                 data: { polygon : geoJson, 
                         layers  : weightedOverlay.activeLayers(), 
                         weights : weightedOverlay.activeWeights() 
@@ -214,7 +214,7 @@ var summary = (function() {
                             var layerName = "Layer:";
                         }
 
-                        sdata.append($('<tr><td>' + layerName + '</td>' + '<td class="bold" style="text-align:right;">' + ls.total + '</td></tr>'));
+                        sdata.append($('<tr><td>10</td<td>' + layerName + '</td>' + '<td class="bold" style="text-align:right;">' + ls.total + '</td></tr>'));
                     });
 
                     sdata.append($('<tr class="warning"><td class="bold">Score:</td>' + '<td class="bold" style="text-align:right;">' + data.total + '</td></tr>'));
@@ -328,7 +328,7 @@ var colorRamps = (function() {
     return { 
         bindColorRamps: function() {
             $.ajax({
-                url: 'gt/colors',
+                url: 'http://207.245.89.238/gt/colors',
                 dataType: 'json',
                 success: function(data) {
                     _.map(data.colors, makeColorRamp)
