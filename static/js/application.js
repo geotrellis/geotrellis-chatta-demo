@@ -66,7 +66,7 @@ var weightedOverlay = (function() {
         };
 
         $.ajax({
-            url: 'http://207.245.89.238/gt/breaks',
+            url: 'gt/breaks',
             data: { 'layers' : getLayers(), 
                     'weights' : getWeights(),
                     'numBreaks': numBreaks },
@@ -88,7 +88,7 @@ var weightedOverlay = (function() {
                     geoJson = GJ.fromPolygon(polygon);
                 }
 
-                WOLayer = new L.TileLayer.WMS("http://207.245.89.238/gt/wo", {
+                WOLayer = new L.TileLayer.WMS("gt/wo", {
                     layers: 'default',
                     format: 'image/png',
                     breaks: breaks,
@@ -197,7 +197,7 @@ var summary = (function() {
 
             var geoJson = GJ.fromPolygon(polygon);
             $.ajax({        
-                url: 'http://207.245.89.238/gt/sum',
+                url: 'gt/sum',
                 data: { polygon : geoJson, 
                         layers  : weightedOverlay.activeLayers(), 
                         weights : weightedOverlay.activeWeights() 
@@ -328,7 +328,7 @@ var colorRamps = (function() {
     return { 
         bindColorRamps: function() {
             $.ajax({
-                url: 'http://207.245.89.238/gt/colors',
+                url: 'gt/colors',
                 dataType: 'json',
                 success: function(data) {
                     _.map(data.colors, makeColorRamp)
