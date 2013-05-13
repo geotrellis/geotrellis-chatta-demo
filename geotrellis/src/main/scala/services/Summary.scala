@@ -80,6 +80,7 @@ class Sum {
         Response.ok(ResponseType.Json).data(data).allowCORS()
       case process.Error(message,trace) =>
         ERROR(message + " " + trace)
+          .allowCORS()
     }
   }
 }
