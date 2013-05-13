@@ -214,11 +214,6 @@ var summary = (function() {
                     var sdata = $("#summary-data");
                     sdata.empty();
 
-                    // for(var i = 0; i < activeLayers.length; i++) {
-                    //     var layerName = activeLayers[i]
-                        
-                        
-                    // }
                     _.map(data.layerSummaries.reverse(), function(ls) {
                         if(layers.hasOwnProperty(ls.layer)) {
                             var layerName = layers[ls.layer];
