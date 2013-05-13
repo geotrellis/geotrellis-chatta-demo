@@ -1,4 +1,4 @@
-var server = '/'
+var server = ''
 
 var getLayer = function(url,attrib) {
     return L.tileLayer(url, { maxZoom: 18, attribution: attrib });
