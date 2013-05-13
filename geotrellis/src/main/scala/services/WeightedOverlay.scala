@@ -98,6 +98,7 @@ s"""
         }
       case process.Error(message,trace) =>
         ERROR(message + " " + trace)
+             .allowCORS()
     }
   }
 }

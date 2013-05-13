@@ -1,3 +1,5 @@
+var server = ''
+
 var getLayer = function(url,attrib) {
     return L.tileLayer(url, { maxZoom: 18, attribution: attrib });
 };
@@ -39,6 +41,8 @@ var map = (function() {
 var weightedOverlay = (function() {
     var layers = [];
 
+    var layersToWeights = {}
+
     var breaks = null;
     var WOLayer = null;
     var opacity = 0.5;
@@ -66,7 +70,7 @@ var weightedOverlay = (function() {
         };
 
         $.ajax({
-            url: 'gt/breaks',
+            url: server + 'gt/breaks',
             data: { 'layers' : getLayers(), 
                     'weights' : getWeights(),
                     'numBreaks': numBreaks },
@@ -88,7 +92,7 @@ var weightedOverlay = (function() {
                     geoJson = GJ.fromPolygon(polygon);
                 }
 
-                WOLayer = new L.TileLayer.WMS("gt/wo", {
+                WOLayer = new L.TileLayer.WMS(server + "gt/wo", {
                     layers: 'default',
                     format: 'image/png',
                     breaks: breaks,
@@ -120,6 +124,7 @@ var weightedOverlay = (function() {
                 $( this ).prev('.weight').text( pn + ui.value );
                 layer.weight = ui.value;
                 update();
+                summary.setLayerWeight(layer.name,layer.weight);
                 summary.update(false);
             }
         });
@@ -188,6 +193,7 @@ var weightedOverlay = (function() {
 var summary = (function() {
     var polygon = null;
     var layers = {};
+    var weights = {};
     var update = function(switchTab) {
         if(polygon != null) {
             if(weightedOverlay.activeLayers().length == 0) {
@@ -196,28 +202,34 @@ var summary = (function() {
             };
 
             var geoJson = GJ.fromPolygon(polygon);
+
             $.ajax({        
-                url: 'gt/sum',
+                url: server + 'gt/sum',
                 data: { polygon : geoJson, 
                         layers  : weightedOverlay.activeLayers(), 
-                        weights : weightedOverlay.activeWeights() 
+                        weights : weightedOverlay.activeWeights()
                       },
                 dataType: "json",
                 success : function(data) {
                     var sdata = $("#summary-data");
                     sdata.empty();
 
-                    _.map(data.layerSummaries, function(ls) {
+                    _.map(data.layerSummaries.reverse(), function(ls) {
                         if(layers.hasOwnProperty(ls.layer)) {
                             var layerName = layers[ls.layer];
                         } else {
                             var layerName = "Layer:";
                         }
 
-                        sdata.append($('<tr><td>10 - </td<td>' + layerName + '</td>' + '<td class="bold" style="text-align:right;">' + ls.total + '</td></tr>'));
+                        sdata.append($('<tr><td style="text-align:right;">' + weights[ls.layer] + 
+                                       '</td><td>' + layerName + '</td>' + 
+                                       '<td class="bold" style="text-align:right;">' + ls.total + 
+                                       '</td></tr>'));
                     });
 
-                    sdata.append($('<tr class="warning"><td class="bold">Score:</td>' + '<td class="bold" style="text-align:right;">' + data.total + '</td></tr>'));
+                    sdata.append($('<tr class="warning"><td></td><td class="bold">Score:</td>' + 
+                                   '<td class="bold" style="text-align:right;">' + data.total + 
+                                   '</td></tr>'));
 
                     if(switchTab) { $('a[href=#summary]').tab('show'); };
                 }
@@ -234,7 +246,11 @@ var summary = (function() {
         setLayers: function(ls) {
             _.map(ls, function(l) {
                 layers[l.name] = l.display;
+                weights[l.name] = l.weight;
             });
+        },
+        setLayerWeight: function(layer,weight) {
+            weights[layer] = weight;
         },
         update: update,
         clear: function() {
@@ -253,7 +269,7 @@ var drawing = (function() {
     var drawnItems = new L.FeatureGroup();
     map.addLayer(drawnItems);
 
-    var drawControl = new L.Control.Draw({
+    var drawOptions = {
         draw: {
 	    position: 'topleft',
             marker: false,
@@ -272,11 +288,10 @@ var drawing = (function() {
 	        }
 	    },
         },
-        edit: {
-	    featureGroup: drawnItems,
-            remove: false
-        }
-    });
+        edit: false
+    };
+
+    var drawControl = new L.Control.Draw(drawOptions);
     map.addControl(drawControl);
 
     map.on('draw:created', function (e) {
