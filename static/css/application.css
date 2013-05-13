@@ -6,6 +6,9 @@ h4 {
 	line-height: 16px;
 }
 
+p {
+	font-size: 13px;
+}
 
 /*
 body {
@@ -33,8 +36,8 @@ body {
 #wrap {
 	position: fixed;
 	bottom: 0;
-	width: 64%;
-	margin-top: 10px;
+	width: 665px;
+	margin 10px; auto;
 }
 
 .modal-body p {
@@ -59,7 +62,7 @@ body {
 
 h4.slider-label {
 	padding: 0 2px 0 0;
-	margin: 0 0 15px -5px;
+	margin: 0 25px 15px -5px;
 	font-size: 12px;
 	font-weight: normal;
 }
@@ -88,7 +91,6 @@ span.weight input {
 
 #summary {
 	margin-right: 15px;
-	overflow-y: scroll;
 }
 
 #main {
@@ -97,6 +99,23 @@ span.weight input {
 	height: 660px;
 	overflow: hidden;
 }
+
+#sidebar {
+	width: 329px;
+	float: right;
+	margin-right: 15px;
+}
+
+#leftCol {
+	width: 665px;
+	float: left;
+}
+
+.container-main {
+	width: 1024px;
+	margin: 0 auto;
+}
+
 
 /* =======================================================
    Scrollbar

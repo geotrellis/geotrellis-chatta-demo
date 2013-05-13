@@ -19,7 +19,7 @@ var Layers = {
 var map = (function() {
     var selected = getLayer(Layers.mapBox.azavea,Layers.mapBox.attrib);
     var baseLayers = {
-	"Azavea" : selected,
+	"Default" : selected,
         "World Light" : getLayer(Layers.mapBox.worldLight,Layers.mapBox.attrib),
         "Terrain" : getLayer(Layers.stamen.terrain,Layers.stamen.attrib),
         "Watercolor" : getLayer(Layers.stamen.watercolor,Layers.stamen.attrib),
@@ -214,7 +214,7 @@ var summary = (function() {
                             var layerName = "Layer:";
                         }
 
-                        sdata.append($('<tr><td>10</td<td>' + layerName + '</td>' + '<td class="bold" style="text-align:right;">' + ls.total + '</td></tr>'));
+                        sdata.append($('<tr><td>10 - </td<td>' + layerName + '</td>' + '<td class="bold" style="text-align:right;">' + ls.total + '</td></tr>'));
                     });
 
                     sdata.append($('<tr class="warning"><td class="bold">Score:</td>' + '<td class="bold" style="text-align:right;">' + data.total + '</td></tr>'));

@@ -6,7 +6,7 @@
     <meta name="description" content="GeoTrellis features demo.">
     <meta name="author" content="Azavea">
 
-	<link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+	 <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
     <link href="css/bootstrap.css" rel="stylesheet">
     <style type="text/css">
       body {
@@ -18,36 +18,27 @@
       }
 
       .options {
-        float: right;
-		z-index: 999;
-		margin-top: 22px;
+		  float: right;
+		  z-index: 999;
+		  margin-top: 22px;
       }
 
       #opacitySlider {
         float:right;
         width:200px;
         padding-left: 20px;
-		margin-top: -3px;
+		  margin-top: -3px;
       }
 
       #colorChooser {
         float:left;
       }
-
-      @media (max-width: 980px) {
-        /* Enable use of floated navbar text */
-        .navbar-text.pull-right {
-          float: none;
-          padding-left: 5px;
-          padding-right: 5px;
-        }
-      }
     </style>
     <link href="css/leaflet.css" rel="stylesheet"/>
     <link href="css/leaflet.draw.css" rel="stylesheet"/>
     <!--[if lte IE 8]>
-	<link rel="stylesheet" href="../dist/leaflet.ie.css" />
-	<![endif]-->
+	   <link rel="stylesheet" href="../dist/leaflet.ie.css" />
+	 <![endif]-->
     
     <link href="css/jquery-ui.css" rel="stylesheet"/>
     <link href="css/application.css" rel="stylesheet"/>
@@ -61,7 +52,6 @@
     <script src="js/jquery-ui-1.10.0.min.js"></script>
     <script src="js/bootstrap.min.js"></script>
 
-
     <!--[if lt IE 9]>
         <script src="../assets/js/html5shiv.js"></script>
     <![endif]-->
@@ -74,7 +64,7 @@
   
     <div class="navbar navbar-inverse navbar-fixed-top">
       <div class="navbar-inner">
-        <div class="container-fluid">
+        <div class="container-main">
           <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
@@ -90,53 +80,52 @@
       </div>
     </div>
 
-    <div class="container-fluid">
-      <div class="row-fluid">
+    <div class="container-main">
+      <div class="row">
 
-	<div class="span8">
+			<div id="leftCol">
 
-	  <div id="map">
-	  <a class="btn btn-inverse" id="clearButton" href="#">Clear Polygon</a>
-	  </div>
-	  
-	  <div id="wrap">
-			<div class="well pull-left">
-			  <table>
-			<tbody class="legend">
-				  <tr>
-					<td><img id="activeRamp" style="text-align: middle;"></img></td>
-				  </tr>
-				  <tr>
-					<td>
-                                          <small>Low</small>
-                                        </td>
-					<td style="position: absolute; margin-left: -28px;">
-                                          <small>High</small>
-                                        </td>
-				  </tr>
-				</tbody>
-			  </table>
-			</div>
-			  <div class="options">
-				<ul id="colorChooser" class="nav">
-				  <li class="dropdown">
-					<a class="btn dropdown-toggle" id="drop5" role="button" data-toggle="dropdown" href="#">
-					  Color Ramps <i class="icon-chevron-down"></i>
-					</a>
-					<ul id="color-ramp-menu" class="dropdown-menu" role="menu" aria-labelledby="drop5">
-					</ul>
-				  </li>
-				</ul> <!-- /tabs -->
-				<div id="opacitySlider">
-					<span class="slider-label">Opacity</span>
-					<div id="opacity-slider"></div>
+				<div id="map">
+					<a class="btn btn-inverse" id="clearButton" href="#">Clear Polygon</a>
 				</div>
+	  
+			<div id="wrap">
+				<div class="well pull-left">
+					<table>
+						<tbody class="legend">
+							<tr>
+								<td><img id="activeRamp" style="text-align: middle;"></img></td>
+							</tr>
+							<tr>
+								<td>
+									<small>Low</small>
+                        </td>
+								<td style="position: absolute; margin-left: -28px;">
+									<small>High</small>
+                        </td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+				<div class="options">
+					<ul id="colorChooser" class="nav">
+						<li class="dropdown">
+							<a class="btn dropdown-toggle" id="drop5" role="button" data-toggle="dropdown" href="#">
+								Color Ramps <i class="icon-chevron-up"></i>
+							</a>
+							<ul id="color-ramp-menu" class="dropdown-menu" role="menu" aria-labelledby="drop5"></ul>
+						</li>
+				</ul> <!-- /tabs -->
+					<div id="opacitySlider">
+						<span class="slider-label">Opacity</span>
+						<div id="opacity-slider"></div>
+					</div>
 			   </div>
 		   </div> <!-- end wrap -->
 	  
         </div><!--/map-->
 
-        <div class="span4" id="sidebar">
+        <div id="sidebar">
 		
 		<ul class="nav nav-tabs">
 			<li class="active"><a href="#parameters" data-toggle="tab">Parameters</a></li>
@@ -195,11 +184,13 @@
 					<tr></tr>
 				</tbody>
 			</table>
+			<p>About the model score: For each parameter, the number of cells representing presence within the study area are summed and then multiplied by the weight applied before running the model. This value is then divided by the total number of cells in the study area. All individual parameter scores are then summed to produce the total study area score. The score does not represent a standard metric, but is valuable when comparing between model results for different study areas or weighting schemes.</p>
 		  </div>
 		  
 		  </div> <!--/tab-content -->
 		  
         </div><!--/span-->
+		  
       </div><!--/row-->
 
     </div><!--/.fluid-container-->
