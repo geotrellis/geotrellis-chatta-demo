@@ -39,11 +39,13 @@ object Model {
 
   def summary(layers:Op[Array[String]], weights:Op[Array[Int]], polygon:Op[Polygon[Int]]) = {
     val sums = logic.ForEach(layers,weights) {
-      (layer,weight) =>
+      (layer,weight) => {
+        println("Executing layer summary.")
         val tileLayer = Main.getTileLayer(layer)
         local.Multiply(weight.toDouble, makeSummary(layer,polygon)).map { score =>
           LayerSummary(layer,score)
         }
+      }
     }
 
     sums.map {

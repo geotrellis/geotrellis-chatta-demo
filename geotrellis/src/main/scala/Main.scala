@@ -1,17 +1,30 @@
 package chatta
 
 import geotrellis.rest.WebRunner
-import geotrellis.process.{Server,Catalog}
+import geotrellis.process._
 import geotrellis._
 import geotrellis.raster._
 import geotrellis.raster.op._
 import geotrellis.feature._
+import akka.actor.{ ActorRef, Props, Actor, ActorSystem }
+import akka.cluster.routing.ClusterRouterConfig
+import akka.cluster.routing.ClusterRouterSettings
+import akka.cluster.routing.AdaptiveLoadBalancingRouter
+import akka.cluster.routing.HeapMetricsSelector
+import akka.cluster.routing.AdaptiveLoadBalancingRouter
+import akka.cluster.routing.SystemLoadAverageMetricsSelector
+import akka.routing.ConsistentHashingRouter
+import akka.routing.FromConfig
 
 case class TiledLayer(raster:Raster,tileRatios:Map[RasterExtent,LayerRatio])
 
 object Main {
   val server = Server("civitas",
                       Catalog.fromPath("data/catalog.json"))
+
+  val router = server.system.actorOf(
+      Props[ServerActor].withRouter(FromConfig),
+      name = "clusterRouter")
 
   private var tiledLayers:Map[String,TiledLayer] = null
 
