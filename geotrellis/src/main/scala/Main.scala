@@ -10,7 +10,7 @@ import geotrellis.feature._
 case class TiledLayer(raster:Raster,tileRatios:Map[RasterExtent,LayerRatio])
 
 object Main {
-  val server = Server("tutorial-server",
+  val server = Server("civitas",
                       Catalog.fromPath("data/catalog.json"))
 
   private var tiledLayers:Map[String,TiledLayer] = null
