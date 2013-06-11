@@ -31,10 +31,10 @@ object Model {
     val mask = io.LoadRaster("mask",rasterExtent)
     local.Mask(local.AddArray(weighted),mask,NODATA,NODATA)
   }
-  
+ 
   private def makeSummary(layer:String,polygon:Op[Polygon[Int]]) = {
     val tileLayer = Main.getTileLayer(layer)
-    RatioOfOnes(tileLayer.raster,polygon,tileLayer.tileRatios)
+    RatioOfOnes(GetRaster(layer),polygon,tileLayer.tileRatios)
   }
 
   def summary(layers:Op[Array[String]], weights:Op[Array[Int]], polygon:Op[Polygon[Int]]) = {
@@ -42,9 +42,9 @@ object Model {
       (layer,weight) => {
         println("Executing layer summary.")
         val tileLayer = Main.getTileLayer(layer)
-        local.Multiply(weight.toDouble, makeSummary(layer,polygon)).map { score =>
+        (local.Multiply(weight.toDouble, makeSummary(layer,polygon)).map { score =>
           LayerSummary(layer,score)
-        }
+        }).dispatch(Main.router)
       }
     }
 
@@ -59,6 +59,10 @@ object Model {
     }
   }
 }
+
+case class GetRaster(layer:Op[String]) extends Op1(layer) ({
+  (layer) => Result(Main.getTileLayer(layer).raster)
+})
 
 object WeightedOverlayArray {
   def apply(rasters:Op[Array[Raster]], weights:Op[Array[Int]]) = {
