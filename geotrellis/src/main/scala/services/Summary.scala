@@ -58,7 +58,7 @@ class Sum {
     val weightOps = 
       logic.ForEach(string.SplitOnComma(weights))(string.ParseInt(_))
 
-    val summary = Model.summary(layerOps,weightOps,polygon).dispatch(Main.router)
+    val summary = Model.summary(layerOps,weightOps,polygon) //.dispatch(Main.router)
 
     Main.server.getResult(summary) match {
       case process.Complete(result,h) =>

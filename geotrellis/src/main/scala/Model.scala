@@ -32,23 +32,25 @@ object Model {
     local.Mask(local.AddArray(weighted),mask,NODATA,NODATA)
   }
  
-  private def makeSummary(layer:String,polygon:Op[Polygon[Int]]) = {
+  private def makeSummary(layer:String,polygon:Op[Polygon[Int]]):Op[Double] = {
+    //println("running makeSummary")
     val tileLayer = Main.getTileLayer(layer)
     RatioOfOnes(GetRaster(layer),polygon,tileLayer.tileRatios)
   }
 
   def summary(layers:Op[Array[String]], weights:Op[Array[Int]], polygon:Op[Polygon[Int]]) = {
-    val sums = logic.ForEach(layers,weights) {
+    val sums = (logic.ForEach(layers,weights) {
       (layer,weight) => {
         println("Executing layer summary.")
         val tileLayer = Main.getTileLayer(layer)
-        (local.Multiply(weight.toDouble, makeSummary(layer,polygon)).map { score =>
-          LayerSummary(layer,score)
-        }).dispatch(Main.router)
+        val weightedSummary = local.Multiply(weight.toDouble, makeSummary(layer,polygon))
+        val summaries = weightedSummary.map { score => LayerSummary(layer,score) }
+        summaries
       }
-    }
+    }).dispatch(Main.router)
 
-    sums.map {
+    val realSums = Main.server.run(sums)
+    Literal(realSums).map {
       s => s.foldLeft(SummaryResult(List[LayerSummary](),0.0)) {
         (result,layerSummary) => 
           SummaryResult(
@@ -77,6 +79,7 @@ object WeightedOverlayArray {
 
 object RatioOfOnes {
   def createTileResults(trd:TiledRasterData, re:RasterExtent) = {
+    //println("Creating tile results for RatioOfOnes")
     val tiles = trd.getTiles(re)
     tiles map { r => (r.rasterExtent, rasterResult(r))} toMap
   }
@@ -107,6 +110,7 @@ case class RatioOfOnes[DD] (r:Op[Raster], zonePolygon:Op[Polygon[DD]], tileResul
   
   def handlePartialTileIntersection(rOp: Op[Raster], gOp: Op[Geometry[D]]) = 
     rOp.flatMap ( r => gOp.flatMap ( g => {
+      println("Executing RatioOfOne tile calculation.")
       var sum: Int = 0
       var total: Int = 0
       val f = new Callback[Geometry,D] {
@@ -134,6 +138,7 @@ case class RatioOfOnes[DD] (r:Op[Raster], zonePolygon:Op[Polygon[DD]], tileResul
   def handleNoDataTile = LayerRatio(0,0) // Should not be any NODATA constant tiles.
 
   def reducer(mapResults: List[LayerRatio]):Double = {
+    println("Executing RatioOfOnes reducer.")
     mapResults.foldLeft(LayerRatio(0,0)) { (l1,l2) =>
       l1.combine(l2)
     }.value

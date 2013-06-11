@@ -9,7 +9,7 @@ resolvers += Resolver.sonatypeRepo("snapshots")
 resolvers +=       "Geotools" at "http://download.osgeo.org/webdav/geotools/"
 
 libraryDependencies ++= Seq(
-  "com.azavea.geotrellis" %% "geotrellis" % "0.8.2-SNAPSHOT",
+  "com.azavea.geotrellis" %% "geotrellis" % "0.8.3-SNAPSHOT",
   "com.azavea.geotrellis" %% "geotrellis-server" % "0.8.1",
   "org.geotools" % "gt-main" % "8.0-M4",
   "org.geotools" % "gt-jdbc" % "8.0-M4",
