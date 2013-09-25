@@ -22,9 +22,9 @@ object Main {
   val server = Server("civitas",
                       Catalog.fromPath("data/catalog.json"))
 
-  val router = server.system.actorOf(
-      Props[ServerActor].withRouter(FromConfig),
-      name = "clusterRouter")
+  // val router = server.system.actorOf(
+  //     Props[ServerActor].withRouter(FromConfig),
+  //     name = "clusterRouter")
 
   private var tiledLayers:Map[String,TiledLayer] = null
 
@@ -44,11 +44,11 @@ object Main {
   def main(args: Array[String]):Unit = {
     try {
       tiledLayers = { for(layer <- weights.keys) yield { 
-        val tilePath = s"data/albers_tiled/albers_$layer"
-        println(s"LOADING TILE RASTER $tilePath")
-        val r = Raster.loadTileSet(tilePath, server)
+        val jsonPath = s"data/albers_tiled/albers_$layer.json"
+        println(s"LOADING TILE RASTER $jsonPath")
+        val r = RasterLayer.fromPath(jsonPath).get.getRaster
 
-        val tileSetRD = r.data.asInstanceOf[TileArrayRasterData]
+        val tileSetRD = r.data.asInstanceOf[TileSetRasterData]
         val tileSums = RatioOfOnes.createTileResults(tileSetRD, r.rasterExtent)
         (layer,TiledLayer(r,tileSums))
       } }.toMap

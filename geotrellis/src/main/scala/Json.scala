@@ -5,7 +5,7 @@ import org.codehaus.jackson.JsonToken._
 import org.codehaus.jackson.map._
 
 import geotrellis._
-import geotrellis.io.LoadGeoJson
+import geotrellis.data.geojson._
 import geotrellis.feature._
 
 import scala.language.existentials
@@ -49,7 +49,7 @@ object JsonParser {
               case "polygon" =>
                 parser.nextToken()
                 val txt = parser.getText()
-                LoadGeoJson.parse(txt) match {
+                GeoJsonReader.parse(txt) match {
                   case Some(f) =>
                     polygon = f.asInstanceOf[Polygon[_]]
                   case None =>

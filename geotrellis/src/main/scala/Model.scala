@@ -47,7 +47,7 @@ object Model {
         val summaries = weightedSummary.map { score => LayerSummary(layer,score) }
         summaries
       }
-    }).dispatch(Main.router)
+    })
 
     val realSums = Main.server.run(sums)
     Literal(realSums).map {
