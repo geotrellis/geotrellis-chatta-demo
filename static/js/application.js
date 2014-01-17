@@ -100,7 +100,7 @@ var weightedOverlay = (function() {
                     layers: layerNames,
                     weights: getWeights(),
                     colorRamp: colorRamp,
-                    mask: geoJson,
+                    mask: encodeURIComponent(geoJson),
                     attribution: 'Azavea'
                 })
 
