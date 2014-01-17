@@ -1,32 +1,28 @@
 package chatta
 
-import geotrellis.rest.WebRunner
 import geotrellis.process._
 import geotrellis._
+import geotrellis.source._
 import geotrellis.raster._
 import geotrellis.raster.op._
 import geotrellis.feature._
+
+import com.typesafe.config.{ConfigFactory,Config}
+
 import akka.actor.{ ActorRef, Props, Actor, ActorSystem }
-import akka.cluster.routing.ClusterRouterConfig
-import akka.cluster.routing.ClusterRouterSettings
-import akka.cluster.routing.AdaptiveLoadBalancingRouter
-import akka.cluster.routing.HeapMetricsSelector
-import akka.cluster.routing.AdaptiveLoadBalancingRouter
-import akka.cluster.routing.SystemLoadAverageMetricsSelector
-import akka.routing.ConsistentHashingRouter
 import akka.routing.FromConfig
 
-case class TiledLayer(raster:Raster,tileRatios:Map[RasterExtent,LayerRatio])
+import akka.actor.{ActorSystem, Props}
+import akka.io.IO
+import spray.can.Http
+
+import com.vividsolutions.jts.{ geom => jts }
 
 object Main {
-  val server = Server("civitas",
-                      Catalog.fromPath("data/catalog.json"))
+  private var cachedRatios:Map[String,SeqSource[LayerRatio]] = null
 
-  // val router = server.system.actorOf(
-  //     Props[ServerActor].withRouter(FromConfig),
-  //     name = "clusterRouter")
-
-  private var tiledLayers:Map[String,TiledLayer] = null
+  private lazy val albersRasterExtent = 
+    RasterSource("albers_Wetlands").rasterExtent.get
 
   val weights = Map(
     "ImperviousSurfaces_Barren Lands_Open Water" -> 1,
@@ -41,50 +37,54 @@ object Main {
     "FarmlandOrForestedLandsWithPrimeAgriculturalSoils" -> 10
   )
 
-  def main(args: Array[String]):Unit = {
+  def initCache(): Boolean = {     
     try {
-      tiledLayers = { for(layer <- weights.keys) yield { 
-        val jsonPath = s"data/albers_tiled/albers_$layer.json"
-        println(s"LOADING TILE RASTER $jsonPath")
-        val r = RasterLayer.fromPath(jsonPath).get.getRaster
-
-        val tileSetRD = r.data.asInstanceOf[TileSetRasterData]
-        val tileSums = RatioOfOnes.createTileResults(tileSetRD, r.rasterExtent)
-        (layer,TiledLayer(r,tileSums))
-      } }.toMap
+      cachedRatios =
+        (for(layer <- weights.keys) yield {
+          println(s"CACHING TILE RESULT FOR RASTER $layer")
+          (layer,
+            RasterSource(s"albers_$layer")
+              .map(LayerRatio.rasterResult(_))
+              .cached
+          )
+        }).toMap
     } catch {
-      case e:Exception => 
-        server.shutdown()
+      case e:Exception =>
+        GeoTrellis.shutdown()
         println(s"Could not load tile set: $e.message")
         e.printStackTrace()
-       return
+        return false
     }
-
-    WebRunner.main(args)
+    true
   }
 
-  def getRasterExtent(polygon:Op[Geometry[_]]):Op[RasterExtent] = {
-    val e = GetFeatureExtent(polygon)
-    val rasterExtent = io.LoadRasterExtent("albers_Wetlands")
-    extent.CropRasterExtent(rasterExtent,e)
+
+  def main(args: Array[String]): Unit = {
+    if(!initCache) 
+      return
+
+    implicit val system = server.system
+
+    val config = ConfigFactory.load()
+    val staticPath = config.getString("geotrellis.server.static-path")
+    val port = config.getInt("geotrellis.port")
+    val host = config.getString("geotrellis.hostname")
+
+    // create and start our service actor
+    val service = 
+      system.actorOf(Props(classOf[ChattaServiceActor], staticPath), "chatta-service")
+
+    // start a new HTTP server on port 8080 with our service actor as the handler
+    IO(Http) ! Http.Bind(service, host, port = port)
   }
 
-  def getTileLayer(layer:String) = {
-    tiledLayers(layer)
+  def getRasterExtent(polygon:jts.Geometry):Op[RasterExtent] = {
+    val env = polygon.getEnvelopeInternal
+    val e = Extent( env.getMinX(), env.getMinY(), env.getMaxX(), env.getMaxY() )
+    albersRasterExtent.createAligned(e)
+  }
+
+  def getCachedRatios(layer: String): SeqSource[LayerRatio] = {
+    cachedRatios(layer)
   }
 }
-
-
-case class GetFeatureExtent(f:Op[Geometry[_]]) extends Op1(f)({
-  (f) => {
-    val env = f.geom.getEnvelopeInternal
-    Result(Extent( env.getMinX(), env.getMinY(), env.getMaxX(), env.getMaxY() ))
-  }
-})
-
-case class AsPolygon[D](g:Op[Geometry[D]]) extends Op1(g) ({
-  g =>
-    Result(Polygon[Int](g.asInstanceOf[Polygon[D]].geom,0))
-})
-
-

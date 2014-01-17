@@ -5,7 +5,7 @@
    "store": "chatta:albers",
    "params": {
      "type": "fs",
-     "path": "data/arg_albers",
+     "path": "arg_albers",
      "cacheAll": "yes"
     }
   },
@@ -13,7 +13,7 @@
    "store": "chatta:wm",
    "params": {
      "type": "fs",
-     "path": "data/arg_wm",
+     "path": "arg_wm",
      "cacheAll": "yes"
     }
   }

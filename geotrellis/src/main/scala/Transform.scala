@@ -57,10 +57,11 @@ object Transformer {
 
   initCache()
 
-  def transform[D](feature:Geometry[D],fromCRS:Crs,toCRS:Crs):Geometry[D] = {
+  def transform[D](feature:Geometry[D],fromCRS:Crs,toCRS:Crs):Geometry[D] =
+    feature.mapGeom( geom => transform(geom, fromCRS, toCRS))
+
+  def transform[D](geom:jts.Geometry,fromCRS:Crs,toCRS:Crs):jts.Geometry = {
     if(!transformCache.contains((fromCRS,toCRS))) { cacheTransform(fromCRS,toCRS) }
-    feature.mapGeom( geom => 
-      JTS.transform(feature.geom, transformCache((fromCRS,toCRS)))
-    )
+    JTS.transform(geom, transformCache((fromCRS,toCRS)))
   }
 }
