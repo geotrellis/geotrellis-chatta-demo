@@ -1,4 +1,5 @@
 *~
+.idea
 project/boot
 project/plugins/project
 project/plugins/target
@@ -12,3 +13,4 @@ TAGS
 .lib
 *.aux.xml
 *.jar
+*.iml
