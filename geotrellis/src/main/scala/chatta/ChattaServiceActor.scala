@@ -3,10 +3,9 @@ package chatta
 import akka.actor._
 import com.vividsolutions.jts.{geom => jts}
 import geotrellis._
-import geotrellis.data.geojson._
-import geotrellis.render._
+import geotrellis.raster.RasterExtent
 import geotrellis.services._
-import geotrellis.source._
+import geotrellis.vector.Extent
 import spray.http._
 import spray.routing.HttpService
 

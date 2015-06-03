@@ -55,7 +55,7 @@ object Transformer {
 
 	initCache()
 
-	def transform[D](feature:Geometry[D], fromCRS: Crs, toCRS: Crs): Geometry[D] =
+	def transform(feature: Geometry, fromCRS: Crs, toCRS: Crs): Geometry =
 		feature.mapGeom(geom => transform(geom, fromCRS, toCRS))
 
 	def transform[D](geom: jts.Geometry, fromCRS: Crs, toCRS: Crs): jts.Geometry = {
