@@ -10,7 +10,7 @@ import spray.can.Http
 
 object Main {
 
-	private var cachedRatios:Map[String,SeqSource[LayerRatio]] = _
+	private var cachedRatios: Map[String, SeqSource[LayerRatio]] = _
 	private lazy val albersRasterExtent = RasterSource("albers_Wetlands").rasterExtent.get
 
 	val weights = Map(
@@ -59,7 +59,7 @@ object Main {
 		}
 	}
 
-	def getRasterExtent(polygon:jts.Geometry):Op[RasterExtent] = {
+	def getRasterExtent(polygon:jts.Geometry): Op[RasterExtent] = {
 		val env = polygon.getEnvelopeInternal
 		val e = Extent(env.getMinX, env.getMinY, env.getMaxX, env.getMaxY )
 		albersRasterExtent.createAligned(e)
