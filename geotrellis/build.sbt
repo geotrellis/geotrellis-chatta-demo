@@ -2,11 +2,11 @@ import AssemblyKeys._
 
 name := "GeoTrellis Tutorial Project"
 
-scalaVersion := "2.10.0"
+scalaVersion := "2.10.3"
 
 resolvers += Resolver.sonatypeRepo("snapshots")
 
-resolvers +=       "Geotools" at "http://download.osgeo.org/webdav/geotools/"
+resolvers += "Geotools" at "http://download.osgeo.org/webdav/geotools/"
 
 libraryDependencies ++= Seq(
   "com.azavea.geotrellis" %% "geotrellis" % "0.9.2",

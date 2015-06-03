@@ -13,7 +13,7 @@ import scala.collection.mutable
 import com.vividsolutions.jts.{ geom => jts }
 
 object Projections {
-  val ChattaAlbers = CRS.parseWKT("""
+    val ChattaAlbers = CRS.parseWKT("""
 PROJCS["Albers_Conical_Equal_Area",
     GEOGCS["NAD83",
         DATUM["North_American_Datum_1983",
@@ -32,7 +32,7 @@ PROJCS["Albers_Conical_Equal_Area",
     PARAMETER["false_northing",0],
     UNIT["metre",1,
         AUTHORITY["EPSG","9001"]]]
-""")
+                                    """)
 
     val WebMercator = CRS.decode("EPSG:3857")
 
@@ -40,28 +40,28 @@ PROJCS["Albers_Conical_Equal_Area",
 }
 
 object Transformer {
-  private val transformCache:mutable.Map[(Crs,Crs),MathTransform] = 
-    new mutable.HashMap[(Crs,Crs),MathTransform]()
-  
-  def cacheTransform(crs1:Crs,crs2:Crs) = {
-    transformCache((crs1,crs2)) = CRS.findMathTransform(crs1,crs2,true)
-  }
+    private val transformCache:mutable.Map[(Crs,Crs),MathTransform] =
+        new mutable.HashMap[(Crs,Crs),MathTransform]()
 
-  private def initCache() = {
-    cacheTransform(Projections.LatLong,Projections.ChattaAlbers)
-    cacheTransform(Projections.ChattaAlbers,Projections.LatLong)
-    cacheTransform(Projections.LatLong,Projections.WebMercator)
-    cacheTransform(Projections.WebMercator,Projections.LatLong)
-    cacheTransform(Projections.WebMercator,Projections.ChattaAlbers)
-  }
+    def cacheTransform(crs1:Crs,crs2:Crs) = {
+        transformCache((crs1,crs2)) = CRS.findMathTransform(crs1,crs2,true)
+    }
 
-  initCache()
+    private def initCache() = {
+        cacheTransform(Projections.LatLong,Projections.ChattaAlbers)
+        cacheTransform(Projections.ChattaAlbers,Projections.LatLong)
+        cacheTransform(Projections.LatLong,Projections.WebMercator)
+        cacheTransform(Projections.WebMercator,Projections.LatLong)
+        cacheTransform(Projections.WebMercator,Projections.ChattaAlbers)
+    }
 
-  def transform[D](feature:Geometry[D],fromCRS:Crs,toCRS:Crs):Geometry[D] =
-    feature.mapGeom( geom => transform(geom, fromCRS, toCRS))
+    initCache()
 
-  def transform[D](geom:jts.Geometry,fromCRS:Crs,toCRS:Crs):jts.Geometry = {
-    if(!transformCache.contains((fromCRS,toCRS))) { cacheTransform(fromCRS,toCRS) }
-    JTS.transform(geom, transformCache((fromCRS,toCRS)))
-  }
+    def transform[D](feature:Geometry[D],fromCRS:Crs,toCRS:Crs):Geometry[D] =
+        feature.mapGeom( geom => transform(geom, fromCRS, toCRS))
+
+    def transform[D](geom:jts.Geometry,fromCRS:Crs,toCRS:Crs):jts.Geometry = {
+        if(!transformCache.contains((fromCRS,toCRS))) { cacheTransform(fromCRS,toCRS) }
+        JTS.transform(geom, transformCache((fromCRS,toCRS)))
+    }
 }
