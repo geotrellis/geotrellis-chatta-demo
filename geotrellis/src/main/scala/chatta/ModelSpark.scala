@@ -2,10 +2,9 @@ package chatta
 
 import com.vividsolutions.jts.{geom => jts}
 import geotrellis._
-import geotrellis.feature._
-import geotrellis.feature.rasterize.{Callback, Rasterizer}
+import geotrellis.vector._
+import geotrellis.raster.rasterize.{Callback, Rasterizer}
 import geotrellis.raster.op.zonal.summary._
-import geotrellis.source._
 
 /*case class LayerSummary(name: String, score: Double)
 case class SummaryResult(layerSummaries: List[LayerSummary], score: Double)
