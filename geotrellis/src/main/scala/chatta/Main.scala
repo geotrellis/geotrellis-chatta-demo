@@ -51,7 +51,7 @@ object Main {
     val host = config.getString("geotrellis.hostname")
 
     // create and start our service actor
-    val service = system.actorOf(Props(classOf[ChattaServiceActor], staticPath), "chatta-service")
+    val service = system.actorOf(Props(classOf[ChattaServiceActor], staticPath, config), "chatta-service")
 
     // start a new HTTP server on port 8080 with our service actor as the handler
     IO(Http) ! Http.Bind(service, host, port = port)

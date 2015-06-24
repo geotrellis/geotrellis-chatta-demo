@@ -8,16 +8,17 @@ resolvers += Resolver.sonatypeRepo("snapshots")
 
 resolvers += "Geotools" at "http://download.osgeo.org/webdav/geotools/"
 
-resolvers += "Local" at "file://"+Path.userHome.absolutePath+"/.ivy2/local/"
+resolvers += "Local Ivy" at "file://"+Path.userHome.absolutePath+"/.ivy2/local/"
 
 libraryDependencies ++= Seq(
   "com.azavea.geotrellis" %% "geotrellis-services" % "0.10.0-SNAPSHOT",
   "com.azavea.geotrellis" %% "geotrellis-spark" % "0.10.0-SNAPSHOT",
-  "org.apache.spark" %% "spark-core" % "1.2.0" % "provided",
+  "org.apache.spark" %% "spark-core" % "1.4.0",
   "io.spray" %% "spray-routing" % "1.3.3",
   "io.spray" %% "spray-can" % "1.3.3",
   "org.geotools" % "gt-main" % "13.1",
-  "org.geotools" % "gt-coveragetools" % "13.1"
+  "org.geotools" % "gt-coveragetools" % "13.1",
+  "org.apache.hadoop" % "hadoop-client" % "2.7.0"
 )
 
 seq(Revolver.settings: _*)
