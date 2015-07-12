@@ -3,7 +3,7 @@
   "cellwidth": 75.0, 
   "cols": 2101, 
   "datatype": "int8", 
-  "epsg": 3785, 
+  "epsg": 3857, 
   "layer": "philly_inc_percap", 
   "rows": 1723, 
   "type": "arg", 
