@@ -75,9 +75,8 @@ trait ChattaService extends HttpService {
     parameters(
       'layers,
       'weights,
-      'numBreaks.as[Int],
-      'mask ? ""
-    ) { (layersParam, weightsParam, numBreaks, mask) =>
+      'numBreaks.as[Int]
+    ) { (layersParam, weightsParam, numBreaks) =>
 
       val layers = layersParam.split(",")
       val weights = weightsParam.split(",").map(_.toInt)
