@@ -1,35 +1,38 @@
 package chatta
 
-import com.typesafe.config.Config
-import geotrellis._
-import geotrellis.raster._
+import java.io.File
+
+import geotrellis.proj4.{LatLng, WebMercator}
+import geotrellis.raster.GridBounds
 import geotrellis.raster.op.local._
 import geotrellis.raster.render._
 import geotrellis.services._
 import geotrellis.spark.utils.SparkUtils
-import geotrellis.vector._
-import geotrellis.vector.io.json._
-import geotrellis.vector.reproject._
-import geotrellis.proj4._
 import geotrellis.spark._
 import geotrellis.spark.io.accumulo._
 import geotrellis.spark.op.local._
 import geotrellis.spark.op.local.spatial._
+import geotrellis.spark.tiling._
+import geotrellis.spark.io.json._
 import geotrellis.spark.op.stats._
+import geotrellis.vector.io.json._
+import geotrellis.vector.reproject._
+import geotrellis.vector.{Extent, Geometry, Polygon}
 
 import akka.actor._
-import com.vividsolutions.jts.{geom => jts}
 import org.apache.accumulo.core.client.security.tokens.PasswordToken
 
+import com.typesafe.config.Config
 
 import spray.http._
 import spray.routing.HttpService
 
-class ChattaServiceActor(val staticPath: String, config: Config) extends Actor with ChattaService {
-	override def actorRefFactory = context
+class ChattaServiceActor(override val staticPath: String, config: Config) extends Actor with ChattaService {
+
+  override def actorRefFactory = context
 	override def receive = runRoute(serviceRoute)
 
-  val accumulo = AccumuloInstance(
+  override val accumulo = AccumuloInstance(
     config.getString("accumulo.instance"),
     config.getString("zookeeper.address"),
     config.getString("accumulo.user"),
@@ -40,91 +43,102 @@ class ChattaServiceActor(val staticPath: String, config: Config) extends Actor w
 trait ChattaService extends HttpService {
 
   implicit val sparkContext = SparkUtils.createLocalSparkContext("local[*]", "ChattaDemo")
+	implicit val executionContext = actorRefFactory.dispatcher
   implicit val accumulo: AccumuloInstance
-  val catalog = AccumuloRasterCatalog()
+  lazy val catalog = AccumuloRasterCatalog()
 
+  val staticPath: String
 	val baseZoomLevel = 9
+
 	def layerId(layer: String): LayerId =
 		LayerId(layer, baseZoomLevel)
 
-	//implicit def executionContext = actorRefFactory.dispatcher
-	val staticPath: String
+	def serviceRoute = get {
+    pathPrefix("gt") {
+      path("colors")(colors) ~
+      path("breaks")(breaks) ~
+      path("tms") {
+        pathPrefix(Segment / IntNumber / IntNumber / IntNumber)(tms)
+      }
+    } ~
+    pathEndOrSingleSlash {
+      getFromFile(staticPath+"/index.html")
+    } ~
+    pathPrefix("") {
+      getFromDirectory(staticPath)
+    }
+  }
 
-	def serviceRoute = get { home ~ api }
+  def colors = complete(ColorRampMap.getJson)
 
-	def home = (pathSingleSlash | pathPrefix("")) {
-		getFromDirectory(staticPath)
-	}
+  def breaks =
+    parameters(
+      'layers,
+      'weights,
+      'numBreaks.as[Int],
+      'mask ? ""
+    ) { (layersParam, weightsParam, numBreaks, mask) =>
 
-	def api = pathPrefix("gt") {
-		path("colors") {
-			complete(ColorRampMap.getJson)
-		} ~
-			path("breaks") {
-				parameters('layers, 'weights, 'numBreaks.as[Int], 'mask ? "") { (layersParam, weightsParam, numBreaks, mask) =>
-					val layers = layersParam.split(",")
-					val weights = weightsParam.split(",").map(_.toInt)
+      val layers = layersParam.split(",")
+      val weights = weightsParam.split(",").map(_.toInt)
 
-					val breaksArray =
-						layers.zip(weights)
-						.map { case (layer, weight) =>
-							catalog.read[SpatialKey](layerId(layer)) * weight
-						}
-						.toSeq
-						.localAdd
-						.classBreaks(numBreaks)
+      val breaksArray =
+        layers.zip(weights)
+        .map { case (layer, weight) =>
+          catalog.read[SpatialKey](layerId(layer)) * weight
+        }
+        .toSeq
+        .localAdd
+        .classBreaks(numBreaks)
 
-					val json = s"""{ "classBreaks" : $breaksArray }"""
-					complete(json)
-				}
-			} ~
-			path("tms") {
-				pathPrefix(Segment / IntNumber / IntNumber / IntNumber) { (layer, zoom, x, y) =>
-					parameters(
-						'layers,
-						'weights,
-						'palette ? "ff0000,ffff00,00ff00,0000ff",
-						'colors.as[Int] ? 4,
-						'breaks, 'colorRamp ? "blue-to-red",
-						'mask ? ""
-					) { (layersParam, weightsParam, palette, colors, breaksString, colorRamp, mask) =>
-						val layers = layersParam.split(",")
-						val weights = weightsParam.split(",").map(_.toInt)
+      complete(s"""{ "classBreaks" : $breaksArray }""")
+    }
 
-						val key = SpatialKey(x, y)
-						val tiles =
-							layers.zip(weights)
-							.map { case (layer, weight) =>
-								catalog.tileReader[SpatialKey](LayerId(layer, zoom)).read(key) * weight
-							}
-							.toSeq
-							.localAdd
+  def tms(layer: String, zoom: Int, x: Int, y: Int) =
+    parameters(
+      'layers,
+      'weights,
+      'breaks,
+      'bbox,
+      'colors.as[Int] ? 4,
+      'colorRamp ? "blue-to-red",
+      'mask ? ""
+    ) { (layersParam, weightsParam, breaksString, bbox, colors, colorRamp, mask) =>
 
-						/*val maskedTile =
-							if (mask.isEmpty) tiles
-							else {
-								val poly =
-									mask
-									.parseGeoJson[Polygon]
-									.reproject(LatLng, WebMercator)
-								tiles.mask(poly)
-							}*/
+      val layers = layersParam.split(",")
+      val weights = weightsParam.split(",").map(_.toInt)
+      val breaks = breaksString.split(",").map(_.toInt)
+      val extent = Extent.fromString(bbox)
+      val key = SpatialKey(x, y)
 
-						val breaks = breaksString.split(",").map(_.toInt)
+      val tile =
+        layers.zip(weights)
+        .map { case (l, weight) =>
+          catalog.tileReader[SpatialKey](LayerId(l, zoom)).read(key) * weight
+        }
+        .toSeq
+        .localAdd()
 
-						val ramp = {
-							val cr = ColorRampMap.getOrElse(colorRamp, ColorRamps.BlueToRed)
-							if (cr.toArray.length < breaks.length) cr.interpolate(breaks.length)
-							else cr
-						}
+      val maskedTile =
+        if (mask.isEmpty) tile
+        else {
+          val poly =
+            mask
+            .parseGeoJson[Polygon]
+            .reproject(LatLng, WebMercator)
+          tile.mask(extent, poly.geom)
+        }
 
-						val png = tiles.renderPng(ramp, breaks)
-						respondWithMediaType(MediaTypes.`image/png`) {
-							complete(png.bytes)
-						}
-					}
-				}
-			} //~
+      val ramp = {
+        val cr = ColorRampMap.getOrElse(colorRamp, ColorRamps.BlueToRed)
+        if (cr.toArray.length < breaks.length) cr.interpolate(breaks.length)
+        else cr
+      }
+
+      respondWithMediaType(MediaTypes.`image/png`) {
+        complete(maskedTile.renderPng(ramp, breaks).bytes)
+      }
+    }
 
 		// path("wo") {
 		//   parameters('service, 'request, 'version, 'format, 'bbox, 'height.as[Int], 'width.as[Int], 'layers, 'weights,
@@ -241,6 +255,5 @@ trait ChattaService extends HttpService {
 		//     }
 		//   }
 		// }
-	}
 
 }

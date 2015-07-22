@@ -4,7 +4,6 @@ import akka.actor.Props
 import akka.io.IO
 import akka.actor.ActorSystem
 import com.typesafe.config.ConfigFactory
-import com.vividsolutions.jts.{geom => jts}
 import spray.can.Http
 
 object Main {
@@ -54,7 +53,7 @@ object Main {
     val service = system.actorOf(Props(classOf[ChattaServiceActor], staticPath, config), "chatta-service")
 
     // start a new HTTP server on port 8080 with our service actor as the handler
-    IO(Http) ! Http.Bind(service, host, port = port)
+    IO(Http) ! Http.Bind(service, host, port)
 //    }
   }
 

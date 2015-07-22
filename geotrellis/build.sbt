@@ -21,7 +21,7 @@ libraryDependencies ++= Seq(
   "org.apache.hadoop" % "hadoop-client" % "2.7.0"
 )
 
-seq(Revolver.settings: _*)
+Revolver.settings
 
 assemblySettings
 
@@ -34,3 +34,5 @@ mergeStrategy in assembly <<= (mergeStrategy in assembly) {
     case _ => MergeStrategy.first
   }
 }
+
+cancelable in Global := true
