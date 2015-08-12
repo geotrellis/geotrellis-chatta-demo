@@ -8,9 +8,6 @@ import spray.can.Http
 
 object Main {
 
-  // private var cachedRatios: Map[String, SeqSource[LayerRatio]] = _
-  // private lazy val albersRasterExtent = RasterSource("albers_Wetlands").rasterExtent.get
-
   val weights = Map(
     "ImperviousSurfaces_Barren Lands_Open Water" -> 1,
     "DevelopedLand" -> 2,
@@ -24,24 +21,8 @@ object Main {
     "FarmlandOrForestedLandsWithPrimeAgriculturalSoils" -> 10
   )
 
-  // def initCache(): Boolean = {
-  //   try {
-  //     cachedRatios = (for (layer <- weights.keys) yield {
-  //       println(s"CACHING TILE RESULT FOR RASTER $layer")
-  //       (layer, RasterSource(s"albers_$layer").map(LayerRatio.rasterResult).cached)
-  //     }).toMap
-  //     true
-  //   } catch {
-  //     case e: Exception =>
-  //       GeoTrellis.shutdown()
-  //       println(s"Could not load tile set: $e.message")
-  //       e.printStackTrace()
-  //       false
-  //   }
-  // }
-
   def main(args: Array[String]): Unit = {
-    //if (initCache()) {
+
     implicit val system = ActorSystem("chatta-demo")
 
     val config = ConfigFactory.load()
@@ -54,16 +35,7 @@ object Main {
 
     // start a new HTTP server on port 8080 with our service actor as the handler
     IO(Http) ! Http.Bind(service, host, port)
-//    }
   }
 
-  // def getRasterExtent(polygon:jts.Geometry): Op[RasterExtent] = {
-  //   val env = polygon.getEnvelopeInternal
-  //   val e = Extent(env.getMinX, env.getMinY, env.getMaxX, env.getMaxY )
-  //   albersRasterExtent.createAligned(e)
-  // }
-
-  // def getCachedRatios(layer: String): SeqSource[LayerRatio] = {
-  //   cachedRatios(layer)
-  // }
 }
+

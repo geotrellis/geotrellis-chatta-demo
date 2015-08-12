@@ -30,7 +30,7 @@ import spray.routing.HttpService
 class ChattaServiceActor(override val staticPath: String, config: Config) extends Actor with ChattaService {
 
   override def actorRefFactory = context
-	override def receive = runRoute(serviceRoute)
+  override def receive = runRoute(serviceRoute)
 
   override val accumulo = AccumuloInstance(
     config.getString("accumulo.instance"),
@@ -43,30 +43,31 @@ class ChattaServiceActor(override val staticPath: String, config: Config) extend
 trait ChattaService extends HttpService {
 
   implicit val sparkContext = SparkUtils.createLocalSparkContext("local[*]", "ChattaDemo")
-	implicit val executionContext = actorRefFactory.dispatcher
+  implicit val executionContext = actorRefFactory.dispatcher
   implicit val accumulo: AccumuloInstance
-  lazy val catalog = AccumuloRasterCatalog()
+  implicit lazy val catalog = AccumuloRasterCatalog()
 
   val staticPath: String
-	val baseZoomLevel = 9
+  val baseZoomLevel = 9
 
-	def layerId(layer: String): LayerId =
-		LayerId(layer, baseZoomLevel)
+  def layerId(layer: String): LayerId =
+    LayerId(layer, baseZoomLevel)
 
-	def serviceRoute = get {
+  def serviceRoute = get {
     pathPrefix("gt") {
       path("colors")(colors) ~
-      path("breaks")(breaks) ~
-      path("tms") {
-        pathPrefix(Segment / IntNumber / IntNumber / IntNumber)(tms)
+        path("breaks")(breaks) ~
+        path("tms") {
+          pathPrefix(Segment / IntNumber / IntNumber / IntNumber)(tms)
+        } ~
+        path("sum")(sum)
+    } ~
+      pathEndOrSingleSlash {
+        getFromFile(staticPath+"/index.html")
+      } ~
+      pathPrefix("") {
+        getFromDirectory(staticPath)
       }
-    } ~
-    pathEndOrSingleSlash {
-      getFromFile(staticPath+"/index.html")
-    } ~
-    pathPrefix("") {
-      getFromDirectory(staticPath)
-    }
   }
 
   def colors = complete(ColorRampMap.getJson)
@@ -139,120 +140,101 @@ trait ChattaService extends HttpService {
       }
     }
 
-		// path("wo") {
-		//   parameters('service, 'request, 'version, 'format, 'bbox, 'height.as[Int], 'width.as[Int], 'layers, 'weights,
-		//     'palette ? "ff0000,ffff00,00ff00,0000ff", 'colors.as[Int] ? 4, 'breaks, 'colorRamp ? "blue-to-red", 'mask ? "") {
-		//     (_, _, _, _, bbox, cols, rows, layersString, weightsString, palette, colors, breaksString, colorRamp, mask) => {
+  def sum =
+    parameters(
+      'polygon,
+      'layers,
+      'weights) { (polygonJson, layersString, weightsString) =>
 
-		//       val extent = Extent.fromString(bbox)
-		//       val re = RasterExtent(extent, cols, rows)
-		//       val zoomLevel = ???
+      val start = System.currentTimeMillis()
 
-		//       catalog.reader[SpatialKey](LayerId(layer, zoomLevel), FilterSet[
+      val poly = {
+        val parsed = polygonJson.parseGeoJson[Polygon]
+        Reproject(parsed, Projections.LatLong, Projections.ChattaAlbers)
+      }
+      val layers = layersString.split(",")
+      val weights = weightsString.split(",").map(_.toInt)
 
-		//       val layers = layersString.split(",")
-		//       val weights = weightsString.split(",").map(_.toInt)
-		//       val model = Model.weightedOverlay(layers,weights,re)
+      val summary = ModelSpark.summary(layers, weights, baseZoomLevel, poly)
+      val elapsedTotal = System.currentTimeMillis - start
 
-		//       val overlay =
-		//         if (mask.isEmpty) model
-		//         else {
-		//           GeoJsonReader.parse(mask) match {
+      val layerSummaries = {
+        val layerSummaries = summary.layerSummaries.map { ls =>
+          val v = "%.2f".format(ls.score * 100)
+          s"""{
+               "layer": "${ls.name}",
+               "total": "$v"
+            }"""
+        }.mkString(",")
+        s"[$layers]"
+      }
 
-		//     	case Some(geomArray) if geomArray.length == 1 =>
-		//     	  val transformed =
-		//     	    geomArray.head.mapGeom { g =>
-		//     	      Transformer.transform(g, Projections.LatLong, Projections.WebMercator)
-		//     	    }
-		//     	  model.mask(transformed)
+      val totalVal = "%.2f".format(summary.score * 100)
+      val data =
+        s"""{
+            "layerSummaries": $layerSummaries,
+            "total": "$totalVal",
+            "elapsed": "$elapsedTotal"
+         }"""
+      complete(data)
+    }
 
-		//     	case _ =>
-		//     	  throw new Exception(s"Invalid GeoJSON: $mask")
-		//           }
-		//         }
+  /*path("wo") {
+   parameters('service, 'request, 'version, 'format, 'bbox, 'height.as[Int], 'width.as[Int], 'layers, 'weights,
+     'palette ? "ff0000,ffff00,00ff00,0000ff", 'colors.as[Int] ? 4, 'breaks, 'colorRamp ? "blue-to-red", 'mask ? "") {
+     (_, _, _, _, bbox, cols, rows, layersString, weightsString, palette, colors, breaksString, colorRamp, mask) => {
 
-		//       val breaks = breaksString.split(",").map(_.toInt)
+       val extent = Extent.fromString(bbox)
+       val re = RasterExtent(extent, cols, rows)
+       val zoomLevel = ???
 
-		//       val ramp = {
-		//         val cr = ColorRampMap.getOrElse(colorRamp, ColorRamps.BlueToRed)
-		//         if (cr.toArray.length < breaks.length) cr.interpolate(breaks.length)
-		//         else cr
-		//       }
+       catalog.reader[SpatialKey](LayerId(layer, zoomLevel), FilterSet[
 
-		//       val png: ValueSource[Png] = overlay.renderPng(ramp, breaks)
-		//       png.run match {
+       val layers = layersString.split(",")
+       val weights = weightsString.split(",").map(_.toInt)
+       val model = Model.weightedOverlay(layers,weights,re)
 
-		//         case process.Complete(img, h) =>
-		//           respondWithMediaType(MediaTypes.`image/png`) {
-		//     	complete(img)
-		//           }
+       val overlay =
+         if (mask.isEmpty) model
+         else {
+           GeoJsonReader.parse(mask) match {
 
-		//         case process.Error(message,trace) =>
-		//           println(message)
-		//           println(trace)
-		//           println(re)
-		//           failWith(new RuntimeException(message))
-		//       }
-		//     }
-		//   }
-		// } ~
+             case Some(geomArray) if geomArray.length == 1 =>
+               val transformed =
+                 geomArray.head.mapGeom { g =>
+                   Transformer.transform(g, Projections.LatLong, Projections.WebMercator)
+                 }
+               model.mask(transformed)
 
+             case _ =>
+               throw new Exception(s"Invalid GeoJSON: $mask")
+           }
+         }
 
-		// path("sum") {
-		//   parameters('polygon, 'layers, 'weights) {
-		//     (polygonJson, layersString, weightsString) => {
-		//       val start = System.currentTimeMillis()
+       val breaks = breaksString.split(",").map(_.toInt)
 
-		//       val poly =
-		//         GeoJsonReader.parse(polygonJson) match {
+       val ramp = {
+         val cr = ColorRampMap.getOrElse(colorRamp, ColorRamps.BlueToRed)
+         if (cr.toArray.length < breaks.length) cr.interpolate(breaks.length)
+         else cr
+       }
 
-		//           case Some(geomArray) if geomArray.length == 1 =>
-		//     	geomArray.head.geom match {
+       val png: ValueSource[Png] = overlay.renderPng(ramp, breaks)
+       png.run match {
 
-		//     	  case p: jts.Polygon =>
-		//     	    Transformer.transform(p, Projections.LatLong, Projections.ChattaAlbers).asInstanceOf[jts.Polygon]
+         case process.Complete(img, h) =>
+           respondWithMediaType(MediaTypes.`image/png`) {
+             complete(img)
+           }
 
-		//     	  case _ =>
-		//     	    throw new Exception(s"Invalid GeoJSON: $polygonJson")
-		//     	}
-
-		//           case _ =>
-		//     	throw new Exception(s"Invalid GeoJSON: $polygonJson")
-		//         }
-
-		//       val re = Main.getRasterExtent(poly)
-
-		//       val layers = layersString.split(",")
-		//       val weights = weightsString.split(",").map(_.toInt)
-
-		//       val summary = Model.summary(layers, weights, poly)
-
-		//       summary.run match {
-
-		//         case process.Complete(result,h) =>
-		//           val elapsedTotal = System.currentTimeMillis - start
-
-		//           val layerSummaries =
-		//     	"[" + result.layerSummaries.map {
-		//     	  ls =>
-		//     	  val v = "%.2f".format(ls.score * 100)
-		//     	  s"""{ "layer": "${ls.name}", "total": "$v" }"""
-		//     	}.mkString(",") + "]"
-
-		//           val totalVal = "%.2f".format(result.score * 100)
-		//           val data =
-		//     	s"""{
-		//                                 "layerSummaries": $layerSummaries,
-		//                                 "total": "$totalVal",
-		//     								"elapsed": "$elapsedTotal"
-		//                             }"""
-		//           complete(data)
-
-		//         case process.Error(message,trace) =>
-		//           failWith(new RuntimeException(message))
-		//       }
-		//     }
-		//   }
-		// }
+         case process.Error(message,trace) =>
+           println(message)
+           println(trace)
+           println(re)
+           failWith(new RuntimeException(message))
+       }
+     }
+   }
+ } ~*/
 
 }
