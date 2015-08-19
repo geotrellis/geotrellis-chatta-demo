@@ -1,6 +1,6 @@
 import AssemblyKeys._
 
-name := "GeoTrellis Tutorial Project"
+name := "GeoTrellis-Tutorial-Project"
 
 scalaVersion := "2.10.5"
 

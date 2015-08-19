@@ -2,7 +2,7 @@
 # Ingest tiled GeoTiff into Accumulo
 
 # Geotrellis (gt-admin) ingest jar
-export JAR="./target/scala-2.10/GeoTrellis Tutorial Project-assembly-0.1-SNAPSHOT.jar"
+export JAR="./target/scala-2.10/GeoTrellis-Tutorial-Project-assembly-0.1-SNAPSHOT.jar"
 
 # Directory with the input tiled GeoTiff's
 LAYERS="./data/arg_wm"
@@ -20,8 +20,8 @@ PASSWORD="secret"
 ZOOKEEPER="localhost"
 
 # Remove some bad signatures from the assembled JAR
-zip -d $1 META-INF/ECLIPSEF.RSA
-zip -d $1 META-INF/ECLIPSEF.SF
+zip -d $JAR META-INF/ECLIPSEF.RSA > /dev/null
+zip -d $JAR META-INF/ECLIPSEF.SF > /dev/null
 
 # Go through all layers and run the spark submit job
 for LAYER in $(ls $LAYERS)
@@ -32,14 +32,14 @@ do
 
   echo "spark-submit \
   --class geotrellis.chatta.ChattaIngest --driver-memory=2G $JAR \
-  --ingest hadoop --format geotiff --cache NONE -I path=$INPUT \
-  --output accumulo -O --instance $INSTANCE --user $USER --password $PASSWORD --zookeeper $ZOOKEEPER \
+  --input hadoop --format geotiff --cache NONE -I path=$INPUT \
+  --output accumulo -O instance=$INSTANCE table=$table user=$USER password=$PASSWORD zookeeper=$ZOOKEEPER \
   --layer $LAYERNAME --pyramid --crs $CRS"
 
   spark-submit \
-  --class geotrellis.chatta.ChattaIngest --driver-memory=2G "$JAR" \
-  --ingest hadoop --format geotiff --cache NONE -I path=$INPUT \
-  --output accumulo -O --instance $INSTANCE --user $USER --password $PASSWORD --zookeeper $ZOOKEEPER \
+  --class geotrellis.chatta.ChattaIngest --driver-memory=2G $JAR \
+  --input hadoop --format geotiff --cache NONE -I path=$INPUT \
+  --output accumulo -O instance=$INSTANCE table=$table user=$USER password=$PASSWORD zookeeper=$ZOOKEEPER \
   --layer $LAYERNAME --pyramid --crs $CRS
 
   break

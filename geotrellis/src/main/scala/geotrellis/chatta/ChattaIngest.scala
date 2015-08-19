@@ -2,6 +2,7 @@ package geotrellis.chatta
 
 import geotrellis.spark.SpatialKey
 import geotrellis.spark.etl.Etl
+import geotrellis.spark.etl.accumulo.AccumuloModule
 import geotrellis.spark.io.index.HilbertKeyIndexMethod
 import geotrellis.spark.utils.SparkUtils
 import org.apache.spark.SparkConf
