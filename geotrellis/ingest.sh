@@ -30,7 +30,7 @@ for LAYER in $(ls $LAYERS)
 do
 
   LAYERNAME=${LAYER%.*}
-  INPUT=file:$LAYERS/$LAYER
+  INPUT=file:$(realpath $LAYERS/$LAYER)
 
   echo "spark-submit \
   --class geotrellis.admin.ingest.AccumuloIngestCommand $JAR \
@@ -39,12 +39,5 @@ do
   --crs $CRS --table $TABLE \
   --layerName $LAYERNAME --input $INPUT
   "
-
-  spark-submit \
-  --class geotrellis.admin.ingest.AccumuloIngestCommand $JAR \
-  --instance $INSTANCE --user $USER --password $PASSWORD --zookeeper $ZOOKEEPER \
-  --pyramid $PYRAMID --clobber $CLOBBER \
-  --crs $CRS --table $TABLE \
-  --layerName $LAYERNAME --input $INPUT
 
 done

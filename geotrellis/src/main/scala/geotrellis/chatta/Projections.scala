@@ -1,4 +1,4 @@
-package chatta
+package geotrellis.chatta
 
 import geotrellis.proj4.CRS
 
@@ -9,4 +9,5 @@ object Projections {
 
   val WebMercator = CRS.fromName("EPSG:3857")
   val LatLong = CRS.fromName("EPSG:4326")
+
 }

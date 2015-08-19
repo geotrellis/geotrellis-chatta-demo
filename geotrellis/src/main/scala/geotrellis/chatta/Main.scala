@@ -1,4 +1,4 @@
-package chatta
+package geotrellis.chatta
 
 import akka.actor.Props
 import akka.io.IO

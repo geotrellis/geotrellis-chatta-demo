@@ -1,4 +1,4 @@
-package chatta
+package geotrellis.chatta
 
 import geotrellis._
 import geotrellis.engine.RasterSource

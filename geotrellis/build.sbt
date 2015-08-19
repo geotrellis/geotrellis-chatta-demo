@@ -13,6 +13,7 @@ resolvers += "Local Ivy" at "file://"+Path.userHome.absolutePath+"/.ivy2/local/"
 libraryDependencies ++= Seq(
   "com.azavea.geotrellis" %% "geotrellis-services" % "0.10.0-SNAPSHOT",
   "com.azavea.geotrellis" %% "geotrellis-spark" % "0.10.0-SNAPSHOT",
+  "com.azavea.geotrellis" %% "geotrellis-spark-etl" % "0.10.0-SNAPSHOT",
   "org.apache.spark" %% "spark-core" % "1.4.0",
   "io.spray" %% "spray-routing" % "1.3.3",
   "io.spray" %% "spray-can" % "1.3.3",

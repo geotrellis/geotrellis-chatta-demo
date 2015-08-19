@@ -1,4 +1,4 @@
-package chatta
+package geotrellis.chatta
 
 import java.io.File
 
