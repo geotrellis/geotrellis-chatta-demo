@@ -102,7 +102,7 @@ make_url () {
   category="$2"
   version="$3"
 
-  echo "http://typesafe.artifactoryonline.com/typesafe/ivy-$category/$groupid/sbt-launch/$version/sbt-launch.jar"
+  echo "http://dl.bintray.com/typesafe/ivy-$category/$groupid/sbt-launch/$version/sbt-launch.jar"
 }
 
 declare -r default_jvm_opts="-Dfile.encoding=UTF8"
@@ -168,7 +168,7 @@ sbt_groupid () {
 sbt_artifactory_list () {
   local version0=$(sbt_version)
   local version=${version0%-SNAPSHOT}
-  local url="http://typesafe.artifactoryonline.com/typesafe/ivy-snapshots/$(sbt_groupid)/sbt-launch/"
+  local url="http://dl.bintray.com/typesafe/ivy-snapshots/$(sbt_groupid)/sbt-launch/"
   dlog "Looking for snapshot list at: $url "
 
   curl -s --list-only "$url" | \
