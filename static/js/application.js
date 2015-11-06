@@ -92,6 +92,8 @@ var weightedOverlay = (function() {
                     geoJson = GJ.fromPolygon(polygon);
                 }
 
+				WOLayer = new L.tileLayer(server+'gt/tms/{layer}/{z}/{x}/{y}', {layers: 'default', maxZoom: 18, attribution: 'Azavea'});
+                /*
                 WOLayer = new L.TileLayer.WMS(server + "gt/wo", {
                     layers: 'default',
                     format: 'image/png',
@@ -103,7 +105,7 @@ var weightedOverlay = (function() {
                     mask: encodeURIComponent(geoJson),
                     attribution: 'Azavea'
                 })
-
+				*/
                 WOLayer.setOpacity(opacity);
                 WOLayer.addTo(map);
                 map.lc.addOverlay(WOLayer, "Weighted Overlay");
