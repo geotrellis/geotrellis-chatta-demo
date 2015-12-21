@@ -3,7 +3,7 @@ package geotrellis.chatta
 import java.io.File
 
 import geotrellis.proj4.{LatLng, WebMercator}
-import geotrellis.raster.GridBounds
+import geotrellis.raster.{Tile, GridBounds}
 import geotrellis.raster.op.local._
 import geotrellis.raster.render._
 import geotrellis.services._
@@ -18,6 +18,7 @@ import geotrellis.spark.op.stats._
 import geotrellis.vector.io.json._
 import geotrellis.vector.reproject._
 import geotrellis.vector.{Extent, Geometry, Polygon}
+import geotrellis.spark.io.avro.codecs._
 
 import akka.actor._
 import org.apache.accumulo.core.client.security.tokens.PasswordToken
@@ -44,8 +45,9 @@ trait ChattaService extends HttpService {
 
   implicit val sparkContext = SparkUtils.createLocalSparkContext("local[*]", "ChattaDemo")
   implicit val executionContext = actorRefFactory.dispatcher
-  implicit val accumulo: AccumuloInstance
-  implicit lazy val catalog = AccumuloRasterCatalog()
+  val accumulo: AccumuloInstance
+  lazy val reader = AccumuloLayerReader[SpatialKey, Tile, RasterRDD](accumulo)
+  lazy val tileReader = AccumuloTileReader[SpatialKey, Tile](accumulo)
 
   val staticPath: String
   val baseZoomLevel = 9
@@ -85,7 +87,7 @@ trait ChattaService extends HttpService {
       val breaksArray =
         layers.zip(weights)
         .map { case (layer, weight) =>
-          catalog.read[SpatialKey](layerId(layer)) * weight
+          reader.read(layerId(layer)) * weight
         }
         .toSeq
         .localAdd
@@ -114,7 +116,7 @@ trait ChattaService extends HttpService {
       val tile =
         layers.zip(weights)
         .map { case (l, weight) =>
-          catalog.tileReader[SpatialKey](LayerId(l, zoom)).read(key) * weight
+          tileReader.read(LayerId(l, zoom)).read(key) * weight
         }
         .toSeq
         .localAdd()
@@ -155,7 +157,7 @@ trait ChattaService extends HttpService {
       val layers = layersString.split(",")
       val weights = weightsString.split(",").map(_.toInt)
 
-      val summary = ModelSpark.summary(layers, weights, baseZoomLevel, poly)
+      val summary = ModelSpark.summary(layers, weights, baseZoomLevel, poly)(reader)
       val elapsedTotal = System.currentTimeMillis - start
 
       val layerSummaries = {

@@ -1,8 +1,23 @@
 #!/usr/bin/env bash
+
+realpath ()
+{
+    f=$@;
+    if [ -d "$f" ]; then
+        base="";
+        dir="$f";
+    else
+        base="/$(basename "$f")";
+        dir=$(dirname "$f");
+    fi;
+    dir=$(cd "$dir" && /bin/pwd);
+    echo "$dir$base"
+}
+
 # Ingest tiled GeoTiff into Accumulo
 
 # Geotrellis (gt-admin) ingest jar
-export JAR="./target/scala-2.10/GeoTrellis-Tutorial-Project-assembly-0.1-SNAPSHOT.jar"
+export JAR="target/scala-2.10/GeoTrellis-Tutorial-Project-assembly-0.1-SNAPSHOT.jar"
 
 # Directory with the input tiled GeoTiff's
 LAYERS="./data/arg_wm"
@@ -13,8 +28,10 @@ TABLE="chattanooga"
 # Destination spatial reference system
 CRS="EPSG:3857"
 
+LAYOUT_SCHEME="tms"
+
 # Accumulo conf
-INSTANCE="GIS"
+INSTANCE="gis"
 USER="root"
 PASSWORD="secret"
 ZOOKEEPER="localhost"
@@ -33,15 +50,26 @@ do
   echo "spark-submit \
   --class geotrellis.chatta.ChattaIngest --driver-memory=2G $JAR \
   --input hadoop --format geotiff --cache NONE -I path=$INPUT \
-  --output accumulo -O instance=$INSTANCE table=$table user=$USER password=$PASSWORD zookeeper=$ZOOKEEPER \
-  --layer $LAYERNAME --pyramid --crs $CRS"
+  --output accumulo -O instance=$INSTANCE table=$TABLE user=$USER password=$PASSWORD zookeeper=$ZOOKEEPER \
+  --layer $LAYERNAME --pyramid --crs $CRS --layoutScheme $LAYOUT_SCHEME"
 
   spark-submit \
   --class geotrellis.chatta.ChattaIngest --driver-memory=2G $JAR \
   --input hadoop --format geotiff --cache NONE -I path=$INPUT \
-  --output accumulo -O instance=$INSTANCE table=$table user=$USER password=$PASSWORD zookeeper=$ZOOKEEPER \
-  --layer $LAYERNAME --pyramid --crs $CRS
+  --output accumulo -O instance=$INSTANCE table=$TABLE user=$USER password=$PASSWORD zookeeper=$ZOOKEEPER \
+  --layer $LAYERNAME --pyramid --crs $CRS --layoutScheme $LAYOUT_SCHEME
 
   break
 
 done
+
+
+./ingest.sh
+spark-submit
+--class geotrellis.chatta.ChattaIngest
+--driver-memory=2G
+target/scala-2.10/GeoTrellis-Tutorial-Project-assembly-0.1-SNAPSHOT.jar
+--input hadoop --format geotiff --cache NONE
+-I path=file:/Users/daunnc/subversions/git/github/pomadchin/geotrellis-chatta-demo/geotrellis/data/arg_wm/DevelopedLand.tiff
+  --output accumulo -O instance=gis table=chattanooga user=root password=secret
+  zookeeper=localhost   --layer DevelopedLand --pyramid --crs EPSG:3857 --layoutScheme tms
