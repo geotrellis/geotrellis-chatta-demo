@@ -2,7 +2,7 @@ package geotrellis.chatta
 
 import geotrellis.spark.SpatialKey
 import geotrellis.spark.etl.Etl
-import geotrellis.spark.io.index.{ZCurveKeyIndexMethod, HilbertKeyIndexMethod}
+import geotrellis.spark.io.index.ZCurveKeyIndexMethod
 import geotrellis.spark.utils.SparkUtils
 import org.apache.spark.SparkConf
 

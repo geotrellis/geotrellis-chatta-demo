@@ -16,11 +16,11 @@ libraryDependencies ++= Seq(
   "com.azavea.geotrellis" %% "geotrellis-spark" % "0.10.0-9d08114",
   "com.azavea.geotrellis" %% "geotrellis-spark-etl" % "0.10.0-9d08114",
   "org.apache.spark" %% "spark-core" % "1.5.2",
-  "io.spray" %% "spray-routing" % "1.3.3",
+  "io.spray" %% "spray-routing" % "1.3.2",
   "io.spray" %% "spray-can" % "1.3.3",
   "org.geotools" % "gt-main" % "13.1",
   "org.geotools" % "gt-coveragetools" % "13.1",
-  "org.apache.hadoop" % "hadoop-client" % "2.7.0"
+  "org.apache.hadoop" % "hadoop-client" % "2.7.1"
 )
 
 Revolver.settings

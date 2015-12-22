@@ -2,8 +2,9 @@ package geotrellis.chatta
 
 import java.io.File
 
+import geotrellis.engine.ValueSource
 import geotrellis.proj4.{LatLng, WebMercator}
-import geotrellis.raster.{Tile, GridBounds}
+import geotrellis.raster.{RasterExtent, Tile, GridBounds}
 import geotrellis.raster.op.local._
 import geotrellis.raster.render._
 import geotrellis.services._
@@ -19,14 +20,20 @@ import geotrellis.vector.io.json._
 import geotrellis.vector.reproject._
 import geotrellis.vector.{Extent, Geometry, Polygon}
 import geotrellis.spark.io.avro.codecs._
+import geotrellis.raster.render._
 
 import akka.actor._
 import org.apache.accumulo.core.client.security.tokens.PasswordToken
 
 import com.typesafe.config.Config
+import org.gdal.gdal.Transformer
 
 import spray.http._
-import spray.routing.HttpService
+import spray.httpx.SprayJsonSupport._
+import spray.json._
+import spray.routing._
+
+import scala.sys.process
 
 class ChattaServiceActor(override val staticPath: String, config: Config) extends Actor with ChattaService {
 
@@ -44,6 +51,7 @@ class ChattaServiceActor(override val staticPath: String, config: Config) extend
 trait ChattaService extends HttpService {
 
   implicit val sparkContext = SparkUtils.createLocalSparkContext("local[*]", "ChattaDemo")
+  //implicit val sparkContext = SparkUtils.createSparkContext("ChattaDemo")
   implicit val executionContext = actorRefFactory.dispatcher
   val accumulo: AccumuloInstance
   lazy val reader = AccumuloLayerReader[SpatialKey, Tile, RasterRDD](accumulo)
@@ -57,15 +65,13 @@ trait ChattaService extends HttpService {
 
   def serviceRoute = get {
     pathPrefix("gt") {
-      path("colors")(colors) ~
+      pathPrefix("tms")(tms) ~
+        path("colors")(colors) ~
         path("breaks")(breaks) ~
-        path("tms") {
-          pathPrefix(Segment / IntNumber / IntNumber / IntNumber)(tms)
-        } ~
         path("sum")(sum)
     } ~
       pathEndOrSingleSlash {
-        getFromFile(staticPath+"/index.html")
+        getFromFile(staticPath + "/index.html")
       } ~
       pathPrefix("") {
         getFromDirectory(staticPath)
@@ -80,28 +86,36 @@ trait ChattaService extends HttpService {
       'weights,
       'numBreaks.as[Int]
     ) { (layersParam, weightsParam, numBreaks) =>
+      import DefaultJsonProtocol._
 
       val layers = layersParam.split(",")
       val weights = weightsParam.split(",").map(_.toInt)
 
       val breaksArray =
         layers.zip(weights)
-        .map { case (layer, weight) =>
-          reader.read(layerId(layer)) * weight
-        }
-        .toSeq
-        .localAdd
-        .classBreaks(numBreaks)
+          .map { case (layer, weight) =>
+            reader.read(layerId(layer)) * weight
+          }
+          .toSeq
+          .localAdd
+          .classBreaks(numBreaks)
 
-      complete(s"""{ "classBreaks" : $breaksArray }""")
+      complete(JsObject(
+        "classBreaks" -> breaksArray.toJson
+      ))
     }
 
-  def tms(layer: String, zoom: Int, x: Int, y: Int) =
+  def test(layer: String, zoom: Int, x: Int, y: Int) = {
+    complete("OK")
+  }
+
+
+  def tms = pathPrefix(Segment / IntNumber / IntNumber / IntNumber) { (layer, zoom, x, y) =>
     parameters(
       'layers,
       'weights,
       'breaks,
-      'bbox,
+      'bbox ? "",
       'colors.as[Int] ? 4,
       'colorRamp ? "blue-to-red",
       'mask ? ""
@@ -110,26 +124,26 @@ trait ChattaService extends HttpService {
       val layers = layersParam.split(",")
       val weights = weightsParam.split(",").map(_.toInt)
       val breaks = breaksString.split(",").map(_.toInt)
-      val extent = Extent.fromString(bbox)
+      //val extent = Extent.fromString(bbox)
       val key = SpatialKey(x, y)
 
       val tile =
         layers.zip(weights)
-        .map { case (l, weight) =>
-          tileReader.read(LayerId(l, zoom)).read(key) * weight
-        }
-        .toSeq
-        .localAdd()
+          .map { case (l, weight) =>
+            tileReader.read(LayerId(l, zoom)).read(key) * weight
+          }
+          .toSeq
+          .localAdd()
 
-      val maskedTile =
-        if (mask.isEmpty) tile
+      val maskedTile = tile
+      /*if (mask.isEmpty) tile
         else {
           val poly =
             mask
-            .parseGeoJson[Polygon]
-            .reproject(LatLng, WebMercator)
+              .parseGeoJson[Polygon]
+              .reproject(LatLng, WebMercator)
           tile.mask(extent, poly.geom)
-        }
+        }*/
 
       val ramp = {
         val cr = ColorRampMap.getOrElse(colorRamp, ColorRamps.BlueToRed)
@@ -141,6 +155,7 @@ trait ChattaService extends HttpService {
         complete(maskedTile.renderPng(ramp, breaks).bytes)
       }
     }
+  }
 
   def sum =
     parameters(
@@ -185,50 +200,39 @@ trait ChattaService extends HttpService {
    parameters('service, 'request, 'version, 'format, 'bbox, 'height.as[Int], 'width.as[Int], 'layers, 'weights,
      'palette ? "ff0000,ffff00,00ff00,0000ff", 'colors.as[Int] ? 4, 'breaks, 'colorRamp ? "blue-to-red", 'mask ? "") {
      (_, _, _, _, bbox, cols, rows, layersString, weightsString, palette, colors, breaksString, colorRamp, mask) => {
-
        val extent = Extent.fromString(bbox)
        val re = RasterExtent(extent, cols, rows)
        val zoomLevel = ???
-
        catalog.reader[SpatialKey](LayerId(layer, zoomLevel), FilterSet[
-
        val layers = layersString.split(",")
        val weights = weightsString.split(",").map(_.toInt)
        val model = Model.weightedOverlay(layers,weights,re)
-
        val overlay =
          if (mask.isEmpty) model
          else {
            GeoJsonReader.parse(mask) match {
-
              case Some(geomArray) if geomArray.length == 1 =>
                val transformed =
                  geomArray.head.mapGeom { g =>
                    Transformer.transform(g, Projections.LatLong, Projections.WebMercator)
                  }
                model.mask(transformed)
-
              case _ =>
                throw new Exception(s"Invalid GeoJSON: $mask")
            }
          }
-
        val breaks = breaksString.split(",").map(_.toInt)
-
        val ramp = {
          val cr = ColorRampMap.getOrElse(colorRamp, ColorRamps.BlueToRed)
          if (cr.toArray.length < breaks.length) cr.interpolate(breaks.length)
          else cr
        }
-
        val png: ValueSource[Png] = overlay.renderPng(ramp, breaks)
        png.run match {
-
          case process.Complete(img, h) =>
            respondWithMediaType(MediaTypes.`image/png`) {
              complete(img)
            }
-
          case process.Error(message,trace) =>
            println(message)
            println(trace)

@@ -92,9 +92,28 @@ var weightedOverlay = (function() {
                     geoJson = GJ.fromPolygon(polygon);
                 }
 
-				WOLayer = new L.tileLayer(server+'gt/tms/{layer}/{z}/{x}/{y}', {layers: 'default', maxZoom: 18, attribution: 'Azavea'});
-                /*
-                WOLayer = new L.TileLayer.WMS(server + "gt/wo", {
+    /* 'layers,
+      'weights,
+      'breaks,
+      'bbox ? "",
+      'colors.as[Int] ? 4,
+      'colorRamp ? "blue-to-red",
+      'mask ? "" */
+				WOLayer = new L.tileLayer(server + 
+                    'gt/tms/{layer}/{z}/{x}/{y}?layers={layers}' +
+                     '&weights={weights}&breaks={breaks}&colorRamp={colorRamp}&mask={mask}', {
+                    layer: 'default',
+                    format: 'image/png',
+                    breaks: breaks,
+                    transparent: true,
+                    layers: layerNames,
+                    weights: getWeights(),
+                    colorRamp: colorRamp,
+                    mask: encodeURIComponent(geoJson),
+                    attribution: 'Azavea'
+                });
+                
+                /* WOLayer = new L.TileLayer.WMS(server + "gt/wo", {
                     layers: 'default',
                     format: 'image/png',
                     breaks: breaks,
@@ -104,12 +123,11 @@ var weightedOverlay = (function() {
                     colorRamp: colorRamp,
                     mask: encodeURIComponent(geoJson),
                     attribution: 'Azavea'
-                })
-				*/
+                }) */
+				
                 WOLayer.setOpacity(opacity);
                 WOLayer.addTo(map);
                 map.lc.addOverlay(WOLayer, "Weighted Overlay");
-
             }
         });
     };
