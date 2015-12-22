@@ -51,10 +51,9 @@ class ChattaServiceActor(override val staticPath: String, config: Config) extend
 trait ChattaService extends HttpService {
 
   implicit val sparkContext = SparkUtils.createLocalSparkContext("local[*]", "ChattaDemo")
-  //implicit val sparkContext = SparkUtils.createSparkContext("ChattaDemo")
   implicit val executionContext = actorRefFactory.dispatcher
   val accumulo: AccumuloInstance
-  lazy val reader = AccumuloLayerReader[SpatialKey, Tile, RasterRDD](accumulo)
+  lazy val reader = AccumuloLayerReader[SpatialKey, Tile, RasterMetaData, RasterRDD[SpatialKey]](accumulo)
   lazy val tileReader = AccumuloTileReader[SpatialKey, Tile](accumulo)
 
   val staticPath: String
@@ -121,6 +120,8 @@ trait ChattaService extends HttpService {
       'mask ? ""
     ) { (layersParam, weightsParam, breaksString, bbox, colors, colorRamp, mask) =>
 
+      import geotrellis.raster._
+
       val layers = layersParam.split(",")
       val weights = weightsParam.split(",").map(_.toInt)
       val breaks = breaksString.split(",").map(_.toInt)
@@ -133,9 +134,10 @@ trait ChattaService extends HttpService {
             tileReader.read(LayerId(l, zoom)).read(key) * weight
           }
           .toSeq
-          .localAdd()
+          .localAdd().convert(TypeInt).map(i => if(i == 0) Int.MinValue else i)
 
       val maskedTile = tile
+
       /*if (mask.isEmpty) tile
         else {
           val poly =
@@ -152,7 +154,7 @@ trait ChattaService extends HttpService {
       }
 
       respondWithMediaType(MediaTypes.`image/png`) {
-        complete(maskedTile.renderPng(ramp, breaks).bytes)
+        complete(maskedTile.renderPng(breaks, ramp.colors.toArray, -1).bytes)
       }
     }
   }

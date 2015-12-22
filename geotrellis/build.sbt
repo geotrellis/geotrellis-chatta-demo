@@ -12,9 +12,9 @@ resolvers ++= Seq(
 )
 
 libraryDependencies ++= Seq(
-  "com.azavea.geotrellis" %% "geotrellis-services" % "0.10.0-9d08114",
-  "com.azavea.geotrellis" %% "geotrellis-spark" % "0.10.0-9d08114",
-  "com.azavea.geotrellis" %% "geotrellis-spark-etl" % "0.10.0-9d08114",
+  "com.azavea.geotrellis" %% "geotrellis-services" % "0.10.0-6a254b6",
+  "com.azavea.geotrellis" %% "geotrellis-spark" % "0.10.0-6a254b6",
+  "com.azavea.geotrellis" %% "geotrellis-spark-etl" % "0.10.0-6a254b6",
   "org.apache.spark" %% "spark-core" % "1.5.2",
   "io.spray" %% "spray-routing" % "1.3.2",
   "io.spray" %% "spray-can" % "1.3.3",

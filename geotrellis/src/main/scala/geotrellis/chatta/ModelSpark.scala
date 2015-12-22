@@ -45,7 +45,7 @@ object LayerRatio {
 object ModelSpark {
 
   def weightedOverlay(layers: Iterable[String], weights: Iterable[Int], zoom: Int, rasterExtent: RasterExtent)
-                     (reader: AccumuloLayerReader[SpatialKey, Tile, RasterRDD[SpatialKey]]): RasterRDD[SpatialKey] = {
+                     (reader: AccumuloLayerReader[SpatialKey, Tile, RasterMetaData, RasterRDD[SpatialKey]]): RasterRDD[SpatialKey] = {
 
     val layerIds = layers.map(l => LayerId(s"albers_$l", zoom))
     val maskId = LayerId("mask", zoom)
@@ -55,7 +55,7 @@ object ModelSpark {
     val weighted =
       layerIds.zip(weights)
       .map { case (layer, weight) =>
-        reader.read(layer, new RDDQuery[SpatialKey, reader.MetaDataType].where(Intersects(bounds))) * weight
+        reader.read(layer, new RDDQuery[SpatialKey, RasterMetaData].where(Intersects(bounds))) * weight
       }
       .toSeq
       .localAdd
@@ -64,7 +64,7 @@ object ModelSpark {
   }
 
   def summary(layers: Iterable[String], weights: Iterable[Int], zoom: Int, polygon: Polygon)
-             (reader: AccumuloLayerReader[SpatialKey, Tile, RasterRDD[SpatialKey]]): SummaryResult = {
+             (reader: AccumuloLayerReader[SpatialKey, Tile, RasterMetaData, RasterRDD[SpatialKey]]): SummaryResult = {
 
     val layerIds = layers.map(l => LayerId(s"albers_$l", zoom))
 
