@@ -1,27 +1,18 @@
 package geotrellis.chatta
 
-import geotrellis._
-import geotrellis.engine.RasterSource
 import geotrellis.raster._
-import geotrellis.spark.io.{RDDQuery, BoundRDDQuery, Intersects}
+import geotrellis.spark.io.{RDDQuery, Intersects}
 import geotrellis.spark.io.accumulo.AccumuloLayerReader
-import geotrellis.spark.io.avro.AvroRecordCodec
-import geotrellis.spark.op._
-import geotrellis.spark.op.local._
 import geotrellis.spark.op.local.spatial._
 import geotrellis.spark._
 import geotrellis.vector._
-import geotrellis.raster.rasterize.{Callback, Rasterizer}
 import geotrellis.raster.op.zonal.summary._
-import spray.json.JsonFormat
 import geotrellis.spark.op.local._
-
-import scala.reflect.ClassTag
 
 case class LayerSummary(name: String, score: Double)
 case class SummaryResult(layerSummaries: List[LayerSummary], score: Double)
 
-case class LayerRatio(sum: Int, count: Int) {
+case class LayerRatio(sum: Long, count: Long) {
   def value = sum / count.toDouble
   def combine(other: LayerRatio) =
     LayerRatio(sum + other.sum, count + other.count)
@@ -34,11 +25,10 @@ object LayerRatio {
     val sum =
       r.map { case (k, tile) =>
         val extent = mapTransform(k)
-        tile.zonalSumDouble(extent, extent.toPolygon())
-      }
-      .sum()
-      .toInt
-    LayerRatio(sum, rasterExtent.rows * rasterExtent.cols)
+        tile.convert(TypeInt).map(i => if(i == 0) Int.MinValue else i).zonalSumDouble(extent, extent.toPolygon())
+      }.sum().toLong
+
+    LayerRatio(sum, rasterExtent.cols.toLong * rasterExtent.rows.toLong)
   }
 }
 
@@ -47,7 +37,7 @@ object ModelSpark {
   def weightedOverlay(layers: Iterable[String], weights: Iterable[Int], zoom: Int, rasterExtent: RasterExtent)
                      (reader: AccumuloLayerReader[SpatialKey, Tile, RasterMetaData, RasterRDD[SpatialKey]]): RasterRDD[SpatialKey] = {
 
-    val layerIds = layers.map(l => LayerId(s"albers_$l", zoom))
+    val layerIds = layers.map(LayerId(_, zoom))
     val maskId = LayerId("mask", zoom)
     val bounds = rasterExtent.gridBoundsFor(rasterExtent.extent)
 
@@ -66,8 +56,8 @@ object ModelSpark {
   def summary(layers: Iterable[String], weights: Iterable[Int], zoom: Int, polygon: Polygon)
              (reader: AccumuloLayerReader[SpatialKey, Tile, RasterMetaData, RasterRDD[SpatialKey]]): SummaryResult = {
 
-    val layerIds = layers.map(l => LayerId(s"albers_$l", zoom))
-
+    //val layerIds = layers.map(l => LayerId(s"albers_$l", zoom))
+    val layerIds = layers.map(LayerId(_, zoom))
     val layerRatios =
       layerIds.zip(weights)
       .map { case (layer, weight) =>

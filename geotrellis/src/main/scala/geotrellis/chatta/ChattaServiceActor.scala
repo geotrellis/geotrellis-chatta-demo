@@ -1,39 +1,28 @@
 package geotrellis.chatta
 
-import java.io.File
-
-import geotrellis.engine.ValueSource
 import geotrellis.proj4.{LatLng, WebMercator}
-import geotrellis.raster.{RasterExtent, Tile, GridBounds}
+import geotrellis.raster.Tile
 import geotrellis.raster.op.local._
-import geotrellis.raster.render._
 import geotrellis.services._
 import geotrellis.spark.utils.SparkUtils
 import geotrellis.spark._
 import geotrellis.spark.io.accumulo._
 import geotrellis.spark.op.local._
-import geotrellis.spark.op.local.spatial._
-import geotrellis.spark.tiling._
 import geotrellis.spark.io.json._
 import geotrellis.spark.op.stats._
 import geotrellis.vector.io.json._
 import geotrellis.vector.reproject._
-import geotrellis.vector.{Extent, Geometry, Polygon}
+import geotrellis.vector.{Extent, Polygon}
 import geotrellis.spark.io.avro.codecs._
 import geotrellis.raster.render._
 
 import akka.actor._
 import org.apache.accumulo.core.client.security.tokens.PasswordToken
-
 import com.typesafe.config.Config
-import org.gdal.gdal.Transformer
-
 import spray.http._
 import spray.httpx.SprayJsonSupport._
 import spray.json._
 import spray.routing._
-
-import scala.sys.process
 
 class ChattaServiceActor(override val staticPath: String, config: Config) extends Actor with ChattaService {
 
@@ -55,12 +44,19 @@ trait ChattaService extends HttpService {
   val accumulo: AccumuloInstance
   lazy val reader = AccumuloLayerReader[SpatialKey, Tile, RasterMetaData, RasterRDD[SpatialKey]](accumulo)
   lazy val tileReader = AccumuloTileReader[SpatialKey, Tile](accumulo)
+  lazy val attributeStore = AccumuloAttributeStore(accumulo.connector)
 
   val staticPath: String
   val baseZoomLevel = 9
 
   def layerId(layer: String): LayerId =
     LayerId(layer, baseZoomLevel)
+
+  def getMetaData(id: LayerId): RasterMetaData = {
+    import DefaultJsonProtocol._
+    attributeStore.readLayerAttributes[
+      Unit, RasterMetaData, Unit, Unit, Unit](id)._2
+  }
 
   def serviceRoute = get {
     pathPrefix("gt") {
@@ -104,17 +100,12 @@ trait ChattaService extends HttpService {
       ))
     }
 
-  def test(layer: String, zoom: Int, x: Int, y: Int) = {
-    complete("OK")
-  }
-
-
-  def tms = pathPrefix(Segment / IntNumber / IntNumber / IntNumber) { (layer, zoom, x, y) =>
+  def tms = pathPrefix(IntNumber / IntNumber / IntNumber) { (zoom, x, y) =>
     parameters(
       'layers,
       'weights,
       'breaks,
-      'bbox ? "",
+      'bbox.?,
       'colors.as[Int] ? 4,
       'colorRamp ? "blue-to-red",
       'mask ? ""
@@ -125,7 +116,6 @@ trait ChattaService extends HttpService {
       val layers = layersParam.split(",")
       val weights = weightsParam.split(",").map(_.toInt)
       val breaks = breaksString.split(",").map(_.toInt)
-      //val extent = Extent.fromString(bbox)
       val key = SpatialKey(x, y)
 
       val tile =
@@ -133,19 +123,23 @@ trait ChattaService extends HttpService {
           .map { case (l, weight) =>
             tileReader.read(LayerId(l, zoom)).read(key) * weight
           }
-          .toSeq
-          .localAdd().convert(TypeInt).map(i => if(i == 0) Int.MinValue else i)
+          .toSeq.localAdd()
 
-      val maskedTile = tile
+      val extent: Extent = layers.zip(weights)
+        .map { case (l, _) =>
+          getMetaData(LayerId(l, zoom)).mapTransform(key).extent
+        }.toSeq.reduce(_ combine _)
 
-      /*if (mask.isEmpty) tile
+      val maskedTile =
+        if (mask.isEmpty) tile
         else {
           val poly =
             mask
               .parseGeoJson[Polygon]
               .reproject(LatLng, WebMercator)
+
           tile.mask(extent, poly.geom)
-        }*/
+        }
 
       val ramp = {
         val cr = ColorRampMap.getOrElse(colorRamp, ColorRamps.BlueToRed)
@@ -154,7 +148,7 @@ trait ChattaService extends HttpService {
       }
 
       respondWithMediaType(MediaTypes.`image/png`) {
-        complete(maskedTile.renderPng(breaks, ramp.colors.toArray, -1).bytes)
+        complete(maskedTile.convert(TypeInt).map(i => if(i == 0) Int.MinValue else i).renderPng(breaks, ramp.colors.toArray, -1).bytes)
       }
     }
   }
@@ -164,38 +158,36 @@ trait ChattaService extends HttpService {
       'polygon,
       'layers,
       'weights) { (polygonJson, layersString, weightsString) =>
+      import DefaultJsonProtocol._
 
       val start = System.currentTimeMillis()
 
       val poly = {
         val parsed = polygonJson.parseGeoJson[Polygon]
-        Reproject(parsed, Projections.LatLong, Projections.ChattaAlbers)
+        Reproject(parsed, LatLng, WebMercator)
       }
       val layers = layersString.split(",")
       val weights = weightsString.split(",").map(_.toInt)
 
+      println(s"weigths: ${weights.toList}")
+
+      println(s"poly: ${poly}")
+
       val summary = ModelSpark.summary(layers, weights, baseZoomLevel, poly)(reader)
       val elapsedTotal = System.currentTimeMillis - start
 
-      val layerSummaries = {
-        val layerSummaries = summary.layerSummaries.map { ls =>
-          val v = "%.2f".format(ls.score * 100)
-          s"""{
-               "layer": "${ls.name}",
-               "total": "$v"
-            }"""
-        }.mkString(",")
-        s"[$layers]"
+      val layerSummaries = summary.layerSummaries.map { ls =>
+        JsObject(
+          "layer" -> ls.name.toJson,
+          "total" -> "%.2f".format(ls.score * 100).toJson
+        )
       }
 
-      val totalVal = "%.2f".format(summary.score * 100)
-      val data =
-        s"""{
-            "layerSummaries": $layerSummaries,
-            "total": "$totalVal",
-            "elapsed": "$elapsedTotal"
-         }"""
-      complete(data)
+      complete(JsObject(
+        "layerSummaries" -> layerSummaries.toJson,
+        "total"          -> "%.2f".format(summary.score * 100).toJson,
+        "elapsed"        -> elapsedTotal.toJson
+      ))
     }
 
   /*path("wo") {
