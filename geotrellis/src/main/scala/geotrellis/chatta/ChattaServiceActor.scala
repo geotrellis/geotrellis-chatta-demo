@@ -1,7 +1,7 @@
 package geotrellis.chatta
 
 import geotrellis.proj4.{LatLng, WebMercator}
-import geotrellis.raster.Tile
+import geotrellis.raster.{TypeInt, Tile}
 import geotrellis.raster.op.local._
 import geotrellis.services._
 import geotrellis.spark.utils.SparkUtils
@@ -118,17 +118,15 @@ trait ChattaService extends HttpService {
       val breaks = breaksString.split(",").map(_.toInt)
       val key = SpatialKey(x, y)
 
-      val tile =
+      val (extSeq, tileSeq) =
         layers.zip(weights)
           .map { case (l, weight) =>
-            tileReader.read(LayerId(l, zoom)).read(key) * weight
-          }
-          .toSeq.localAdd().convert(TypeInt).map(i => if(i == 0) Int.MinValue else i)
+            getMetaData(LayerId(l, zoom)).mapTransform(key).extent ->
+              tileReader.read(LayerId(l, zoom)).read(key) * weight
+          }.toSeq.unzip
 
-      val extent: Extent = layers.zip(weights)
-        .map { case (l, _) =>
-          getMetaData(LayerId(l, zoom)).mapTransform(key).extent
-        }.toSeq.reduce(_ combine _)
+      val tile   = tileSeq.localAdd().convert(TypeInt).map(i => if(i == 0) Int.MinValue else i)
+      val extent = extSeq.reduce(_ combine _)
 
       val maskedTile =
         if (mask.isEmpty) tile
