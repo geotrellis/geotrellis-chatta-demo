@@ -295,14 +295,12 @@ var drawing = (function() {
     map.addControl(drawControl);
 
     map.on('draw:created', function (e) {
-        console.log('draw:created');
         if (e.layerType === 'polygon') {
             summary.setPolygon(e.layer);
         }
     });
 
     map.on('draw:edited', function(e) {
-        console.log('draw:edited');
         var polygon = summary.getPolygon();
         if(polygon != null) { 
             summary.update();
@@ -312,12 +310,10 @@ var drawing = (function() {
 
     map.on('draw:drawstart', function(e) {
         var polygon = summary.getPolygon();
-        console.log('draw:drawstart');
         if(polygon != null) { drawnItems.removeLayer(polygon); }
     });
 
     map.on('draw:drawstop', function(e) {
-        console.log('draw:drawstop');
         drawnItems.addLayer(summary.getPolygon());
     });
 
