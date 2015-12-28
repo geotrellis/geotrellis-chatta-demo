@@ -56,12 +56,10 @@ object ModelSpark {
   def summary(layers: Iterable[String], weights: Iterable[Int], zoom: Int, polygon: Polygon)
              (reader: AccumuloLayerReader[SpatialKey, Tile, RasterMetaData, RasterRDD[SpatialKey]]): SummaryResult = {
 
-    //val layerIds = layers.map(l => LayerId(s"albers_$l", zoom))
     val layerIds = layers.map(LayerId(_, zoom))
     val layerRatios =
       layerIds.zip(weights)
       .map { case (layer, weight) =>
-        //val raster = catalog.query[SpatialKey](layer).where(Intersects(bounds)).toRDD * weight
         val raster = reader.read(layer) * weight
         val masked = raster.mask(polygon)
         val ratio = LayerRatio.rasterResult(masked)
