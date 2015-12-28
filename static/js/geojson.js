@@ -3,7 +3,7 @@ var GJ = (function () {
         var latlngs = layer.getLatLngs();
         var a = []
         for(var i = 0; i < latlngs.length; i++ ) { 
-            a.push([latlngs[i].lat,latlngs[i].lng]) 
+            a.push([latlngs[i].lng, latlngs[i].lat]) 
         }
 
         return JSON.stringify({ 

@@ -123,7 +123,7 @@ trait ChattaService extends HttpService {
           .map { case (l, weight) =>
             tileReader.read(LayerId(l, zoom)).read(key) * weight
           }
-          .toSeq.localAdd()
+          .toSeq.localAdd().convert(TypeInt).map(i => if(i == 0) Int.MinValue else i)
 
       val extent: Extent = layers.zip(weights)
         .map { case (l, _) =>
@@ -148,7 +148,7 @@ trait ChattaService extends HttpService {
       }
 
       respondWithMediaType(MediaTypes.`image/png`) {
-        complete(maskedTile.convert(TypeInt).map(i => if(i == 0) Int.MinValue else i).renderPng(breaks, ramp.colors.toArray, -1).bytes)
+        complete(maskedTile.renderPng(ramp, breaks).bytes)
       }
     }
   }
