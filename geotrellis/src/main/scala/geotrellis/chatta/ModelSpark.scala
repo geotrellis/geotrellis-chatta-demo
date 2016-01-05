@@ -21,14 +21,13 @@ case class LayerRatio(sum: Long, count: Long) {
 object LayerRatio {
   def rasterResult(r: RasterRDD[SpatialKey]): LayerRatio = {
     val mapTransform = r.metaData.mapTransform
-    val rasterExtent = r.metaData.rasterExtent
-    val sum =
-      r.map { case (k, tile) =>
+    val (sum, count) =
+      r map { case (k, tile) =>
         val extent = mapTransform(k)
-        tile.zonalSumDouble(extent, extent.toPolygon())
-      }.sum().toLong
+        (tile.zonalSumDouble(extent, extent.toPolygon()).toLong, tile.size)
+      } reduce { case ((sl, cl), (sr, cr)) => (sl + sr, cl + cr) }
 
-    LayerRatio(sum, rasterExtent.cols.toLong * rasterExtent.rows.toLong)
+    LayerRatio(sum, count)
   }
 }
 
@@ -60,7 +59,7 @@ object ModelSpark {
     val layerRatios =
       layerIds.zip(weights)
       .map { case (layer, weight) =>
-        val raster = reader.read(layer).convert(TypeInt)
+        val raster = reader.read(layer)
         val masked = raster.mask(polygon)
         val ratio = LayerRatio.rasterResult(masked)
 
