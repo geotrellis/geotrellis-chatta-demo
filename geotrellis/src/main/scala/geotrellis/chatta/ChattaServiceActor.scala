@@ -1,11 +1,9 @@
 package geotrellis.chatta
 
-import geotrellis.engine.RasterSource
 import geotrellis.proj4.{LatLng, WebMercator}
 import geotrellis.raster._
 import geotrellis.raster.op.local._
 import geotrellis.services._
-import geotrellis.spark.io.{RDDQuery, Intersects}
 import geotrellis.spark.utils.SparkUtils
 import geotrellis.spark._
 import geotrellis.spark.io.accumulo._
@@ -14,7 +12,7 @@ import geotrellis.spark.io.json._
 import geotrellis.spark.op.stats._
 import geotrellis.vector.io.json._
 import geotrellis.vector.reproject._
-import geotrellis.vector.{Extent, Polygon}
+import geotrellis.vector.Polygon
 import geotrellis.spark.io.avro.codecs._
 import geotrellis.raster.render._
 
