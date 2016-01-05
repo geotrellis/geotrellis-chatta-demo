@@ -1,9 +1,11 @@
 package geotrellis.chatta
 
+import geotrellis.engine.RasterSource
 import geotrellis.proj4.{LatLng, WebMercator}
-import geotrellis.raster.{TypeInt, Tile}
+import geotrellis.raster._
 import geotrellis.raster.op.local._
 import geotrellis.services._
+import geotrellis.spark.io.{RDDQuery, Intersects}
 import geotrellis.spark.utils.SparkUtils
 import geotrellis.spark._
 import geotrellis.spark.io.accumulo._
@@ -37,7 +39,7 @@ class ChattaServiceActor(override val staticPath: String, config: Config) extend
   )
 }
 
-trait ChattaService extends HttpService {
+trait ChattaService extends HttpService with LazyLogging {
 
   implicit val sparkContext = SparkUtils.createLocalSparkContext("local[*]", "ChattaDemo")
   implicit val executionContext = actorRefFactory.dispatcher
@@ -86,15 +88,34 @@ trait ChattaService extends HttpService {
       val layers = layersParam.split(",")
       val weights = weightsParam.split(",").map(_.toInt)
 
-      val breaksArray =
-        layers.zip(weights)
-          .map { case (layer, weight) =>
-            reader.read(layerId(layer)) * weight
-          }
-          .toSeq
-          .localAdd
-          .classBreaks(numBreaks)
+      val breaksSeq =
+        timedCreate(
+          "breaks",
+          "ChattaServiceActor(91)::breaksSeq start",
+          "ChattaServiceActor(91)::breaksSeq end") {
+          layers.zip(weights)
+            .map { case (layer, weight) =>
+              reader.read(layerId(layer)).convert(TypeInt) * weight
+            }.toSeq
+        }
 
+      val breaksAdd =
+        timedCreate(
+          "breaks",
+          "ChattaServiceActor(102)::breaksAdd start",
+          "ChattaServiceActor(102)::breaksAdd end") {
+          breaksSeq.localAdd
+        }
+
+      val breaksArray =
+        timedCreate(
+          "breaks",
+          "ChattaServiceActor(110)::breaksArray start",
+          "ChattaServiceActor(110)::breaksArray end") {
+          breaksAdd.classBreaks(numBreaks)
+        }
+
+      printBuffer("breaks")
       complete(JsObject(
         "classBreaks" -> breaksArray.toJson
       ))
@@ -118,15 +139,56 @@ trait ChattaService extends HttpService {
       val breaks = breaksString.split(",").map(_.toInt)
       val key = SpatialKey(x, y)
 
-      val (extSeq, tileSeq) =
-        layers.zip(weights)
-          .map { case (l, weight) =>
-            getMetaData(LayerId(l, zoom)).mapTransform(key).extent ->
-              tileReader.read(LayerId(l, zoom)).read(key) * weight
-          }.toSeq.unzip
+      val maskTile =
+        timedCreate(
+          "tms",
+          "ChattaServiceActor(142)::maskTile start",
+          "ChattaServiceActor(142)::maskTile end") {
+          tileReader.read(LayerId("mask", zoom)).read(key).convert(TypeInt).mutable
+        }
 
-      val tile   = tileSeq.localAdd().convert(TypeInt).map(i => if(i == 0) Int.MinValue else i)
-      val extent = extSeq.reduce(_ combine _)
+      val (extSeq, tileSeq) =
+        timedCreate(
+          "tms",
+          "ChattaServiceActor(150)::(extSeq, tileSeq) start",
+          "ChattaServiceActor(150)::(extSeq, tileSeq) end") {
+          layers.zip(weights)
+            .map { case (l, weight) =>
+              getMetaData(LayerId(l, zoom)).mapTransform(key).extent ->
+                tileReader.read(LayerId(l, zoom)).read(key).convert(TypeInt) * weight
+            }.toSeq.unzip
+        }
+
+      val extent =
+        timedCreate(
+          "tms",
+          "ChattaServiceActor(162)::extent start",
+          "ChattaServiceActor(162)::extent end") {
+          extSeq.reduce(_ combine _)
+        }
+
+      val tileAdd =
+        timedCreate(
+          "tms",
+          "ChattaServiceActor(170)::tileAdd start",
+          "ChattaServiceActor(170)::tileAdd end") {
+          tileSeq.localAdd
+        }
+
+      val tileMap =
+        timedCreate(
+          "tms",
+          "ChattaServiceActor(178)::tileMap start",
+          "ChattaServiceActor(178)::tileMap end") {
+          tileAdd.map(i => if(i == 0) NODATA else i)
+        }
+
+      val tile = timedCreate(
+        "tms",
+        "ChattaServiceActor(186)::tile start",
+        "ChattaServiceActor(186)::tile end") {
+        tileMap.localMask(maskTile, NODATA, NODATA)
+      }
 
       val maskedTile =
         if (mask.isEmpty) tile
@@ -146,7 +208,16 @@ trait ChattaService extends HttpService {
       }
 
       respondWithMediaType(MediaTypes.`image/png`) {
-        complete(maskedTile.renderPng(ramp, breaks).bytes)
+        val result =
+          timedCreate(
+            "tms",
+            "ChattaServiceActor(211)::result start",
+            "ChattaServiceActor(211)::result end") {
+            maskedTile.renderPng(ramp, breaks).bytes
+          }
+
+        printBuffer("tms")
+        complete(result)
       }
     }
   }
@@ -167,11 +238,13 @@ trait ChattaService extends HttpService {
       val layers = layersString.split(",")
       val weights = weightsString.split(",").map(_.toInt)
 
-      println(s"weigths: ${weights.toList}")
-
-      println(s"poly: ${poly}")
-
-      val summary = ModelSpark.summary(layers, weights, baseZoomLevel, poly)(reader)
+      val summary =
+        timedCreate(
+          "sum",
+          "ChattaServiceActor(241)::summary start",
+          "ChattaServiceActor(241)::summary end") {
+          ModelSpark.summary(layers, weights, baseZoomLevel, poly)(reader)
+        }
       val elapsedTotal = System.currentTimeMillis - start
 
       val layerSummaries = summary.layerSummaries.map { ls =>
@@ -181,6 +254,7 @@ trait ChattaService extends HttpService {
         )
       }
 
+      printBuffer("sum")
       complete(JsObject(
         "layerSummaries" -> layerSummaries.toJson,
         "total"          -> "%.2f".format(summary.score * 100).toJson,

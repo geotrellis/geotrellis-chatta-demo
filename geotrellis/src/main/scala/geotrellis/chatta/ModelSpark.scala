@@ -25,7 +25,7 @@ object LayerRatio {
     val sum =
       r.map { case (k, tile) =>
         val extent = mapTransform(k)
-        tile.convert(TypeInt).map(i => if(i == 0) Int.MinValue else i).zonalSumDouble(extent, extent.toPolygon())
+        tile.zonalSumDouble(extent, extent.toPolygon())
       }.sum().toLong
 
     LayerRatio(sum, rasterExtent.cols.toLong * rasterExtent.rows.toLong)
@@ -60,7 +60,7 @@ object ModelSpark {
     val layerRatios =
       layerIds.zip(weights)
       .map { case (layer, weight) =>
-        val raster = reader.read(layer) * weight
+        val raster = reader.read(layer).convert(TypeInt)
         val masked = raster.mask(polygon)
         val ratio = LayerRatio.rasterResult(masked)
 
