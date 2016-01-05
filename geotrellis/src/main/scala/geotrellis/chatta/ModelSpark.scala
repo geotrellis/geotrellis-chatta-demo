@@ -24,7 +24,7 @@ object LayerRatio {
     val (sum, count) =
       r map { case (k, tile) =>
         val extent = mapTransform(k)
-        (tile.zonalSumDouble(extent, extent.toPolygon()).toLong, tile.size)
+        (tile.zonalSum(extent, extent.toPolygon()), tile.size)
       } reduce { case ((sl, cl), (sr, cr)) => (sl + sr, cl + cr) }
 
     LayerRatio(sum, count)
