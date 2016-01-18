@@ -42,7 +42,7 @@ trait ChattaService extends HttpService with LazyLogging {
   implicit val sparkContext = SparkUtils.createLocalSparkContext("local[*]", "ChattaDemo")
   implicit val executionContext = actorRefFactory.dispatcher
   val accumulo: AccumuloInstance
-  lazy val reader = AccumuloLayerReader[SpatialKey, Tile, RasterMetaData, RasterRDD[SpatialKey]](accumulo)
+  lazy val reader = AccumuloLayerReader[SpatialKey, Tile, RasterMetaData](accumulo)
   lazy val tileReader = AccumuloTileReader[SpatialKey, Tile](accumulo)
   lazy val attributeStore = AccumuloAttributeStore(accumulo.connector)
 
