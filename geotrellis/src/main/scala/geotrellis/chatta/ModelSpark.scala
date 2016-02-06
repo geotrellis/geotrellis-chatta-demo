@@ -8,6 +8,7 @@ import geotrellis.spark._
 import geotrellis.vector._
 import geotrellis.raster.op.zonal.summary._
 import geotrellis.spark.op.local._
+import org.apache.spark.rdd.RDD
 
 case class LayerSummary(name: String, score: Double)
 case class SummaryResult(layerSummaries: List[LayerSummary], score: Double)
@@ -34,7 +35,7 @@ object LayerRatio {
 object ModelSpark {
 
   def weightedOverlay(layers: Iterable[String], weights: Iterable[Int], zoom: Int, rasterExtent: RasterExtent)
-                     (reader: AccumuloLayerReader[SpatialKey, Tile, RasterMetaData]): RasterRDD[SpatialKey] = {
+                     (reader: AccumuloLayerReader[SpatialKey, Tile, RasterMetaData]): RDD[(SpatialKey, Tile)] = {
 
     val layerIds = layers.map(LayerId(_, zoom))
     val maskId = LayerId("mask", zoom)
