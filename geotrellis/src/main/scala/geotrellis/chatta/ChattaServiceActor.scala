@@ -4,7 +4,6 @@ import geotrellis.proj4.{LatLng, WebMercator}
 import geotrellis.raster._
 import geotrellis.raster.op.local._
 import geotrellis.services._
-import geotrellis.spark.utils.SparkUtils
 import geotrellis.spark._
 import geotrellis.spark.io.accumulo._
 import geotrellis.spark.op.local._
@@ -19,12 +18,22 @@ import geotrellis.raster.render._
 import akka.actor._
 import org.apache.accumulo.core.client.security.tokens.PasswordToken
 import com.typesafe.config.Config
+import org.apache.spark.{SparkConf, SparkContext}
 import spray.http._
 import spray.httpx.SprayJsonSupport._
 import spray.json._
 import spray.routing._
 
-class ChattaServiceActor(override val staticPath: String, config: Config) extends Actor with ChattaService {
+class ChattaServiceActor(override val staticPath: String, config: Config) extends Actor with ChattaService { self =>
+  implicit val sparkContext =
+    new SparkContext(
+      new SparkConf()
+        .setMaster(config.getString("spark.master"))
+        .setAppName("ChattaDemo")
+        .set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
+        .set("spark.kryo.registrator", "geotrellis.spark.io.hadoop.KryoRegistrator")
+        .setJars(SparkContext.jarOfObject(this).toList)
+    )
 
   override def actorRefFactory = context
   override def receive = runRoute(serviceRoute)
@@ -38,8 +47,8 @@ class ChattaServiceActor(override val staticPath: String, config: Config) extend
 }
 
 trait ChattaService extends HttpService with LazyLogging {
+  implicit val sparkContext: SparkContext
 
-  implicit val sparkContext = SparkUtils.createLocalSparkContext("local[*]", "ChattaDemo")
   implicit val executionContext = actorRefFactory.dispatcher
   val accumulo: AccumuloInstance
   lazy val reader = AccumuloLayerReader[SpatialKey, Tile, RasterMetaData](accumulo)
