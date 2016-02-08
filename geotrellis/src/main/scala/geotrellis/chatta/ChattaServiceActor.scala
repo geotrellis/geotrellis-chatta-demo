@@ -24,7 +24,7 @@ import spray.httpx.SprayJsonSupport._
 import spray.json._
 import spray.routing._
 
-class ChattaServiceActor(override val staticPath: String, config: Config) extends Actor with ChattaService { self =>
+class ChattaServiceActor(override val staticPath: String, config: Config) extends Actor with ChattaService {
   implicit val sparkContext =
     new SparkContext(
       new SparkConf()
