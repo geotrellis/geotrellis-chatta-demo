@@ -31,7 +31,7 @@ class ChattaServiceActor(override val staticPath: String, config: Config) extend
         .setMaster(config.getString("spark.master"))
         .setAppName("ChattaDemo")
         .set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
-        .set("spark.kryo.registrator", "geotrellis.spark.io.hadoop.KryoRegistrator")
+        .set("spark.kryo.registrator", "geotrellis.spark.io.kryo.KryoRegistrator")
         .setJars(SparkContext.jarOfObject(this).toList)
     )
 
