@@ -2,18 +2,18 @@ package geotrellis.chatta
 
 import geotrellis.proj4.{LatLng, WebMercator}
 import geotrellis.raster._
-import geotrellis.raster.op.local._
 import geotrellis.services._
 import geotrellis.spark._
 import geotrellis.spark.io.accumulo._
-import geotrellis.spark.op.local._
 import geotrellis.spark.io.json._
-import geotrellis.spark.op.stats._
 import geotrellis.vector.io.json._
 import geotrellis.vector.reproject._
 import geotrellis.vector.Polygon
 import geotrellis.spark.io.avro.codecs._
 import geotrellis.raster.render._
+import geotrellis.raster._
+import geotrellis.spark._
+import geotrellis.raster.mapalgebra.local._
 
 import akka.actor._
 import org.apache.accumulo.core.client.security.tokens.PasswordToken
@@ -102,7 +102,7 @@ trait ChattaService extends HttpService with LazyLogging {
           "ChattaServiceActor(91)::breaksSeq end") {
           layers.zip(weights)
             .map { case (layer, weight) =>
-              reader.read(layerId(layer)).convert(TypeInt) * weight
+              reader.read(layerId(layer)).convert(IntCellType) * weight
             }.toSeq
         }
 
@@ -137,7 +137,7 @@ trait ChattaService extends HttpService with LazyLogging {
       'colors.as[Int] ? 4,
       'colorRamp ? "blue-to-red",
       'mask ? ""
-    ) { (layersParam, weightsParam, breaksString, bbox, colors, colorRamp, mask) =>
+    ) { (layersParam, weightsParam, breaksString, bbox, colors, colorRamp, maskz) =>
 
       import geotrellis.raster._
 
@@ -151,7 +151,7 @@ trait ChattaService extends HttpService with LazyLogging {
           "tms",
           "ChattaServiceActor(142)::maskTile start",
           "ChattaServiceActor(142)::maskTile end") {
-          tileReader.read(LayerId("mask", zoom)).read(key).convert(TypeInt).mutable
+          tileReader.read(LayerId("mask", zoom)).read(key).convert(IntCellType).mutable
         }
 
       val (extSeq, tileSeq) =
@@ -162,7 +162,7 @@ trait ChattaService extends HttpService with LazyLogging {
           layers.zip(weights)
             .map { case (l, weight) =>
               getMetaData(LayerId(l, zoom)).mapTransform(key).extent ->
-                tileReader.read(LayerId(l, zoom)).read(key).convert(TypeInt) * weight
+                tileReader.read(LayerId(l, zoom)).read(key).convert(IntCellType) * weight
             }.toSeq.unzip
         }
 
@@ -198,10 +198,10 @@ trait ChattaService extends HttpService with LazyLogging {
       }
 
       val maskedTile =
-        if (mask.isEmpty) tile
+        if (maskz.isEmpty) tile
         else {
           val poly =
-            mask
+            maskz
               .parseGeoJson[Polygon]
               .reproject(LatLng, WebMercator)
 

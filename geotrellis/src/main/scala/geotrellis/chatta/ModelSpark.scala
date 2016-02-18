@@ -1,13 +1,10 @@
 package geotrellis.chatta
 
-import geotrellis.raster._
 import geotrellis.spark.io.{RDDQuery, Intersects}
 import geotrellis.spark.io.accumulo.AccumuloLayerReader
-import geotrellis.spark.op.local.spatial._
+import geotrellis.raster._
 import geotrellis.spark._
 import geotrellis.vector._
-import geotrellis.raster.op.zonal.summary._
-import geotrellis.spark.op.local._
 import org.apache.spark.rdd.RDD
 
 case class LayerSummary(name: String, score: Double)
@@ -25,7 +22,7 @@ object LayerRatio {
     val (sum, count) =
       r map { case (k, tile) =>
         val extent = mapTransform(k)
-        (tile.zonalSum(extent, extent.toPolygon()), tile.size)
+        (tile.polygonalSum(extent, extent.toPolygon()), tile.size)
       } reduce { case ((sl, cl), (sr, cr)) => (sl + sr, cl + cr) }
 
     LayerRatio(sum, count)
