@@ -2,18 +2,16 @@ package geotrellis.chatta
 
 import geotrellis.proj4.{LatLng, WebMercator}
 import geotrellis.raster._
+import geotrellis.raster.mapalgebra.local._
+import geotrellis.raster.render._
 import geotrellis.services._
 import geotrellis.spark._
+import geotrellis.spark.io.AttributeStore.Fields
+import geotrellis.spark.io._
 import geotrellis.spark.io.accumulo._
-import geotrellis.spark.io.json._
-import geotrellis.vector.io.json._
-import geotrellis.vector.reproject._
+import geotrellis.vector.io.json.Implicits._
 import geotrellis.vector.Polygon
-import geotrellis.spark.io.avro.codecs._
-import geotrellis.raster.render._
-import geotrellis.raster._
-import geotrellis.spark._
-import geotrellis.raster.mapalgebra.local._
+import geotrellis.vector.reproject._
 
 import akka.actor._
 import org.apache.accumulo.core.client.security.tokens.PasswordToken
@@ -51,7 +49,7 @@ trait ChattaService extends HttpService with LazyLogging {
 
   implicit val executionContext = actorRefFactory.dispatcher
   val accumulo: AccumuloInstance
-  lazy val reader = AccumuloLayerReader[SpatialKey, Tile, RasterMetaData](accumulo)
+  lazy val reader = AccumuloLayerReader(accumulo)
   lazy val tileReader = AccumuloTileReader[SpatialKey, Tile](accumulo)
   lazy val attributeStore = AccumuloAttributeStore(accumulo.connector)
 
@@ -61,11 +59,8 @@ trait ChattaService extends HttpService with LazyLogging {
   def layerId(layer: String): LayerId =
     LayerId(layer, baseZoomLevel)
 
-  def getMetaData(id: LayerId): RasterMetaData = {
-    import DefaultJsonProtocol._
-    attributeStore.readLayerAttributes[
-      Unit, RasterMetaData, Unit, Unit, Unit](id)._2
-  }
+  def getMetaData(id: LayerId): TileLayerMetadata[SpatialKey] =
+    attributeStore.read[TileLayerMetadata[SpatialKey]](id, Fields.metadata)
 
   def serviceRoute = get {
     pathPrefix("gt") {
@@ -102,7 +97,7 @@ trait ChattaService extends HttpService with LazyLogging {
           "ChattaServiceActor(91)::breaksSeq end") {
           layers.zip(weights)
             .map { case (layer, weight) =>
-              reader.read(layerId(layer)).convert(IntCellType) * weight
+              reader.read[SpatialKey, Tile, TileLayerMetadata[SpatialKey]](layerId(layer)).convert(IntCellType) * weight
             }.toSeq
         }
 
@@ -161,7 +156,7 @@ trait ChattaService extends HttpService with LazyLogging {
           "ChattaServiceActor(150)::(extSeq, tileSeq) end") {
           layers.zip(weights)
             .map { case (l, weight) =>
-              getMetaData(LayerId(l, zoom)).mapTransform(key).extent ->
+              getMetaData(LayerId(l, zoom)).mapTransform(key) ->
                 tileReader.read(LayerId(l, zoom)).read(key).convert(IntCellType) * weight
             }.toSeq.unzip
         }
@@ -208,11 +203,8 @@ trait ChattaService extends HttpService with LazyLogging {
           tile.mask(extent, poly.geom)
         }
 
-      val ramp = {
-        val cr = ColorRampMap.getOrElse(colorRamp, ColorRamps.BlueToRed)
-        if (cr.toArray.length < breaks.length) cr.interpolate(breaks.length)
-        else cr
-      }
+      val classifier =
+        BlendingColorClassifier(breaks, ColorRampMap.getOrElse(colorRamp, ColorRamps.BlueToRed)).normalize
 
       respondWithMediaType(MediaTypes.`image/png`) {
         val result =
@@ -220,7 +212,7 @@ trait ChattaService extends HttpService with LazyLogging {
             "tms",
             "ChattaServiceActor(211)::result start",
             "ChattaServiceActor(211)::result end") {
-            maskedTile.renderPng(ramp, breaks).bytes
+            maskedTile.renderPng(classifier).bytes
           }
 
         printBuffer("tms")

@@ -1,8 +1,8 @@
 import scala.util.Properties
 
 name := "GeoTrellis-Tutorial-Project"
-scalaVersion := Properties.propOrElse("scala.version", "2.10.5")
-crossScalaVersions := Seq("2.11.5", "2.10.5")
+scalaVersion := Properties.propOrElse("scala.version", "2.10.6")
+crossScalaVersions := Seq("2.11.8", "2.10.6")
 organization := "com.azavea"
 licenses := Seq("Apache-2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0.html"))
 scalacOptions ++= Seq(
@@ -22,9 +22,10 @@ pomIncludeRepository := { _ => false }
 resolvers += Resolver.bintrayRepo("azavea", "geotrellis")
 
 libraryDependencies ++= Seq(
-  "com.azavea.geotrellis" %% "geotrellis-services"  % "0.10.0-SNAPSHOT",
-  "com.azavea.geotrellis" %% "geotrellis-spark"     % "0.10.0-SNAPSHOT",
-  "com.azavea.geotrellis" %% "geotrellis-spark-etl" % "0.10.0-SNAPSHOT",
+  "com.azavea.geotrellis" %% "geotrellis-spark"     % "0.10.0-RC1",
+  "com.azavea.geotrellis" %% "geotrellis-accumulo"  % "0.10.0-RC1",
+  "com.azavea.geotrellis" %% "geotrellis-spark-etl" % "0.10.0-RC1",
+  "com.azavea.geotrellis" %% "geotrellis-raster"    % "0.10.0-RC1",
   "org.apache.spark"      %% "spark-core"           % "1.5.2",
   "io.spray"              %% "spray-routing"        % "1.3.3",
   "io.spray"              %% "spray-can"            % "1.3.3",

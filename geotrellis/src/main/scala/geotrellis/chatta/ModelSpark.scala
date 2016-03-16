@@ -1,10 +1,12 @@
 package geotrellis.chatta
 
-import geotrellis.spark.io.{RDDQuery, Intersects}
-import geotrellis.spark.io.accumulo.AccumuloLayerReader
 import geotrellis.raster._
 import geotrellis.spark._
+import geotrellis.spark.io._
+import geotrellis.spark.io.accumulo._
+import geotrellis.spark.ingest._
 import geotrellis.vector._
+
 import org.apache.spark.rdd.RDD
 
 case class LayerSummary(name: String, score: Double)
@@ -17,8 +19,8 @@ case class LayerRatio(sum: Long, count: Long) {
 }
 
 object LayerRatio {
-  def rasterResult(r: RasterRDD[SpatialKey]): LayerRatio = {
-    val mapTransform = r.metaData.mapTransform
+  def rasterResult(r: TileLayerRDD[SpatialKey]): LayerRatio = {
+    val mapTransform = r.metadata.mapTransform
     val (sum, count) =
       r map { case (k, tile) =>
         val extent = mapTransform(k)
@@ -32,17 +34,17 @@ object LayerRatio {
 object ModelSpark {
 
   def weightedOverlay(layers: Iterable[String], weights: Iterable[Int], zoom: Int, rasterExtent: RasterExtent)
-                     (reader: AccumuloLayerReader[SpatialKey, Tile, RasterMetaData]): RDD[(SpatialKey, Tile)] = {
+                     (reader: AccumuloLayerReader): RDD[(SpatialKey, Tile)] = {
 
     val layerIds = layers.map(LayerId(_, zoom))
     val maskId = LayerId("mask", zoom)
     val bounds = rasterExtent.gridBoundsFor(rasterExtent.extent)
 
-    val mask = reader.query(maskId).where(Intersects(bounds)).toRDD
+    val mask = reader.query[SpatialKey, Tile, TileLayerMetadata[SpatialKey]](maskId).where(Intersects(bounds)).result
     val weighted =
       layerIds.zip(weights)
       .map { case (layer, weight) =>
-        reader.read(layer, new RDDQuery[SpatialKey, RasterMetaData].where(Intersects(bounds))) * weight
+        reader.read[SpatialKey, Tile, TileLayerMetadata[SpatialKey]](layer, new LayerQuery[SpatialKey, TileLayerMetadata[SpatialKey]].where(Intersects(bounds))) * weight
       }
       .toSeq
       .localAdd
@@ -51,13 +53,13 @@ object ModelSpark {
   }
 
   def summary(layers: Iterable[String], weights: Iterable[Int], zoom: Int, polygon: Polygon)
-             (reader: AccumuloLayerReader[SpatialKey, Tile, RasterMetaData]): SummaryResult = {
+             (reader: AccumuloLayerReader): SummaryResult = {
 
     val layerIds = layers.map(LayerId(_, zoom))
     val layerRatios =
       layerIds.zip(weights)
       .map { case (layer, weight) =>
-        val raster = reader.read(layer)
+        val raster = reader.read[SpatialKey, Tile, TileLayerMetadata[SpatialKey]](layer)
         val masked = raster.mask(polygon)
         val ratio = LayerRatio.rasterResult(masked)
 
