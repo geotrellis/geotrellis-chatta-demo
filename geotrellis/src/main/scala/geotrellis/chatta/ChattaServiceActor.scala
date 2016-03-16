@@ -1,5 +1,6 @@
 package geotrellis.chatta
 
+import geotrellis.kryo.AvroRegistrator
 import geotrellis.proj4.{LatLng, WebMercator}
 import geotrellis.raster._
 import geotrellis.raster.mapalgebra.local._
@@ -23,15 +24,15 @@ import spray.json._
 import spray.routing._
 
 class ChattaServiceActor(override val staticPath: String, config: Config) extends Actor with ChattaService {
-  implicit val sparkContext =
-    new SparkContext(
-      new SparkConf()
-        .setMaster(config.getString("spark.master"))
-        .setAppName("ChattaDemo")
-        .set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
-        .set("spark.kryo.registrator", "geotrellis.spark.io.kryo.KryoRegistrator")
-        .setJars(SparkContext.jarOfObject(this).toList)
-    )
+  val conf = AvroRegistrator(new SparkConf()
+    .setMaster(config.getString("spark.master"))
+    .setAppName("ChattaDemo")
+    .set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
+    .set("spark.kryo.registrator", "geotrellis.spark.io.kryo.KryoRegistrator")
+    .setJars(SparkContext.jarOfObject(this).toList)
+  )
+
+  implicit val sparkContext = new SparkContext(conf)
 
   override def actorRefFactory = context
   override def receive = runRoute(serviceRoute)
