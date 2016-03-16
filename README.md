@@ -29,9 +29,9 @@ To compile and run this demo, we prepared a development environment.
   ```
   
   To check that cluster is operating normally check pages availability: 
-  * Hadoop http://localhost:50070/
-  * Accumulo http://localhost:50095/
-  * Spark http://localhost:8080/
+  * Hadoop [http://localhost:50070/](http://localhost:50070/)
+  * Accumulo [http://localhost:50095/](http://localhost:50095/)
+  * Spark [http://localhost:8080/](http://localhost:8080/)
   
   To check containers status is possible using following command:
 
