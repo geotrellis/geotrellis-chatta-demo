@@ -22,7 +22,7 @@ import geotrellis.raster.render._
   * to be used for coloring rendered rasters.
   */
 object ColorRampMap {
-  val rampMap =
+  val rampMap: Map[String, ColorRamp] =
     Map(
       "blue-to-orange" -> ColorRamps.BlueToOrange,
       "green-to-orange" -> ColorRamps.LightYellowToOrange,
@@ -38,10 +38,8 @@ object ColorRampMap {
       "muted-terrain-qualitative" -> ColorRamps.ClassificationMutedTerrain
     )
 
-  def get(s: String): Option[Array[RGBA]] = rampMap.get(s)
-
-  def getOrElse(s: String, arr: Array[RGBA]): Array[RGBA] =
-    get(s).getOrElse(arr)
+  def get(s:String): Option[ColorRamp] = rampMap.get(s)
+  def getOrElse(s:String, cr:ColorRamp): ColorRamp = rampMap.getOrElse(s,cr)
 
   def getJson = {
     val c = for(key <- rampMap.keys) yield {

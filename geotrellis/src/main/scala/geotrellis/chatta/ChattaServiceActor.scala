@@ -204,8 +204,7 @@ trait ChattaService extends HttpService with LazyLogging {
           tile.mask(extent, poly.geom)
         }
 
-      val classifier =
-        BlendingColorClassifier(breaks, ColorRampMap.getOrElse(colorRamp, ColorRamps.BlueToRed)).normalize
+      val ramp =  ColorRampMap.getOrElse(colorRamp, ColorRamps.BlueToRed)
 
       respondWithMediaType(MediaTypes.`image/png`) {
         val result =
@@ -213,7 +212,7 @@ trait ChattaService extends HttpService with LazyLogging {
             "tms",
             "ChattaServiceActor(211)::result start",
             "ChattaServiceActor(211)::result end") {
-            maskedTile.renderPng(classifier).bytes
+            maskedTile.renderPng(ramp).bytes
           }
 
         printBuffer("tms")
