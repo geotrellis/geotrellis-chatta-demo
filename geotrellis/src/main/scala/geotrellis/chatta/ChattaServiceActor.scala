@@ -204,7 +204,7 @@ trait ChattaService extends HttpService with LazyLogging {
           tile.mask(extent, poly.geom)
         }
 
-      val ramp =  ColorRampMap.getOrElse(colorRamp, ColorRamps.BlueToRed)
+      val ramp = ColorRampMap.getOrElse(colorRamp, ColorRamps.BlueToRed).toColorMap(breaks)
 
       respondWithMediaType(MediaTypes.`image/png`) {
         val result =
