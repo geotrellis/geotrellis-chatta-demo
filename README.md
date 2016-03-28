@@ -11,10 +11,10 @@ Each tile is ingests into it's own layer and the result map consists of layers c
 
 ### API routes:
 
-* `gt/colors`             - [Color Ramps](./#color-ramps)
-* `gt/breaks`             - [Color Breaks](./#color-breaks)
-* `gt/tms/{zoom}/{x}/{y}` - [Weighted Overlay](./#weighted-overlay)
-* `gt/sum`                - [Zonal Summary](./#zonal-summary)
+* `gt/colors`             - [Color Ramps](#color-ramps)
+* `gt/breaks`             - [Color Breaks](#color-breaks)
+* `gt/tms/{zoom}/{x}/{y}` - [Weighted Overlay](#weighted-overlay)
+* `gt/sum`                - [Zonal Summary](#zonal-summary)
 
 ### Color Ramps
 
@@ -41,7 +41,6 @@ Calculates breaks for combined layers by weights with specified breaks amount.
 
 ### Weighted Overlay:
 
-``
 *Get Parameters:* `layers`, `weights`, `breaks`, `bbox`, `colors: [default: 4]`, `colorRamp: [default: "blue-to-red"]`, `mask`.
 
 It is a TMS layer service that gets `{zoom}/{x}/{y}`, passed a series of layer names and weights, and returns PNG tms tiles of the weighted overlay. 
@@ -50,7 +49,9 @@ If the `mask` option is set to a polygon, `{zoom}/{x}/{y}` tiles masked by polyg
 
 ### Zonal Summary:
 
-This service at 'gt/sum' takes the same layers and weights, but also a polygon. 
+*Get Parameters:* `polygon`, `layers`, `weights`.
+
+This service takes layers, weights and a polygon. 
 It will compute a weighted summary of the area under the polygon.
 
 ## Runing demo using [GeoDocker cluster](https://github.com/geotrellis/geodocker-cluster)
