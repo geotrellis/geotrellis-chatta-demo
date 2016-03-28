@@ -98,7 +98,7 @@ trait ChattaService extends HttpService with LazyLogging {
           "ChattaServiceActor(91)::breaksSeq end") {
           layers.zip(weights)
             .map { case (layer, weight) =>
-              reader.read[SpatialKey, Tile, TileLayerMetadata[SpatialKey]](layerId(layer)).convert(IntCellType) * weight
+              reader.read[SpatialKey, Tile, TileLayerMetadata[SpatialKey]](layerId(layer)).convert(ShortConstantNoDataCellType) * weight
             }.toSeq
         }
 
@@ -147,7 +147,7 @@ trait ChattaService extends HttpService with LazyLogging {
           "tms",
           "ChattaServiceActor(142)::maskTile start",
           "ChattaServiceActor(142)::maskTile end") {
-          tileReader.read(LayerId("mask", zoom)).read(key).convert(IntCellType).mutable
+          tileReader.read(LayerId("mask", zoom)).read(key).convert(ShortConstantNoDataCellType).mutable
         }
 
       val (extSeq, tileSeq) =
@@ -158,7 +158,7 @@ trait ChattaService extends HttpService with LazyLogging {
           layers.zip(weights)
             .map { case (l, weight) =>
               getMetaData(LayerId(l, zoom)).mapTransform(key) ->
-                tileReader.read(LayerId(l, zoom)).read(key).convert(IntCellType) * weight
+                tileReader.read(LayerId(l, zoom)).read(key).convert(ShortConstantNoDataCellType) * weight
             }.toSeq.unzip
         }
 

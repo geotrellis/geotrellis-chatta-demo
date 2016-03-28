@@ -9,7 +9,7 @@ import spray.can.Http
 object Main {
 
   val weights = Map(
-    "ImperviousSurfaces_Barren Lands_Open Water" -> 1,
+    "ImperviousSurfacesBarrenLandsOpenWater" -> 1,
     "DevelopedLand" -> 2,
     "Wetlands" -> 3,
     "ForestedLands" -> 4,
