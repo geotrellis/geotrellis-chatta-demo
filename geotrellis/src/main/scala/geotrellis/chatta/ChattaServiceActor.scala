@@ -51,7 +51,7 @@ trait ChattaService extends HttpService with LazyLogging {
   implicit val executionContext = actorRefFactory.dispatcher
   val accumulo: AccumuloInstance
   lazy val reader = AccumuloLayerReader(accumulo)
-  lazy val tileReader = AccumuloTileReader[SpatialKey, Tile](accumulo)
+  lazy val tileReader = AccumuloValueReader(accumulo)
   lazy val attributeStore = AccumuloAttributeStore(accumulo.connector)
 
   val staticPath: String
@@ -147,7 +147,7 @@ trait ChattaService extends HttpService with LazyLogging {
           "tms",
           "ChattaServiceActor(142)::maskTile start",
           "ChattaServiceActor(142)::maskTile end") {
-          tileReader.read(LayerId("mask", zoom)).read(key).convert(ShortConstantNoDataCellType).mutable
+          tileReader.reader[SpatialKey, Tile](LayerId("mask", zoom)).read(key).convert(ShortConstantNoDataCellType).mutable
         }
 
       val (extSeq, tileSeq) =
@@ -158,7 +158,7 @@ trait ChattaService extends HttpService with LazyLogging {
           layers.zip(weights)
             .map { case (l, weight) =>
               getMetaData(LayerId(l, zoom)).mapTransform(key) ->
-                tileReader.read(LayerId(l, zoom)).read(key).convert(ShortConstantNoDataCellType) * weight
+                tileReader.reader[SpatialKey, Tile](LayerId(l, zoom)).read(key).convert(ShortConstantNoDataCellType) * weight
             }.toSeq.unzip
         }
 

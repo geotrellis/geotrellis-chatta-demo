@@ -21,7 +21,7 @@ pomIncludeRepository := { _ => false }
 
 resolvers += Resolver.bintrayRepo("azavea", "geotrellis")
 
-val gtVersion = "0.10.0-RC3"
+val gtVersion = "0.10.0-RC4"
 
 val geotrellis = Seq(
   "com.azavea.geotrellis" %% "geotrellis-accumulo"  % gtVersion,
