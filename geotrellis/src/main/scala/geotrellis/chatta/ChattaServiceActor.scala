@@ -115,7 +115,7 @@ trait ChattaService extends HttpService with LazyLogging {
           "breaks",
           "ChattaServiceActor(110)::breaksArray start",
           "ChattaServiceActor(110)::breaksArray end") {
-          breaksAdd.classBreaks(numBreaks)
+          breaksAdd.histogramExactInt.quantileBreaks(numBreaks)
         }
 
       printBuffer("breaks")
