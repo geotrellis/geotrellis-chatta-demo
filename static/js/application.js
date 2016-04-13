@@ -59,7 +59,7 @@ var weightedOverlay = (function() {
         return _.map(notZeros, function(l) { return l.weight; }).join(",");
     };
 
-    update = function() {
+    update = function() {        
         if(getLayers().length == 0) { 
             if (WOLayer) {
                 map.lc.removeLayer(WOLayer);
@@ -92,8 +92,9 @@ var weightedOverlay = (function() {
                     geoJson = GJ.fromPolygon(polygon);
                 }
 
-                WOLayer = new L.TileLayer.WMS(server + "gt/wo", {
-                    layers: 'default',
+				WOLayer = new L.tileLayer(server + 
+                    'gt/tms/{z}/{x}/{y}?layers={layers}' +
+                     '&weights={weights}&breaks={breaks}&colorRamp={colorRamp}&mask={mask}', {
                     format: 'image/png',
                     breaks: breaks,
                     transparent: true,
@@ -102,12 +103,11 @@ var weightedOverlay = (function() {
                     colorRamp: colorRamp,
                     mask: encodeURIComponent(geoJson),
                     attribution: 'Azavea'
-                })
-
+                });
+                				
                 WOLayer.setOpacity(opacity);
                 WOLayer.addTo(map);
                 map.lc.addOverlay(WOLayer, "Weighted Overlay");
-
             }
         });
     };

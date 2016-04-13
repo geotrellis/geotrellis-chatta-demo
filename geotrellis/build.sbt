@@ -1,32 +1,52 @@
-import AssemblyKeys._
+import scala.util.Properties
 
-name := "GeoTrellis Tutorial Project"
+name := "GeoTrellis-Tutorial-Project"
+scalaVersion := Properties.propOrElse("scala.version", "2.10.6")
+crossScalaVersions := Seq("2.11.8", "2.10.6")
+organization := "com.azavea"
+licenses := Seq("Apache-2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0.html"))
+scalacOptions ++= Seq(
+  "-deprecation",
+  "-unchecked",
+  "-Yinline-warnings",
+  "-language:implicitConversions",
+  "-language:reflectiveCalls",
+  "-language:higherKinds",
+  "-language:postfixOps",
+  "-language:existentials",
+  "-feature")
+publishMavenStyle := true
+publishArtifact in Test := false
+pomIncludeRepository := { _ => false }
 
-scalaVersion := "2.10.0"
+resolvers += Resolver.bintrayRepo("azavea", "geotrellis")
 
-resolvers += Resolver.sonatypeRepo("snapshots")
+val gtVersion = "0.10.0-RC4"
 
-resolvers +=       "Geotools" at "http://download.osgeo.org/webdav/geotools/"
-
-libraryDependencies ++= Seq(
-  "com.azavea.geotrellis" %% "geotrellis" % "0.9.2",
-  "com.azavea.geotrellis" %% "geotrellis-services" % "0.9.2",
-  "io.spray" % "spray-routing" % "1.2.2",
-  "io.spray" % "spray-can" % "1.2.2",
-  "org.geotools" % "gt-main" % "8.0-M4",
-  "org.geotools" % "gt-coveragetools" % "8.0-M4"
+val geotrellis = Seq(
+  "com.azavea.geotrellis" %% "geotrellis-accumulo"  % gtVersion,
+  "com.azavea.geotrellis" %% "geotrellis-s3"        % gtVersion,
+  "com.azavea.geotrellis" %% "geotrellis-spark"     % gtVersion,
+  "com.azavea.geotrellis" %% "geotrellis-spark-etl" % gtVersion
 )
 
-seq(Revolver.settings: _*)
+libraryDependencies ++= Seq(
+  "org.apache.spark"      %% "spark-core"           % "1.5.2",
+  "io.spray"              %% "spray-routing"        % "1.3.3",
+  "io.spray"              %% "spray-can"            % "1.3.3",
+  "org.apache.hadoop"      % "hadoop-client"        % "2.7.1"
+) ++ geotrellis
 
-assemblySettings
+ivyScala := ivyScala.value map { _.copy(overrideScalaVersion = true) }
 
-mergeStrategy in assembly <<= (mergeStrategy in assembly) {
-  (old) => {
-    case "reference.conf" => MergeStrategy.concat
-    case "application.conf" => MergeStrategy.concat
-    case "META-INF/MANIFEST.MF" => MergeStrategy.discard
-    case "META-INF\\MANIFEST.MF" => MergeStrategy.discard
-    case _ => MergeStrategy.first
-  }
+test in assembly := {}
+
+assemblyMergeStrategy in assembly := {
+  case "reference.conf" => MergeStrategy.concat
+  case "application.conf" => MergeStrategy.concat
+  case "META-INF/MANIFEST.MF" => MergeStrategy.discard
+  case "META-INF\\MANIFEST.MF" => MergeStrategy.discard
+  case "META-INF/ECLIPSEF.RSA" => MergeStrategy.discard
+  case "META-INF/ECLIPSEF.SF" => MergeStrategy.discard
+  case _ => MergeStrategy.first
 }

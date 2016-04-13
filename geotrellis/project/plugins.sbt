@@ -1,8 +1,3 @@
-resolvers += Classpaths.typesafeResolver
+addSbtPlugin("me.lessis" % "bintray-sbt" % "0.3.0")
 
-resolvers += Resolver.url("sbt-plugin-releases",
-  new URL("http://scalasbt.artifactoryonline.com/scalasbt/sbt-plugin-releases/"))(Resolver.ivyStylePatterns)
-
-addSbtPlugin("com.eed3si9n" % "sbt-assembly" % "0.11.2")
-
-addSbtPlugin("io.spray" % "sbt-revolver" % "0.7.1")
+addSbtPlugin("com.eed3si9n" % "sbt-assembly" % "0.14.1")

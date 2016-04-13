@@ -14,3 +14,5 @@ TAGS
 *.aux.xml
 *.jar
 *.iml
+*.sublime-workspace
+.DS_Store
