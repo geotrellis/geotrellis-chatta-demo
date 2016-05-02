@@ -30,11 +30,11 @@ CRS="EPSG:3857"
 
 LAYOUT_SCHEME="tms"
 
-# Accumulo conf
-INSTANCE="gis"
-USER="root"
-PASSWORD="secret"
-ZOOKEEPER="localhost"
+# Cassandra conf
+HOST="localhost"
+USER=""
+PASSWORD=""
+KEYSPACE="geotrellis"
 
 # Remove some bad signatures from the assembled JAR
 zip -d $JAR META-INF/ECLIPSEF.RSA > /dev/null
@@ -50,13 +50,13 @@ do
   echo "spark-submit \
   --class geotrellis.chatta.ChattaIngest --driver-memory=2G $JAR \
   --input hadoop --format geotiff --cache NONE -I path=$INPUT \
-  --output accumulo -O instance=$INSTANCE table=$TABLE user=$USER password=$PASSWORD zookeeper=$ZOOKEEPER \
+  --output cassandra -O host=$HOST table=$TABLE user=$USER password=$PASSWORD keyspace=$KEYSPACE \
   --layer $LAYERNAME --pyramid --crs $CRS --layoutScheme $LAYOUT_SCHEME"
 
   spark-submit \
   --class geotrellis.chatta.ChattaIngest --driver-memory=2G $JAR \
   --input hadoop --format geotiff --cache NONE -I path=$INPUT \
-  --output accumulo -O instance=$INSTANCE table=$TABLE user=$USER password=$PASSWORD zookeeper=$ZOOKEEPER \
+  --output cassandra -O host=$HOST table=$TABLE user=$USER password=$PASSWORD keyspace=$KEYSPACE \
   --layer $LAYERNAME --pyramid --crs $CRS --layoutScheme $LAYOUT_SCHEME
 
 done

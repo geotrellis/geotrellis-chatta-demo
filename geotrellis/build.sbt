@@ -21,21 +21,22 @@ pomIncludeRepository := { _ => false }
 
 resolvers += Resolver.bintrayRepo("azavea", "geotrellis")
 
-val gtVersion = "0.10.0-RC4"
+val gtVersion = "0.10.0-SNAPSHOT"
 
 val geotrellis = Seq(
   "com.azavea.geotrellis" %% "geotrellis-accumulo"  % gtVersion,
+  "com.azavea.geotrellis" %% "geotrellis-cassandra" % gtVersion,
   "com.azavea.geotrellis" %% "geotrellis-s3"        % gtVersion,
   "com.azavea.geotrellis" %% "geotrellis-spark"     % gtVersion,
   "com.azavea.geotrellis" %% "geotrellis-spark-etl" % gtVersion
 )
 
-libraryDependencies ++= Seq(
-  "org.apache.spark"      %% "spark-core"           % "1.5.2",
-  "io.spray"              %% "spray-routing"        % "1.3.3",
-  "io.spray"              %% "spray-can"            % "1.3.3",
-  "org.apache.hadoop"      % "hadoop-client"        % "2.7.1"
-) ++ geotrellis
+libraryDependencies ++= (((Seq(
+  "org.apache.spark"  %% "spark-core"    % "1.5.2",
+  "io.spray"          %% "spray-routing" % "1.3.3",
+  "io.spray"          %% "spray-can"     % "1.3.3",
+  "org.apache.hadoop"  % "hadoop-client" % "2.7.1"
+) ++ geotrellis) map (_ exclude("com.google.guava", "guava"))) ++ Seq("com.google.guava" % "guava" % "16.0.1"))
 
 ivyScala := ivyScala.value map { _.copy(overrideScalaVersion = true) }
 

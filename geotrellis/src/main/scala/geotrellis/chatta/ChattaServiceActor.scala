@@ -9,7 +9,7 @@ import geotrellis.services._
 import geotrellis.spark._
 import geotrellis.spark.io.AttributeStore.Fields
 import geotrellis.spark.io._
-import geotrellis.spark.io.accumulo._
+import geotrellis.spark.io.cassandra._
 import geotrellis.vector.io.json.Implicits._
 import geotrellis.vector.Polygon
 import geotrellis.vector.reproject._
@@ -22,6 +22,8 @@ import spray.http._
 import spray.httpx.SprayJsonSupport._
 import spray.json._
 import spray.routing._
+
+import scala.collection.JavaConversions._
 
 class ChattaServiceActor(override val staticPath: String, config: Config) extends Actor with ChattaService {
   val conf = AvroRegistrator(new SparkConf()
@@ -37,11 +39,13 @@ class ChattaServiceActor(override val staticPath: String, config: Config) extend
   override def actorRefFactory = context
   override def receive = runRoute(serviceRoute)
 
-  override val accumulo = AccumuloInstance(
-    config.getString("accumulo.instance"),
-    config.getString("zookeeper.address"),
-    config.getString("accumulo.user"),
-    new PasswordToken(config.getString("accumulo.password"))
+  override val instance = BaseCassandraInstance(
+    config.getStringList("cassandra.hosts").toList,
+    config.getString("cassandra.keyspace"),
+    config.getString("cassandra.user"),
+    config.getString("cassandra.password"),
+    config.getString("cassandra.replicationStrategy"),
+    config.getInt("cassandra.replicationFactor")
   )
 }
 
@@ -49,10 +53,10 @@ trait ChattaService extends HttpService with LazyLogging {
   implicit val sparkContext: SparkContext
 
   implicit val executionContext = actorRefFactory.dispatcher
-  val accumulo: AccumuloInstance
-  lazy val reader = AccumuloLayerReader(accumulo)
-  lazy val tileReader = AccumuloValueReader(accumulo)
-  lazy val attributeStore = AccumuloAttributeStore(accumulo.connector)
+  val instance: CassandraInstance
+  lazy val reader = CassandraLayerReader(instance)
+  lazy val tileReader = CassandraValueReader(instance)
+  lazy val attributeStore = CassandraAttributeStore(instance)
 
   val staticPath: String
   val baseZoomLevel = 9
