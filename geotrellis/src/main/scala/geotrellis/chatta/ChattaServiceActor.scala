@@ -15,7 +15,6 @@ import geotrellis.vector.Polygon
 import geotrellis.vector.reproject._
 
 import akka.actor._
-import org.apache.accumulo.core.client.security.tokens.PasswordToken
 import com.typesafe.config.Config
 import org.apache.spark.{SparkConf, SparkContext}
 import spray.http._
@@ -39,24 +38,15 @@ class ChattaServiceActor(override val staticPath: String, config: Config) extend
   override def actorRefFactory = context
   override def receive = runRoute(serviceRoute)
 
-  override val instance = BaseCassandraInstance(
-    config.getStringList("cassandra.hosts").toList,
-    config.getString("cassandra.keyspace"),
-    config.getString("cassandra.user"),
-    config.getString("cassandra.password"),
-    config.getString("cassandra.replicationStrategy"),
-    config.getInt("cassandra.replicationFactor")
-  )
+  lazy val (reader, tileReader, attributeStore) = initBackend(config)
 }
 
 trait ChattaService extends HttpService with LazyLogging {
   implicit val sparkContext: SparkContext
-
   implicit val executionContext = actorRefFactory.dispatcher
-  val instance: CassandraInstance
-  lazy val reader = CassandraLayerReader(instance)
-  lazy val tileReader = CassandraValueReader(instance)
-  lazy val attributeStore = CassandraAttributeStore(instance)
+  val reader: FilteringLayerReader[LayerId]
+  val tileReader: ValueReader[LayerId]
+  val attributeStore: AttributeStore
 
   val staticPath: String
   val baseZoomLevel = 9
