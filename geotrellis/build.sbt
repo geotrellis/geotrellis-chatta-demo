@@ -21,22 +21,25 @@ pomIncludeRepository := { _ => false }
 
 resolvers += Resolver.bintrayRepo("azavea", "geotrellis")
 
-val gtVersion = "0.10.0-SNAPSHOT"
+val gtVersion = "1.0.0-SNAPSHOT"
 
 val geotrellis = Seq(
   "com.azavea.geotrellis" %% "geotrellis-accumulo"  % gtVersion,
-  "com.azavea.geotrellis" %% "geotrellis-cassandra" % gtVersion,
+  "com.azavea.geotrellis" %% "geotrellis-cassandra" % gtVersion exclude("com.datastax.cassandra", "cassandra-driver-core"),
   "com.azavea.geotrellis" %% "geotrellis-s3"        % gtVersion,
   "com.azavea.geotrellis" %% "geotrellis-spark"     % gtVersion,
   "com.azavea.geotrellis" %% "geotrellis-spark-etl" % gtVersion
 )
 
-libraryDependencies ++= (((Seq(
+libraryDependencies ++= Seq(
   "org.apache.spark"  %% "spark-core"    % "1.5.2",
   "io.spray"          %% "spray-routing" % "1.3.3",
   "io.spray"          %% "spray-can"     % "1.3.3",
-  "org.apache.hadoop"  % "hadoop-client" % "2.7.1"
-) ++ geotrellis) map (_ exclude("com.google.guava", "guava"))) ++ Seq("com.google.guava" % "guava" % "16.0.1"))
+  "org.apache.hadoop"  % "hadoop-client" % "2.7.1",
+  "com.datastax.cassandra" % "cassandra-driver-core" % "2.1.10.2"
+    excludeAll (ExclusionRule("org.jboss.netty"), ExclusionRule("io.netty"), ExclusionRule("org.slf4j"), ExclusionRule("io.spray"), ExclusionRule("com.typesafe.akka"))
+    exclude("org.apache.hadoop", "hadoop-client")
+) ++ geotrellis
 
 ivyScala := ivyScala.value map { _.copy(overrideScalaVersion = true) }
 

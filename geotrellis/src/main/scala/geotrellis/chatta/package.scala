@@ -36,7 +36,6 @@ package object chatta {
       case "cassandra" => {
         val instance = BaseCassandraInstance(
           config.getStringList("cassandra.hosts").toList,
-          config.getString("cassandra.keyspace"),
           config.getString("cassandra.user"),
           config.getString("cassandra.password"),
           config.getString("cassandra.replicationStrategy"),
