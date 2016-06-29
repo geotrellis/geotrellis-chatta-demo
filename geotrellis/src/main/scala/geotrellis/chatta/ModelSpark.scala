@@ -3,7 +3,6 @@ package geotrellis.chatta
 import geotrellis.raster._
 import geotrellis.spark._
 import geotrellis.spark.io._
-import geotrellis.spark.io.accumulo._
 import geotrellis.spark.ingest._
 import geotrellis.vector._
 
@@ -34,7 +33,7 @@ object LayerRatio {
 object ModelSpark {
 
   def weightedOverlay(layers: Iterable[String], weights: Iterable[Int], zoom: Int, rasterExtent: RasterExtent)
-                     (reader: AccumuloLayerReader): RDD[(SpatialKey, Tile)] = {
+                     (reader: FilteringLayerReader[LayerId]): RDD[(SpatialKey, Tile)] = {
 
     val layerIds = layers.map(LayerId(_, zoom))
     val maskId = LayerId("mask", zoom)
@@ -53,7 +52,7 @@ object ModelSpark {
   }
 
   def summary(layers: Iterable[String], weights: Iterable[Int], zoom: Int, polygon: Polygon)
-             (reader: AccumuloLayerReader): SummaryResult = {
+             (reader: FilteringLayerReader[LayerId]): SummaryResult = {
 
     val layerIds = layers.map(LayerId(_, zoom))
     val layerRatios =
