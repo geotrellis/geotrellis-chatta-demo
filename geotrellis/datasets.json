@@ -1,0 +1,27 @@
+[
+  {
+    "name":"DevelopedLand",
+    "ingestType":{
+      "format":"geotiff",
+      "input":"hadoop",
+      "output":"accumulo",
+      "outputCredentials":"accumulo-gis"
+    },
+    "path":{
+      "input":"file:///Users/daunnc/subversions/git/github/pomadchin/geotrellis-chatta-demo/geotrellis/raster0.tif",
+      "output":"gittertest"
+    },
+    "cache":"NONE",
+    "ingestOptions":{
+      "reprojectMethod":"buffered",
+      "tileSize":256,
+      "pyramid":true,
+      "resampleMethod":"nearest-neighbor",
+      "keyIndexMethod":{
+        "type":"zorder"
+      },
+      "layoutScheme":"zoomed",
+      "crs":"EPSG:3857"
+    }
+  }
+]

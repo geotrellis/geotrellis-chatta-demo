@@ -60,3 +60,8 @@ do
   --layer $LAYERNAME --pyramid --crs $CRS --layoutScheme $LAYOUT_SCHEME
 
 done
+
+spark-submit \
+  --class geotrellis.chatta.ChattaIngest --driver-memory=2G target/scala-2.10/GeoTrellis-Tutorial-Project-assembly-0.1-SNAPSHOT.jar \
+  --credentials "file:///${PWD}/credentials.json" \
+  --datasets "file://${PWD}/datasets.json"
