@@ -25,6 +25,7 @@ val gtVersion = "1.0.0-SNAPSHOT"
 
 val geotrellis = Seq(
   "com.azavea.geotrellis" %% "geotrellis-accumulo"  % gtVersion,
+  "com.azavea.geotrellis" %% "geotrellis-hbase"     % gtVersion,
   "com.azavea.geotrellis" %% "geotrellis-cassandra" % gtVersion,
   "com.azavea.geotrellis" %% "geotrellis-s3"        % gtVersion,
   "com.azavea.geotrellis" %% "geotrellis-spark"     % gtVersion,

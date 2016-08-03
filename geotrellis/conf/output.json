@@ -1,0 +1,20 @@
+{
+  "backend": {
+    "type": "accumulo",
+    "path": "chattanooga",
+    "profile": "accumulo-local"
+  },
+  "reprojectMethod": "buffered",
+  "cellSize": {
+    "width": 256.0,
+    "height": 256.0
+  },
+  "tileSize": 256,
+  "pyramid": true,
+  "resampleMethod": "nearest-neighbor",
+  "keyIndexMethod": {
+    "type": "zorder"
+  },
+  "layoutScheme": "zoomed",
+  "crs": "EPSG:3857"
+}

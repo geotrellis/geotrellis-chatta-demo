@@ -4,6 +4,7 @@ import geotrellis.spark.LayerId
 import geotrellis.spark.io._
 import geotrellis.spark.io.s3._
 import geotrellis.spark.io.accumulo._
+import geotrellis.spark.io.hbase._
 import geotrellis.spark.io.cassandra._
 import geotrellis.spark.io.hadoop._
 import geotrellis.spark.io.file._
@@ -32,6 +33,14 @@ package object chatta {
         )
 
         (AccumuloLayerReader(instance), AccumuloValueReader(instance), AccumuloAttributeStore(instance))
+      }
+      case "hbase" => {
+        val instance = HBaseInstance(
+          config.getString("hbase.zookeepers").split(","),
+          config.getString("accumulo.master")
+        )
+
+        (HBaseLayerReader(instance), HBaseValueReader(instance), HBaseAttributeStore(instance))
       }
       case "cassandra" => {
         val instance = BaseCassandraInstance(

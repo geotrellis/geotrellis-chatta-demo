@@ -3,7 +3,6 @@ package geotrellis.chatta
 import geotrellis.raster._
 import geotrellis.spark._
 import geotrellis.spark.io._
-import geotrellis.spark.ingest._
 import geotrellis.vector._
 
 import org.apache.spark.rdd.RDD
