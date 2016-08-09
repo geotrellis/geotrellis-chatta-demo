@@ -56,16 +56,11 @@ It will compute a weighted summary of the area under the polygon.
 
 ## Runing demo using [GeoDocker cluster](https://github.com/geotrellis/geodocker-cluster)
 
-To compile and run this demo, we prepared a development environment. 
-
-* Clone GeoDocker cluster repository: 
-  ```bash
-    git clone https://github.com/geotrellis/geodocker-cluster ./
-  ```
+To compile and run this demo, we prepared an [environment](https://github.com/geotrellis/geodocker-cluster). To run cluster we have a bit modified `docker-compose-dev.yml` file:
 
 * To run cluster:
   ```bash
-    cd ./geodocker-cluster/nodes; ./start-cluster.sh -n=2 # n >= 1, nodes amount
+    cd ./geotrellis-chatta-demo/.docker; docker-compose-dev.yml up
   ```
   
   To check that cluster is operating normally check pages availability: 
@@ -78,14 +73,13 @@ To compile and run this demo, we prepared a development environment.
   ```bash
   docker ps -a | grep geodocker 
   ```
-  Runing containers have names `master1`, `slave1`, ..., `slaveN`, `N = n - 1`.
   
 * Install and run this demo on cluster
   ```bash
-    cd ./geodocker-cluster/install/geotrellis
+    cd .docker
     ./install.sh
-    ./ingest.sh # to ingest
-    ./run.sh    # to run server on a cluster
+    ./ingest.sh     # to ingest
+    ./run-server.sh # to run server on a cluster
   ```
 
-  This demo would be installed into `/data` directory, inside the container.
+  This demo would be installed into `/data` directory, inside the spark container.
