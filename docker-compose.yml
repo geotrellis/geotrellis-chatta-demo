@@ -1,0 +1,73 @@
+version: '2'
+services:
+    hdfs-name:
+        image: quay.io/geodocker/hdfs:latest
+        command: name
+        environment:
+          HADOOP_MASTER_ADDRESS: hdfs-name
+        ports:
+          - 50070:50070
+        # volumes:
+        #   - '/data/gt/hdfs:/data/hdfs'
+    hdfs-data:
+        image: quay.io/geodocker/hdfs:latest
+        command: data
+        environment:
+          HADOOP_MASTER_ADDRESS: hdfs-name
+        depends_on:
+          - hdfs-name
+        # volumes:
+        #  - '/data/gt/hdfs:/data/hdfs'
+    zookeeper:
+        image: quay.io/geodocker/zookeeper:latest
+        ports:
+          - 2181:2181
+        #  volumes:
+        #   - '/data/gt/hdfs:/data/hdfs'
+    accumulo-master:
+      image: quay.io/geodocker/accumulo:latest
+      command: master --auto-init
+      environment:
+        HADOOP_MASTER_ADDRESS: hdfs-name
+        ZOOKEEPERS: zookeeper
+        ACCUMULO_PASSWORD: GisPwd
+      depends_on:
+        - zookeeper
+    accumulo-monitor:
+        image: quay.io/geodocker/accumulo:latest
+        command: monitor
+        environment:
+          HADOOP_MASTER_ADDRESS: hdfs-name
+          ZOOKEEPERS: zookeeper
+        ports:
+          - 50095:50095
+        depends_on:
+          - zookeeper
+          - accumulo-master
+    accumulo-tserver:
+        image: quay.io/geodocker/accumulo:latest
+        command: tserver
+        environment:
+          HADOOP_MASTER_ADDRESS: hdfs-name
+          ZOOKEEPERS: zookeeper
+        depends_on:
+          - zookeeper
+          - accumulo-master
+    spark-master:
+        image: quay.io/geodocker/spark:latest
+        command: master
+        environment:
+          HADOOP_MASTER_ADDRESS: hdfs-name
+        ports:
+          - 4040:4040
+          - 8080:8080
+        depends_on:
+          - hdfs-data
+    spark-worker:
+        image: quay.io/geodocker/spark:latest
+        command: worker
+        environment:
+          HADOOP_MASTER_ADDRESS: hdfs-name
+          SPARK_MASTER: spark-master
+        depends_on:
+          - spark-master
