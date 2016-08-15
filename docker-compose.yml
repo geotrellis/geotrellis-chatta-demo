@@ -61,6 +61,7 @@ services:
         ports:
           - 4040:4040
           - 8080:8080
+          - 8777:8777
         depends_on:
           - hdfs-data
     spark-worker:
