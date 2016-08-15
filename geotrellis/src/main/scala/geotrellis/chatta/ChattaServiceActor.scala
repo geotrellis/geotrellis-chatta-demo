@@ -25,12 +25,11 @@ import spray.routing._
 import scala.collection.JavaConversions._
 
 class ChattaServiceActor(override val staticPath: String, config: Config) extends Actor with ChattaService {
-  val conf = AvroRegistrator(new SparkConf()
-    .setMaster(config.getString("spark.master"))
-    .setAppName("ChattaDemo")
-    .set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
-    .set("spark.kryo.registrator", "geotrellis.spark.io.kryo.KryoRegistrator")
-    .setJars(SparkContext.jarOfObject(this).toList)
+  val conf = AvroRegistrator(
+    new SparkConf()
+      .setAppName("ChattaDemo")
+      .set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
+      .set("spark.kryo.registrator", "geotrellis.spark.io.kryo.KryoRegistrator")
   )
 
   implicit val sparkContext = new SparkContext(conf)
