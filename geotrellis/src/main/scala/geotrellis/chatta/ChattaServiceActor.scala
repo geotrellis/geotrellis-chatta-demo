@@ -54,7 +54,7 @@ trait ChattaService extends HttpService with LazyLogging {
     LayerId(layer, baseZoomLevel)
 
   def getMetaData(id: LayerId): TileLayerMetadata[SpatialKey] =
-    attributeStore.read[TileLayerMetadata[SpatialKey]](id, Fields.metadata)
+    attributeStore.readMetadata[TileLayerMetadata[SpatialKey]](id)
 
   def serviceRoute = get {
     pathPrefix("gt") {
