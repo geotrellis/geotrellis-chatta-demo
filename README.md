@@ -2,7 +2,7 @@
 
 This is a demo of GeoTrellis functionality. Demo consists of two parts: tile ingest process and demo server to query ingested data.
 
-To run ingest, use `./ingest.sh`, to run server, use `./sbt run`. Web map would be available here `http://locahost:8777/`. 
+To run ingest, use `./ingest.sh`, to run server, use `./run-server.sh`. Web map would be available here `http://locahost:8777/`. 
 
 ## Short description
 
@@ -54,18 +54,13 @@ If the `mask` option is set to a polygon, `{zoom}/{x}/{y}` tiles masked by polyg
 This service takes layers, weights and a polygon. 
 It will compute a weighted summary of the area under the polygon.
 
-## Runing demo using [GeoDocker cluster](https://github.com/geotrellis/geodocker-cluster)
+## Runing demo using [GeoDocker cluster](https://github.com/geodocker/geodocker)
 
-To compile and run this demo, we prepared a development environment. 
-
-* Clone GeoDocker cluster repository: 
-  ```bash
-    git clone https://github.com/geotrellis/geodocker-cluster ./
-  ```
+To compile and run this demo, we prepared an [environment](https://github.com/geodocker/geodocker). To run cluster we have a bit modified [docker-compose.yml](docker-compose.yml) file:
 
 * To run cluster:
   ```bash
-    cd ./geodocker-cluster/nodes; ./start-cluster.sh -n=2 # n >= 1, nodes amount
+    docker-compose up
   ```
   
   To check that cluster is operating normally check pages availability: 
@@ -78,14 +73,59 @@ To compile and run this demo, we prepared a development environment.
   ```bash
   docker ps -a | grep geodocker 
   ```
-  Runing containers have names `master1`, `slave1`, ..., `slaveN`, `N = n - 1`.
-  
-* Install and run this demo on cluster
-  ```bash
-    cd ./geodocker-cluster/install/geotrellis
-    ./install.sh
-    ./ingest.sh # to ingest
-    ./run.sh    # to run server on a cluster
-  ```
 
-  This demo would be installed into `/data` directory, inside the container.
+ More information avaible in a [GeoDocker cluster](https://github.com/geodocker/geodocker) repo
+  
+* Install and run this demo using [GeoDocker cluster](https://github.com/geodocker/geodocker)
+
+  * Modify [application.conf](geotrellis/src/main/resource/application.conf) (working conf example for GeoDocker cluster):
+
+    ```conf
+      geotrellis {
+        port = 8777
+        server.static-path = "../static"
+        catalog  = "data/catalog.json"
+        hostname = "spark-master"
+        backend  = "accumulo"
+      }
+
+      accumulo {
+        instance   = "accumulo"
+        user       = "root"
+        password   = "GisPwd"
+        zookeepers = "zookeeper"
+      }
+    ```
+
+  * Modify [backend-profiles.json](geotrellis/conf/backend-profiles.json) (working conf example for GeoDocker cluster):
+
+    ```json
+      {
+        "name": "accumulo-local",
+        "type": "accumulo",
+        "zookeepers": "zookeeper",
+        "instance": "accumulo",
+        "user": "root",
+        "password": "GisPwd"
+      }
+    ```
+
+  * Copy everything into spark master container:
+
+    ```bash
+      cd ./geodocker
+      docker exec geotrellischattademo_spark-master_1 mkdir -p /data/target/scala-2.10/
+      docker cp target/scala-2.10/GeoTrellis-Tutorial-Project-assembly-0.1-SNAPSHOT.jar geotrellischattademo_spark-master_1:/data/target/scala-2.10/GeoTrellis-Tutorial-Project-assembly-0.1-SNAPSHOT.jar
+      docker cp data/arg_wm/ geotrellischattademo_spark-master_1:/data/
+      docker cp conf geotrellischattademo_spark-master_1:/data/
+      docker cp ingest.sh geotrellischattademo_spark-master_1:/data/
+      docker cp run-server.sh geotrellischattademo_spark-master_1:/data/
+    ```
+
+    ```bash
+      docker exec -it geotrellischattademo_spark-master_1 bash
+      cd /data/; ./ingest.sh # to ingest data into accumulo
+      cd /data/; ./run-server.sh # to run server
+    ```
+
+  This demo would be installed into `/data` directory, inside spark master container.

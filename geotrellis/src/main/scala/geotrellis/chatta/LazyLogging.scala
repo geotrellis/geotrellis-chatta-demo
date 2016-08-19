@@ -1,6 +1,7 @@
 package geotrellis.chatta
 
 import org.apache.log4j.{PatternLayout, WriterAppender, Logger}
+
 import scala.collection.mutable
 import java.io.StringWriter
 

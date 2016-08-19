@@ -1,0 +1,24 @@
+{
+  "backend-profiles": [
+    {
+      "name": "accumulo-local",
+      "type": "accumulo",
+      "zookeepers": "localhost",
+      "instance": "gis",
+      "user": "root",
+      "password": "secret"
+    },
+    {
+      "name": "cassandra-local",
+      "type": "cassandra",
+      "allowRemoteDCsForLocalConsistencyLevel": false,
+      "localDc": "datacenter1",
+      "usedHostsPerRemoteDc": 0,
+      "hosts": "localhost",
+      "replicationStrategy": "SimpleStrategy",
+      "replicationFactor": 1,
+      "user": "",
+      "password": ""
+    }
+  ]
+}
