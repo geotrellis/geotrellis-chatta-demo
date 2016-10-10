@@ -113,9 +113,11 @@ To compile and run this demo, we prepared an [environment](https://github.com/ge
   * Copy everything into spark master container:
 
     ```bash
-      cd ./geodocker
+      cd ./geotrellis
+      ./sbt assembly
       docker exec geotrellischattademo_spark-master_1 mkdir -p /data/target/scala-2.10/
-      docker cp target/scala-2.10/GeoTrellis-Tutorial-Project-assembly-0.1-SNAPSHOT.jar geotrellischattademo_spark-master_1:/data/target/scala-2.10/GeoTrellis-Tutorial-Project-assembly-0.1-SNAPSHOT.jar
+      docker cp target/scala-2.11/GeoTrellis-Tutorial-Project-assembly-0.1-SNAPSHOT.jar geotrellischattademo_spark-master_1:/data/target/scala-2.10/GeoTrellis-Tutorial-Project-assembly-0.1-SNAPSHOT.jar
+      docker cp  ../static geotrellischattademo_spark-master_1:/static
       docker cp data/arg_wm/ geotrellischattademo_spark-master_1:/data/
       docker cp conf geotrellischattademo_spark-master_1:/data/
       docker cp ingest.sh geotrellischattademo_spark-master_1:/data/
