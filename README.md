@@ -1,13 +1,15 @@
 # GeoTrellis Chattanooga model demo 
 
-This is a demo of GeoTrellis functionality. Demo consists of two parts: tile ingest process and demo server to query ingested data.
+This is a demo of GeoTrellis functionality.
+The demo consists of two parts: the tile ingest process and demo server to query ingested data.
 
 To run ingest, use `./ingest.sh`, to run server, use `./run-server.sh`. Web map would be available here `http://locahost:8777/`. 
 
 ## Short description
 
-Demo covers [Chattanooga](https://goo.gl/S2qPCO) with different `Byte` tiles. In fact it's a `Bit` type (each tile has values `{0, 1}`). 
-Each tile is ingests into it's own layer and the result map consists of layers combination with different weights (it is called weighted overlay).  
+The demo covers [Chattanooga](https://goo.gl/S2qPCO) with different `Byte` tiles.
+(In fact each tile is essentially of type `Bit` because they only contain the  values `{0, 1}`).
+Each tile is ingests into it's own layer, and the resulting map consists of layers which consist of combinations of differently-weighted source layers (a weighted overlay).  
 
 ### API routes:
 
@@ -43,9 +45,9 @@ Calculates breaks for combined layers by weights with specified breaks amount.
 
 *Get Parameters:* `layers`, `weights`, `breaks`, `bbox`, `colors: [default: 4]`, `colorRamp: [default: "blue-to-red"]`, `mask`.
 
-It is a TMS layer service that gets `{zoom}/{x}/{y}`, passed a series of layer names and weights, and returns PNG tms tiles of the weighted overlay. 
+It is a TMS layer service that gets `{zoom}/{x}/{y}`, passed a series of layer names and weights, and returns PNG TMS tiles of the weighted overlay. 
 It also takes the breaks that were computed using the `gt/breaks` service. 
-If the `mask` option is set to a polygon, `{zoom}/{x}/{y}` tiles masked by polygon would be returned.
+If the `mask` option is set to a polygon, `{zoom}/{x}/{y}` tiles masked by that polygon would be returned.
 
 ### Zonal Summary:
 
@@ -56,14 +58,15 @@ It will compute a weighted summary of the area under the polygon.
 
 ## Runing demo using [GeoDocker cluster](https://github.com/geodocker/geodocker)
 
-To compile and run this demo, we prepared an [environment](https://github.com/geodocker/geodocker). To run cluster we have a bit modified [docker-compose.yml](docker-compose.yml) file:
+To compile and run this demo, we prepared an [environment](https://github.com/geodocker/geodocker).
+To run cluster we have a slightly-modified [docker-compose.yml](docker-compose.yml) file:
 
 * To run cluster:
   ```bash
     docker-compose up
   ```
   
-  To check that cluster is operating normally check pages availability: 
+  To check that cluster is operating normally check the availability of these pages:
   * Hadoop [http://localhost:50070/](http://localhost:50070/)
   * Accumulo [http://localhost:50095/](http://localhost:50095/)
   * Spark [http://localhost:8080/](http://localhost:8080/)
