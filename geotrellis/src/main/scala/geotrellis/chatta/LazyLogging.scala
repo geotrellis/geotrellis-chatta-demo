@@ -3,7 +3,9 @@ package geotrellis.chatta
 import org.apache.log4j.{PatternLayout, WriterAppender, Logger}
 
 import scala.collection.mutable
+import scala.collection.JavaConversions._
 import java.io.StringWriter
+import java.util
 
 /**
   * LazyLogging dirty trait
@@ -12,7 +14,7 @@ trait LazyLogging { self =>
   @transient private lazy val logger: Logger = Logger.getLogger(self.getClass)
   val withTimings: Boolean
 
-  private val logBuffer = mutable.Map[String, mutable.ListBuffer[String]]()
+  private val logBuffer = new util.concurrent.ConcurrentHashMap[String, mutable.ListBuffer[String]]()
 
   def timedCreate[T](id: String, startMsg: String, endMsg: String)(f: => T): T = {
     if(withTimings) {
@@ -28,9 +30,8 @@ trait LazyLogging { self =>
       logger.info(s"\t$endMsg (in $t ms)")
       writer.flush()
       logger.removeAppender(appender)
-      logBuffer.get(id).fold(
-        logBuffer.update(id, mutable.ListBuffer(writer.toString))
-      )(_ += writer.toString)
+      Option(logBuffer.get(id))
+        .fold(logBuffer.put(id, mutable.ListBuffer(writer.toString)))(_ += writer.toString)
 
       result
     } else f

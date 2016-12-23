@@ -16,28 +16,19 @@ publishMavenStyle := true
 publishArtifact in Test := false
 pomIncludeRepository := { _ => false }
 
-val gtVersion   = "1.0.0-SNAPSHOT"
+val gtVersion        = "1.0.0-SNAPSHOT"
+val akkaActorVersion = "2.4.16"
+val akkaHttpVersion  = "2.4.11"
 
-val geotrellis = Seq(
-  "org.locationtech.geotrellis" %% "geotrellis-accumulo"  % gtVersion,
-  "org.locationtech.geotrellis" %% "geotrellis-hbase"     % gtVersion,
-  "org.locationtech.geotrellis" %% "geotrellis-cassandra" % gtVersion,
-  "org.locationtech.geotrellis" %% "geotrellis-s3"        % gtVersion,
-  "org.locationtech.geotrellis" %% "geotrellis-spark"     % gtVersion,
-  "org.locationtech.geotrellis" %% "geotrellis-spark-etl" % gtVersion
-)
-
-val akka = Seq(
-  "com.typesafe.akka" %% "akka-actor" % "2.4.14",
-  "com.typesafe.akka" %% "akka-http-core" % "2.4.11",
-  "com.typesafe.akka" %% "akka-http-experimental" % "2.4.11",
-  "com.typesafe.akka" %% "akka-http-spray-json-experimental" % "2.4.11"
-)
-
-libraryDependencies ++= (((Seq(
+libraryDependencies ++= ((Seq(
+  "org.locationtech.geotrellis" %% "geotrellis-spark-etl" % gtVersion,
+  "com.typesafe.akka" %% "akka-actor" % akkaActorVersion,
+  "com.typesafe.akka" %% "akka-http-core" % akkaHttpVersion,
+  "com.typesafe.akka" %% "akka-http-experimental" % akkaHttpVersion,
+  "com.typesafe.akka" %% "akka-http-spray-json-experimental" % akkaHttpVersion,
   "org.apache.spark"  %% "spark-core"    % "2.0.2",
   "org.apache.hadoop"  % "hadoop-client" % "2.7.3"
-) ++ geotrellis ++ akka) map (_ exclude("com.google.guava", "guava"))) ++ Seq("com.google.guava" % "guava" % "16.0.1"))
+) map (_ exclude("com.google.guava", "guava"))) ++ Seq("com.google.guava" % "guava" % "16.0.1"))
 
 ivyScala := ivyScala.value map { _.copy(overrideScalaVersion = true) }
 
