@@ -1,4 +1,4 @@
-name := "GeoTrellis-Tutorial-Project"
+name := "geotrellis-chatta-demo"
 scalaVersion := "2.11.8"
 organization := "com.azavea"
 licenses := Seq("Apache-2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0.html"))
@@ -16,7 +16,7 @@ publishMavenStyle := true
 publishArtifact in Test := false
 pomIncludeRepository := { _ => false }
 
-val gtVersion = "1.0.0"
+val gtVersion   = "1.0.0"
 
 val geotrellis = Seq(
   "org.locationtech.geotrellis" %% "geotrellis-accumulo"  % gtVersion,
@@ -27,13 +27,17 @@ val geotrellis = Seq(
   "org.locationtech.geotrellis" %% "geotrellis-spark-etl" % gtVersion
 )
 
+val akka = Seq(
+  "com.typesafe.akka" %% "akka-actor" % "2.4.14",
+  "com.typesafe.akka" %% "akka-http-core" % "2.4.11",
+  "com.typesafe.akka" %% "akka-http-experimental" % "2.4.11",
+  "com.typesafe.akka" %% "akka-http-spray-json-experimental" % "2.4.11"
+)
+
 libraryDependencies ++= (((Seq(
   "org.apache.spark"  %% "spark-core"    % "2.0.2",
-  "io.spray"          %% "spray-routing" % "1.3.3",
-  "io.spray"          %% "spray-can"     % "1.3.3",
-  "com.typesafe.akka" %% "akka-actor"    % "2.3.15",
   "org.apache.hadoop"  % "hadoop-client" % "2.7.3"
-) ++ geotrellis) map (_ exclude("com.google.guava", "guava"))) ++ Seq("com.google.guava" % "guava" % "16.0.1"))
+) ++ geotrellis ++ akka) map (_ exclude("com.google.guava", "guava"))) ++ Seq("com.google.guava" % "guava" % "16.0.1"))
 
 ivyScala := ivyScala.value map { _.copy(overrideScalaVersion = true) }
 

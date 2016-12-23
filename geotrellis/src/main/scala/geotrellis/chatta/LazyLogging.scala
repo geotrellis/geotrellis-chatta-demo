@@ -9,9 +9,9 @@ import java.io.StringWriter
   * LazyLogging dirty trait
   */
 trait LazyLogging { self =>
-  @transient lazy val logger: Logger = Logger.getLogger(self.getClass)
+  @transient private lazy val logger: Logger = Logger.getLogger(self.getClass)
 
-  val logBuffer = mutable.Map[String, mutable.ListBuffer[String]]()
+  private val logBuffer = mutable.Map[String, mutable.ListBuffer[String]]()
 
   def timedCreate[T](id: String, startMsg: String, endMsg: String)(f: => T): T = {
     val writer = new StringWriter()
