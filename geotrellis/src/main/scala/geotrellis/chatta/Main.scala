@@ -41,6 +41,7 @@ object Main extends ChattaServiceRouter {
   val staticPath = config.getString("geotrellis.server.static-path")
   val port = config.getInt("geotrellis.port")
   val host = config.getString("geotrellis.hostname")
+  val withTimings = config.getBoolean("geotrellis.with-timings")
 
   /*val conf = AvroRegistrator(
     new SparkConf()

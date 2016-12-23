@@ -10,38 +10,42 @@ import java.io.StringWriter
   */
 trait LazyLogging { self =>
   @transient private lazy val logger: Logger = Logger.getLogger(self.getClass)
+  val withTimings: Boolean
 
   private val logBuffer = mutable.Map[String, mutable.ListBuffer[String]]()
 
   def timedCreate[T](id: String, startMsg: String, endMsg: String)(f: => T): T = {
-    val writer = new StringWriter()
-    val appender = new WriterAppender(new PatternLayout(), writer)
+    if(withTimings) {
+      val writer = new StringWriter()
+      val appender = new WriterAppender(new PatternLayout(), writer)
 
-    logger.info(startMsg)
-    logger.addAppender(appender)
-    val s = System.currentTimeMillis
-    val result = f
-    val e = System.currentTimeMillis
-    val t = "%,d".format(e - s)
-    logger.info(s"\t$endMsg (in $t ms)")
-    writer.flush()
-    logger.removeAppender(appender)
-    logBuffer.get(id).fold(
-      logBuffer.update(id, mutable.ListBuffer(writer.toString))
-    )(_ += writer.toString)
+      logger.info(startMsg)
+      logger.addAppender(appender)
+      val s = System.currentTimeMillis
+      val result = f
+      val e = System.currentTimeMillis
+      val t = "%,d".format(e - s)
+      logger.info(s"\t$endMsg (in $t ms)")
+      writer.flush()
+      logger.removeAppender(appender)
+      logBuffer.get(id).fold(
+        logBuffer.update(id, mutable.ListBuffer(writer.toString))
+      )(_ += writer.toString)
 
-    result
+      result
+    } else f
   }
 
-  def printBuffer(id: String) = {
-    println
-    println("=================================")
-    println(s"$id summary:")
-    println("=================================")
-    println
-    logBuffer(id) foreach println
-    println("=================================")
-    println
-    logBuffer(id) clear()
-  }
+  def printBuffer(id: String) =
+    if(withTimings) {
+      println
+      println("=================================")
+      println(s"$id summary:")
+      println("=================================")
+      println
+      logBuffer(id) foreach println
+      println("=================================")
+      println
+      logBuffer(id) clear()
+    }
 }

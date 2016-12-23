@@ -10,7 +10,7 @@ import geotrellis.vector.io.json.Implicits._
 import geotrellis.vector.Polygon
 import geotrellis.vector.reproject._
 
-import org.apache.spark.{SparkConf, SparkContext}
+// import org.apache.spark.{SparkConf, SparkContext}
 import akka.http.scaladsl.server.Directives
 import akka.http.scaladsl.model.{ContentType, HttpEntity, HttpResponse, MediaTypes}
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
@@ -68,8 +68,8 @@ trait ChattaServiceRouter extends Directives with AkkaSystem.LoggerExecutor with
           val breaksSeq =
             timedCreate(
               "breaks",
-              "ChattaServiceActor(91)::breaksSeq start",
-              "ChattaServiceActor(91)::breaksSeq end") {
+              "ChattaServiceRouter(71)::breaksSeq start",
+              "ChattaServiceRouter(71)::breaksSeq end") {
               layers.zip(weights)
                 .map { case (layer, weight) =>
                   reader.read[SpatialKey, Tile, TileLayerMetadata[SpatialKey]](layerId(layer)).convert(ShortConstantNoDataCellType) * weight
@@ -79,16 +79,16 @@ trait ChattaServiceRouter extends Directives with AkkaSystem.LoggerExecutor with
           val breaksAdd =
             timedCreate(
               "breaks",
-              "ChattaServiceActor(102)::breaksAdd start",
-              "ChattaServiceActor(102)::breaksAdd end") {
+              "ChattaServiceRouter(82)::breaksAdd start",
+              "ChattaServiceRouter(82)::breaksAdd end") {
               breaksSeq.localAdd
             }
 
           val breaksArray =
             timedCreate(
               "breaks",
-              "ChattaServiceActor(110)::breaksArray start",
-              "ChattaServiceActor(110)::breaksArray end") {
+              "ChattaServiceRouter(90)::breaksArray start",
+              "ChattaServiceRouter(90)::breaksArray end") {
               breaksAdd.histogramExactInt.quantileBreaks(numBreaks)
             }
 
@@ -121,16 +121,16 @@ trait ChattaServiceRouter extends Directives with AkkaSystem.LoggerExecutor with
           val maskTile =
             timedCreate(
               "tms",
-              "ChattaServiceActor(142)::maskTile start",
-              "ChattaServiceActor(142)::maskTile end") {
+              "ChattaServiceRouter(124)::maskTile start",
+              "ChattaServiceRouter(124)::maskTile end") {
               tileReader.reader[SpatialKey, Tile](LayerId("mask", zoom)).read(key).convert(ShortConstantNoDataCellType).mutable
             }
 
           val (extSeq, tileSeq) =
             timedCreate(
               "tms",
-              "ChattaServiceActor(150)::(extSeq, tileSeq) start",
-              "ChattaServiceActor(150)::(extSeq, tileSeq) end") {
+              "ChattaServiceRouter(132)::(extSeq, tileSeq) start",
+              "ChattaServiceRouter(132)::(extSeq, tileSeq) end") {
               layers.zip(weights)
                 .map { case (l, weight) =>
                   getMetaData(LayerId(l, zoom)).mapTransform(key) ->
@@ -141,31 +141,31 @@ trait ChattaServiceRouter extends Directives with AkkaSystem.LoggerExecutor with
           val extent =
             timedCreate(
               "tms",
-              "ChattaServiceActor(162)::extent start",
-              "ChattaServiceActor(162)::extent end") {
+              "ChattaServiceRouter(144)::extent start",
+              "ChattaServiceRouter(145)::extent end") {
               extSeq.reduce(_ combine _)
             }
 
           val tileAdd =
             timedCreate(
               "tms",
-              "ChattaServiceActor(170)::tileAdd start",
-              "ChattaServiceActor(170)::tileAdd end") {
+              "ChattaServiceRouter(152)::tileAdd start",
+              "ChattaServiceRouter(152)::tileAdd end") {
               tileSeq.localAdd
             }
 
           val tileMap =
             timedCreate(
               "tms",
-              "ChattaServiceActor(178)::tileMap start",
-              "ChattaServiceActor(178)::tileMap end") {
+              "ChattaServiceRouter(160)::tileMap start",
+              "ChattaServiceRouter(160)::tileMap end") {
               tileAdd.map(i => if (i == 0) NODATA else i)
             }
 
           val tile = timedCreate(
             "tms",
-            "ChattaServiceActor(186)::tile start",
-            "ChattaServiceActor(186)::tile end") {
+            "ChattaServiceRouter(167)::tile start",
+            "ChattaServiceRouter(167)::tile end") {
             tileMap.localMask(maskTile, NODATA, NODATA)
           }
 
@@ -185,8 +185,8 @@ trait ChattaServiceRouter extends Directives with AkkaSystem.LoggerExecutor with
           val bytes =
             timedCreate(
               "tms",
-              "ChattaServiceActor(211)::result start",
-              "ChattaServiceActor(211)::result end") {
+              "ChattaServiceRouter(188)::result start",
+              "ChattaServiceRouter(188)::result end") {
               maskedTile.renderPng(ramp).bytes
             }
 
@@ -218,8 +218,8 @@ trait ChattaServiceRouter extends Directives with AkkaSystem.LoggerExecutor with
           val summary =
             timedCreate(
               "sum",
-              "ChattaServiceActor(241)::summary start",
-              "ChattaServiceActor(241)::summary end") {
+              "ChattaServiceRouter(221)::summary start",
+              "ChattaServiceRouter(221)::summary end") {
               Model.summary(layers, weights, baseZoomLevel, poly)(reader)
             }
           val elapsedTotal = System.currentTimeMillis - start

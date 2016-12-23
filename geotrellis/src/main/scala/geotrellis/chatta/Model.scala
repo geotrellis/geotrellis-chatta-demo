@@ -5,17 +5,14 @@ import geotrellis.spark._
 import geotrellis.spark.io._
 import geotrellis.vector._
 
-import org.apache.spark.rdd.RDD
-
 object CollectionLayerRatio {
   def rasterResult(r: TileLayerCollection[SpatialKey]): LayerRatio = {
     val mapTransform = r.metadata.mapTransform
-    val reduceFunction: ((Long, Int), (Long, Int)) => (Long, Int) = (t1: (Long, Int), t2: (Long, Int)) => (t1._1 + t2._1, t1._2 + t2._2)
     val (sum, count) =
       r map { case (k, tile) =>
         val extent = mapTransform(k)
         (tile.polygonalSum(extent, extent.toPolygon()), tile.size)
-      } reduce reduceFunction
+      } reduce[(Long, Int)] { case (t1, t2) => (t1._1 + t2._1, t1._2 + t2._2) }
 
     LayerRatio(sum, count)
   }
