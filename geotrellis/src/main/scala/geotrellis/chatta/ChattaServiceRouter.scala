@@ -20,18 +20,17 @@ import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
 trait ChattaServiceRouter extends Directives with AkkaSystem.LoggerExecutor with LazyLogging {
-  val conf: SparkConf
-  implicit val sc: SparkContext
+  // val conf: SparkConf
+  // implicit val sc: SparkContext
 
-  val reader: FilteringLayerReader[LayerId]
+  val reader: CollectionLayerReader[LayerId]
   val tileReader: ValueReader[LayerId]
   val attributeStore: AttributeStore
 
   val staticPath: String
   val baseZoomLevel = 9
 
-  def layerId(layer: String): LayerId =
-    LayerId(layer, baseZoomLevel)
+  def layerId(layer: String): LayerId = LayerId(layer, baseZoomLevel)
 
   def getMetaData(id: LayerId): TileLayerMetadata[SpatialKey] =
     attributeStore.readMetadata[TileLayerMetadata[SpatialKey]](id)
@@ -221,7 +220,7 @@ trait ChattaServiceRouter extends Directives with AkkaSystem.LoggerExecutor with
               "sum",
               "ChattaServiceActor(241)::summary start",
               "ChattaServiceActor(241)::summary end") {
-              ModelSpark.summary(layers, weights, baseZoomLevel, poly)(reader)
+              Model.summary(layers, weights, baseZoomLevel, poly)(reader)
             }
           val elapsedTotal = System.currentTimeMillis - start
 

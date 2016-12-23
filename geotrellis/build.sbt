@@ -16,7 +16,7 @@ publishMavenStyle := true
 publishArtifact in Test := false
 pomIncludeRepository := { _ => false }
 
-val gtVersion   = "1.0.0"
+val gtVersion   = "1.0.0-SNAPSHOT"
 
 val geotrellis = Seq(
   "org.locationtech.geotrellis" %% "geotrellis-accumulo"  % gtVersion,

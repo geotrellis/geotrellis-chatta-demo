@@ -1,7 +1,8 @@
 {
   "backend": {
-    "type": "file",
-    "path": "/data/chatta-demo"
+    "type": "accumulo",
+    "path": "chattanooga",
+    "profile": "accumulo-local"
   },
   "reprojectMethod": "buffered",
   "cellSize": {

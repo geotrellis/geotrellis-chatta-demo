@@ -42,16 +42,16 @@ object Main extends ChattaServiceRouter {
   val port = config.getInt("geotrellis.port")
   val host = config.getString("geotrellis.hostname")
 
-  val conf = AvroRegistrator(
+  /*val conf = AvroRegistrator(
     new SparkConf()
       .setAppName("ChattaDemo")
       .set("spark.serializer", classOf[org.apache.spark.serializer.KryoSerializer].getName)
       .set("spark.kryo.registrator", classOf[geotrellis.spark.io.kryo.KryoRegistrator].getName)
   )
 
-  implicit val sc = new SparkContext(conf)
+  implicit val sc = new SparkContext(conf)*/
 
-  lazy val (reader, tileReader, attributeStore) = initBackend(config)
+  lazy val (reader, tileReader, attributeStore) = initCollectionBackend(config)
 
   def main(args: Array[String]): Unit = {
     Http().bindAndHandle(routes, host, port)

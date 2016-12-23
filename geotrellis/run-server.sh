@@ -3,6 +3,6 @@
 # GeoTrellis ingest jar
 export JAR="target/scala-2.11/geotrellis-chatta-demo-assembly-0.1-SNAPSHOT.jar"
 
-echo "--class geotrellis.chatta.Main --driver-memory=2G $JAR"
+echo "java -cp $JAR geotrellis.chatta.Main"
 
-spark-submit --class geotrellis.chatta.Main --driver-memory=2G $JAR
+java -cp $JAR geotrellis.chatta.Main

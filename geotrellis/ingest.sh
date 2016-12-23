@@ -11,5 +11,5 @@ echo "--class geotrellis.chatta.ChattaIngest --driver-memory=2G $JAR \
 spark-submit \
   --class geotrellis.chatta.ChattaIngest --driver-memory=2G $JAR \
   --input "file:///${PWD}/conf/input.json" \
-  --output "file://${PWD}/conf/output.json" \
+  --output "file://${PWD}/conf/output-accumulo.json" \
   --backend-profiles "file://${PWD}/conf/backend-profiles.json"
