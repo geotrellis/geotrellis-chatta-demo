@@ -30,8 +30,6 @@ libraryDependencies ++= ((Seq(
   "org.apache.hadoop"  % "hadoop-client" % "2.7.3"
 ) map (_ exclude("com.google.guava", "guava"))) ++ Seq("com.google.guava" % "guava" % "16.0.1"))
 
-ivyScala := ivyScala.value map { _.copy(overrideScalaVersion = true) }
-
 test in assembly := {}
 
 assemblyMergeStrategy in assembly := {
