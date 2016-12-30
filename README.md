@@ -86,8 +86,7 @@ To run cluster we have a slightly-modified [docker-compose.yml](docker-compose.y
     ```conf
       geotrellis {
         port = 8777
-        server.static-path = "../static"
-        catalog  = "data/catalog.json"
+        server.static-path = "../static"        
         hostname = "spark-master"
         backend  = "accumulo"
       }
