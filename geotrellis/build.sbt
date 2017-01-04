@@ -20,7 +20,7 @@ val gtVersion        = "1.0.0-SNAPSHOT"
 val akkaActorVersion = "2.4.16"
 val akkaHttpVersion  = "2.4.11"
 
-libraryDependencies ++= ((Seq(
+libraryDependencies ++= Seq(
   "org.locationtech.geotrellis" %% "geotrellis-spark-etl" % gtVersion,
   "com.typesafe.akka" %% "akka-actor" % akkaActorVersion,
   "com.typesafe.akka" %% "akka-http-core" % akkaHttpVersion,
@@ -28,7 +28,7 @@ libraryDependencies ++= ((Seq(
   "com.typesafe.akka" %% "akka-http-spray-json-experimental" % akkaHttpVersion,
   "org.apache.spark"  %% "spark-core"    % "2.0.2",
   "org.apache.hadoop"  % "hadoop-client" % "2.7.3"
-) map (_ exclude("com.google.guava", "guava"))) ++ Seq("com.google.guava" % "guava" % "16.0.1"))
+)
 
 test in assembly := {}
 
