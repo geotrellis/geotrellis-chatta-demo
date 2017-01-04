@@ -58,6 +58,13 @@ It will compute a weighted summary of the area under the polygon.
 
 ## Runing demo using [GeoDocker cluster](https://github.com/geodocker/geodocker)
 
+Quick clarification: 
+
+* Ingest requires Spark usage.
+* Server works without Spark (uses GeoTrellis Collections API).
+
+This description is a bit more generic, and describes dependent Spark server run.
+
 To compile and run this demo, we prepared an [environment](https://github.com/geodocker/geodocker).
 To run cluster we have a slightly-modified [docker-compose.yml](docker-compose.yml) file:
 
