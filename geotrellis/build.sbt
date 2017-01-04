@@ -32,6 +32,13 @@ libraryDependencies ++= Seq(
 
 test in assembly := {}
 
+assemblyShadeRules in assembly := {
+  val shadePackage = "com.azavea.shaded.demo"
+  Seq(
+    ShadeRule.rename("com.google.common.**" -> s"$shadePackage.google.common.@1").inProject
+  )
+}
+
 assemblyMergeStrategy in assembly := {
   case "reference.conf" | "application.conf" => MergeStrategy.concat
   case "META-INF/MANIFEST.MF" | "META-INF\\MANIFEST.MF" => MergeStrategy.discard
