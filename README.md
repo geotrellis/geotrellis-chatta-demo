@@ -1,15 +1,25 @@
-# GeoTrellis Chattanooga model demo 
+# GeoTrellis Chattanooga model demo
 
-This is a demo of GeoTrellis functionality.
-The demo consists of two parts: the tile ingest process and demo server to query ingested data.
+This is a demo of GeoTrellis functionality. The demo consists of two parts:
+the tile ingest process and demo server to query ingested data.
 
-To run ingest, use `./ingest.sh`, to run server, use `./run-server.sh`. Web map would be available here `http://locahost:8777/`. 
+Usage
+-----
 
-## Short description
+See the `Makefile` for full details.
+
+Command | Action
+------- | -------
+`make build` | Build ingest/server code
+`make ingest` | Ingest data for use by server
+`make server` | Start a test server at localhost:8777
+`make image` | Generate a Docker image for deployment
+
+## Details
 
 The demo covers [Chattanooga](https://goo.gl/S2qPCO) with different `Byte` tiles.
 (In fact each tile is essentially of type `Bit` because they only contain the  values `{0, 1}`).
-Each tile is ingests into it's own layer, and the resulting map consists of layers which consist of combinations of differently-weighted source layers (a weighted overlay).  
+Each tile is ingests into it's own layer, and the resulting map consists of layers which consist of combinations of differently-weighted source layers (a weighted overlay).
 
 ### API routes:
 
@@ -20,8 +30,8 @@ Each tile is ingests into it's own layer, and the resulting map consists of laye
 
 ### Color Ramps
 
-List of available color ramps to color weighted overlay: 
- 
+List of available color ramps to color weighted overlay:
+
 * `blue-to-orange`
 * `green-to-orange`
 * `blue-to-red`
@@ -45,47 +55,48 @@ Calculates breaks for combined layers by weights with specified breaks amount.
 
 *Get Parameters:* `layers`, `weights`, `breaks`, `bbox`, `colors: [default: 4]`, `colorRamp: [default: "blue-to-red"]`, `mask`.
 
-It is a TMS layer service that gets `{zoom}/{x}/{y}`, passed a series of layer names and weights, and returns PNG TMS tiles of the weighted overlay. 
-It also takes the breaks that were computed using the `gt/breaks` service. 
+It is a TMS layer service that gets `{zoom}/{x}/{y}`, passed a series of layer names and weights, and returns PNG TMS tiles of the weighted overlay.
+It also takes the breaks that were computed using the `gt/breaks` service.
 If the `mask` option is set to a polygon, `{zoom}/{x}/{y}` tiles masked by that polygon would be returned.
 
 ### Zonal Summary:
 
 *Get Parameters:* `polygon`, `layers`, `weights`.
 
-This service takes layers, weights and a polygon. 
+This service takes layers, weights and a polygon.
 It will compute a weighted summary of the area under the polygon.
 
-## Runing demo using [GeoDocker cluster](https://github.com/geodocker/geodocker)
+## Running Demo with [GeoDocker Cluster](https://github.com/geodocker/geodocker)
 
-Quick clarification: 
+Quick clarification:
 
 * Ingest requires Spark usage.
 * Server works without Spark (uses GeoTrellis Collections API).
 
 This description is a bit more generic, and describes dependent Spark server run.
 
-To compile and run this demo, we prepared an [environment](https://github.com/geodocker/geodocker).
-To run cluster we have a slightly-modified [docker-compose.yml](docker-compose.yml) file:
+To compile and run this demo, we prepared an
+[environment](https://github.com/geodocker/geodocker). To run cluster we
+have a slightly-modified [docker-compose.yml](docker-compose.yml) file:
 
 * To run cluster:
   ```bash
     docker-compose up
   ```
-  
+
   To check that cluster is operating normally check the availability of these pages:
   * Hadoop [http://localhost:50070/](http://localhost:50070/)
   * Accumulo [http://localhost:50095/](http://localhost:50095/)
   * Spark [http://localhost:8080/](http://localhost:8080/)
-  
+
   To check containers status is possible using following command:
 
   ```bash
-  docker ps -a | grep geodocker 
+  docker ps -a | grep geodocker
   ```
 
  More information avaible in a [GeoDocker cluster](https://github.com/geodocker/geodocker) repo
-  
+
 * Install and run this demo using [GeoDocker cluster](https://github.com/geodocker/geodocker)
 
   * Modify [application.conf](geotrellis/src/main/resource/application.conf) (working conf example for GeoDocker cluster):
@@ -93,7 +104,7 @@ To run cluster we have a slightly-modified [docker-compose.yml](docker-compose.y
     ```conf
       geotrellis {
         port = 8777
-        server.static-path = "../static"        
+        server.static-path = "../static"
         hostname = "spark-master"
         backend  = "accumulo"
       }
