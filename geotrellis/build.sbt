@@ -30,8 +30,6 @@ libraryDependencies ++= Seq(
   "org.apache.hadoop"  % "hadoop-client" % "2.7.3"
 )
 
-dependencyOverrides += "com.google.guava" % "guava" % "16.0.1"
-
 assemblyShadeRules in assembly := {
   val shadePackage = "com.azavea.shaded.demo"
   Seq(
