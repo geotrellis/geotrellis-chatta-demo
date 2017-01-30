@@ -6,4 +6,4 @@ ADD static/ /static
 
 EXPOSE 8777
 
-CMD java -Dgeotrellis.hostname=chatta -cp /opt/geotrellis-chatta-demo-assembly-0.1-SNAPSHOT.jar geotrellis.chatta.Main
+CMD java -noverify -Dgeotrellis.hostname=chatta -cp /opt/geotrellis-chatta-demo-assembly-0.1-SNAPSHOT.jar geotrellis.chatta.Main
