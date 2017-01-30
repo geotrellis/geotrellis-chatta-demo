@@ -17,9 +17,11 @@ Command | Action
 
 ## Details
 
-The demo covers [Chattanooga](https://goo.gl/S2qPCO) with different `Byte` tiles.
-(In fact each tile is essentially of type `Bit` because they only contain the  values `{0, 1}`).
-Each tile is ingests into it's own layer, and the resulting map consists of layers which consist of combinations of differently-weighted source layers (a weighted overlay).
+The demo covers [Chattanooga](https://goo.gl/S2qPCO) with different `Byte`
+tiles. (In fact each tile is essentially of type `Bit` because they only
+contain the  values `{0, 1}`). Each tile is ingests into it's own layer, and
+the resulting map consists of layers which consist of combinations of
+differently-weighted source layers (a weighted overlay).
 
 ### API routes:
 
@@ -55,9 +57,11 @@ Calculates breaks for combined layers by weights with specified breaks amount.
 
 *Get Parameters:* `layers`, `weights`, `breaks`, `bbox`, `colors: [default: 4]`, `colorRamp: [default: "blue-to-red"]`, `mask`.
 
-It is a TMS layer service that gets `{zoom}/{x}/{y}`, passed a series of layer names and weights, and returns PNG TMS tiles of the weighted overlay.
+It is a TMS layer service that gets `{zoom}/{x}/{y}`, passed a series of
+layer names and weights, and returns PNG TMS tiles of the weighted overlay.
 It also takes the breaks that were computed using the `gt/breaks` service.
-If the `mask` option is set to a polygon, `{zoom}/{x}/{y}` tiles masked by that polygon would be returned.
+If the `mask` option is set to a polygon, `{zoom}/{x}/{y}` tiles masked by
+that polygon would be returned.
 
 ### Zonal Summary:
 
@@ -146,8 +150,8 @@ have a slightly-modified [docker-compose.yml](docker-compose.yml) file:
 
     ```bash
       docker exec -it geotrellischattademo_spark-master_1 bash
-      cd /data/; ./ingest.sh # to ingest data into accumulo
-      cd /data/; ./run-server.sh # to run server
+      cd /data/; make ingest  # to ingest data into accumulo
+      cd /data/; make server  # to run the server
     ```
 
   This demo would be installed into `/data` directory, inside spark master container.
