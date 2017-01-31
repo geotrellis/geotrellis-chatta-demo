@@ -1,5 +1,6 @@
 FROM quay.io/azavea/spark:2.0.2
 
+# Must be `root` or else writes to mounted volume will fail.
 USER root
 
 VOLUME /data
