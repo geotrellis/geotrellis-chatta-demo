@@ -18,14 +18,14 @@ pomIncludeRepository := { _ => false }
 
 val gtVersion        = "1.0.0-SNAPSHOT"
 val akkaActorVersion = "2.4.16"
-val akkaHttpVersion  = "2.4.11"
+val akkaHttpVersion  = "10.0.3"
 
 libraryDependencies ++= Seq(
   "org.locationtech.geotrellis" %% "geotrellis-spark-etl" % gtVersion,
   "com.typesafe.akka" %% "akka-actor" % akkaActorVersion,
   "com.typesafe.akka" %% "akka-http-core" % akkaHttpVersion,
-  "com.typesafe.akka" %% "akka-http-experimental" % akkaHttpVersion,
-  "com.typesafe.akka" %% "akka-http-spray-json-experimental" % akkaHttpVersion,
+  "com.typesafe.akka" %% "akka-http" % akkaHttpVersion,
+  "com.typesafe.akka" %% "akka-http-spray-json" % akkaHttpVersion,
   "org.apache.spark"  %% "spark-core"    % "2.0.2",
   "org.apache.hadoop"  % "hadoop-client" % "2.7.3"
 )
