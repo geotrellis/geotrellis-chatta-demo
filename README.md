@@ -18,6 +18,7 @@ Command | Action
 ------- | -------
 `make build` | Build ingest/server code
 `make ingest` | Ingest data for use by server
+`make ingest-docker` | Ingest via docker
 `make server` | Start a test server at localhost:8777
 `make image` | Generate a Docker image for deployment
 
