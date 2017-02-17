@@ -17,7 +17,7 @@ publishArtifact in Test := false
 pomIncludeRepository := { _ => false }
 
 val gtVersion        = "1.0.0-SNAPSHOT"
-val akkaActorVersion = "2.4.16"
+val akkaActorVersion = "2.4.17"
 val akkaHttpVersion  = "10.0.3"
 
 libraryDependencies ++= Seq(
@@ -26,7 +26,7 @@ libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-http-core" % akkaHttpVersion,
   "com.typesafe.akka" %% "akka-http" % akkaHttpVersion,
   "com.typesafe.akka" %% "akka-http-spray-json" % akkaHttpVersion,
-  "org.apache.spark"  %% "spark-core"    % "2.0.2",
+  "org.apache.spark"  %% "spark-core"    % "2.1.0",
   "org.apache.hadoop"  % "hadoop-client" % "2.7.3"
 )
 
