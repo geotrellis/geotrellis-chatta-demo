@@ -23,7 +23,7 @@ ingest-docker: geotrellis/${JAR}
 
 # `-noverify` is to get around some strange Guava dependency problems.
 server: geotrellis/${JAR}
-	cd geotrellis && java -noverify -cp ${JAR} geotrellis.chatta.Main
+	cd geotrellis && java -cp ${JAR} geotrellis.chatta.Main
 
 image: geotrellis/${JAR}
 	docker build -t geotrellis-chatta-demo:${TAG} .
