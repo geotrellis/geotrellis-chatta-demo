@@ -3,6 +3,12 @@
 This is a demo of GeoTrellis functionality. The demo consists of two parts:
 the tile ingest process and demo server to query ingested data.
 
+Dependencies
+------------
+- Java 8
+- (optional - for `make ingest`) Apache Spark
+- (optional - for `make ingest-docker`) Docker
+
 Usage
 -----
 
@@ -12,6 +18,7 @@ Command | Action
 ------- | -------
 `make build` | Build ingest/server code
 `make ingest` | Ingest data for use by server
+`make ingest-docker` | Ingest via docker
 `make server` | Start a test server at localhost:8777
 `make image` | Generate a Docker image for deployment
 
