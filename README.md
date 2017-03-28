@@ -146,13 +146,11 @@ have a slightly-modified [docker-compose.yml](docker-compose.yml) file:
     ```bash
       cd ./geotrellis
       ./sbt assembly
-      docker exec geotrellischattademo_spark-master_1 mkdir -p /data/target/scala-2.10/
-      docker cp target/scala-2.11/GeoTrellis-Tutorial-Project-assembly-0.1-SNAPSHOT.jar geotrellischattademo_spark-master_1:/data/target/scala-2.10/GeoTrellis-Tutorial-Project-assembly-0.1-SNAPSHOT.jar
+      docker exec geotrellischattademo_spark-master_1 mkdir -p /data/target/scala-2.11/
+      docker cp target/scala-2.11/geotrellis-chatta-demo-assembly-0.1-SNAPSHOT.jar geotrellischattademo_spark-master_1:/data/target/scala-2.11/geotrellis-chatta-demo-assembly-0.1-SNAPSHOT.jar
       docker cp  ../static geotrellischattademo_spark-master_1:/static
       docker cp data/arg_wm/ geotrellischattademo_spark-master_1:/data/
       docker cp conf geotrellischattademo_spark-master_1:/data/
-      docker cp ingest.sh geotrellischattademo_spark-master_1:/data/
-      docker cp run-server.sh geotrellischattademo_spark-master_1:/data/
     ```
 
     ```bash
