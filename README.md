@@ -144,13 +144,12 @@ have a slightly-modified [docker-compose.yml](docker-compose.yml) file:
   * Copy everything into spark master container:
 
     ```bash
-      cd ./geotrellis
-      ./sbt assembly
-      docker exec geotrellischattademo_spark-master_1 mkdir -p /data/target/scala-2.11/
-      docker cp target/scala-2.11/geotrellis-chatta-demo-assembly-0.1-SNAPSHOT.jar geotrellischattademo_spark-master_1:/data/target/scala-2.11/geotrellis-chatta-demo-assembly-0.1-SNAPSHOT.jar
-      docker cp  ../static geotrellischattademo_spark-master_1:/static
-      docker cp data/arg_wm/ geotrellischattademo_spark-master_1:/data/
-      docker cp conf geotrellischattademo_spark-master_1:/data/
+      cd ./geotrellis; ./sbt assembly && cd ../ # build the assembly
+      docker exec geotrellischattademo_spark-master_1 mkdir -p /data/geotrellis/target/scala-2.11/
+      docker cp $PWD/geotrellis/conf geotrellischattademo_spark-master_1:/data/geotrellis/conf
+      docker cp $PWD/geotrellis/data/arg_wm geotrellischattademo_spark-master_1:/data/
+      docker cp $PWD/geotrellis/target/scala-2.11/geotrellis-chatta-demo-assembly-0.1-SNAPSHOT.jar geotrellischattademo_spark-master_1:/data/geotrellis/target/scala-2.11/
+      docker cp $PWD/Makefile geotrellischattademo_spark-master_1:/data/
     ```
 
     ```bash
