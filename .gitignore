@@ -1,9 +1,5 @@
 *~
 .idea
-project/boot
-project/plugins/project
-project/plugins/target
-project/target
 target
 .ensime
 TAGS
@@ -16,3 +12,12 @@ TAGS
 *.iml
 *.sublime-workspace
 .DS_Store
+deployment/ansible/roles/azavea.*
+service/geotrellis/data/chatta-demo
+service/geotrellis/project/boot
+service/geotrellis/project/plugins/project
+service/geotrellis/project/plugins/target
+service/geotrellis/project/target
+service/geotrellis/target
+ingest-data.zip
+.vagrant

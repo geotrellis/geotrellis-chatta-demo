@@ -1,0 +1,5 @@
+terraform_version: "0.9.6"
+awscli_version: "1.11.*"
+aws_profile: "geotrellis-site"
+docker_version: "17.*"
+docker_compose_version: "1.13.*"

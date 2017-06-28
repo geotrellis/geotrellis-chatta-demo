@@ -1,0 +1,14 @@
+---
+- hosts: all
+  become: True
+
+  pre_tasks:
+    - name: Update APT cache
+      apt: update_cache=yes cache_valid_time=3600
+
+  roles:
+    - { role: "azavea.terraform" }
+    - { role: "azavea.aws-cli" }
+    - { role: "azavea.python-security", when: 'ansible_python_version | version_compare("2.7.9", "<")' }
+    - { role: "gt-chatta-demo.environment" }
+    - { role: "gt-chatta-demo.docker" }
