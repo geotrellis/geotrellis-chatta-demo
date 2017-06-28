@@ -1,0 +1,23 @@
+[
+    {
+        "name": "gt-chatta",
+        "image": "${chatta_image}",
+        "cpu": 10,
+        "memory": 2048,
+        "essential": true,
+        "portMappings": [
+            {
+                "containerPort": 8777,
+                "hostPort": 0
+            }
+        ],
+        "logConfiguration": {
+            "logDriver": "awslogs",
+            "options": {
+                "awslogs-group": "log${chatta_environment}ChattaDemo",
+                "awslogs-region": "${chatta_region}",
+                "awslogs-stream-prefix": "chatta-demo"
+            }
+        }
+    }
+]

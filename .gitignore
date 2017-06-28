@@ -12,6 +12,9 @@ TAGS
 *.iml
 *.sublime-workspace
 .DS_Store
+
+# Vagrant
+.vagrant
 deployment/ansible/roles/azavea.*
 service/geotrellis/data/chatta-demo
 service/geotrellis/project/boot
@@ -20,4 +23,8 @@ service/geotrellis/project/plugins/target
 service/geotrellis/project/target
 service/geotrellis/target
 ingest-data.zip
-.vagrant
+
+# Terraform
+deployment/terraform/.terraform
+*.tfplan
+*.tfstate*
