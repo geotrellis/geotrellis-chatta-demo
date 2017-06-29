@@ -9,7 +9,7 @@ variable "remote_state_bucket" {
 
 variable "aws_account_id" {
   default     = "896538046175"
-  description = "Geotrellis Transit account ID"
+  description = "Geotrellis Chatta account ID"
 }
 
 variable "aws_region" {
@@ -18,7 +18,7 @@ variable "aws_region" {
 
 variable "image_version" {
   type        = "string"
-  description = "Geotrellis Transit Image version"
+  description = "Geotrellis Chatta Image version"
 }
 
 variable "cdn_price_class" {
