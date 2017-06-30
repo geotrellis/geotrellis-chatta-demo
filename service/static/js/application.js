@@ -5,15 +5,15 @@ var getLayer = function(url,attrib) {
 };
 
 var Layers = {
-    stamen: { 
-        toner:  'http://{s}.tile.stamen.com/toner/{z}/{x}/{y}.png',   
-        terrain: 'http://{s}.tile.stamen.com/terrain/{z}/{x}/{y}.png',
-        watercolor: 'http://{s}.tile.stamen.com/watercolor/{z}/{x}/{y}.png',
+    stamen: {
+        toner:  'https://stamen-tiles-{s}.a.ssl.fastly.net/toner/{z}/{x}/{y}.png',   
+        terrain: 'https://stamen-tiles-{s}.a.ssl.fastly.net/terrain/{z}/{x}/{y}.png',
+        watercolor: 'https://stamen-tiles-{s}.a.ssl.fastly.net/watercolor/{z}/{x}/{y}.png',
         attrib: 'Map data &copy;2013 OpenStreetMap contributors, Tiles &copy;2013 Stamen Design'
     },
     mapBox: {
-        azavea:     'http://{s}.tiles.mapbox.com/v3/azavea.map-zbompf85/{z}/{x}/{y}.png',
-        worldLight: 'http://c.tiles.mapbox.com/v3/mapbox.world-light/{z}/{x}/{y}.png',
+        azavea:     'https://{s}.tiles.mapbox.com/v3/azavea.map-zbompf85/{z}/{x}/{y}.png',
+        worldLight: 'https://c.tiles.mapbox.com/v3/mapbox.world-light/{z}/{x}/{y}.png',
         attrib: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery &copy; <a href="http://mapbox.com">MapBox</a>'
     }
 };

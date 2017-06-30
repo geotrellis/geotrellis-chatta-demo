@@ -5,10 +5,10 @@ USER root
 
 VOLUME /data
 
-ADD target/scala-2.11/geotrellis-chatta-demo-assembly-0.1-SNAPSHOT.jar /
-ADD conf/input.json /
-ADD conf/output.json /
-ADD conf/backend-profiles.json /
+COPY geotrellis/target/scala-2.11/geotrellis-chatta-demo-assembly-0.1-SNAPSHOT.jar /
+COPY geotrellis/conf/input.json /
+COPY geotrellis/conf/output.json /
+COPY geotrellis/conf/backend-profiles.json /
 
 CMD spark-submit \
     --class geotrellis.chatta.ChattaIngest --driver-memory=4G /geotrellis-chatta-demo-assembly-0.1-SNAPSHOT.jar \
