@@ -1,0 +1,7 @@
+version: '2.1'
+services:
+  gt-chatta:
+    image: gt-chatta:${VERSION}
+    build:
+      context: ./service
+      dockerfile: Dockerfile

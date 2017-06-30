@@ -1,0 +1,5 @@
+*
+!geotrellis/target/scala-2.11/geotrellis-chatta-demo-assembly-0.1-SNAPSHOT.jar
+!geotrellis/data/chatta-demo/*
+!geotrellis/conf/*
+!static/*

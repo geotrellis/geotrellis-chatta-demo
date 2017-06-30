@@ -3,24 +3,46 @@
 This is a demo of GeoTrellis functionality. The demo consists of two parts:
 the tile ingest process and demo server to query ingested data.
 
-Dependencies
-------------
-- Java 8
-- (optional - for `make ingest`) Apache Spark
-- (optional - for `make ingest-docker`) Docker
+## Dependencies
 
-Usage
------
 
-See the `Makefile` for full details.
+- Vagrant 1.9.5
+- VirtualBox 5.1+
+- AWS CLI 1.11+
+- AWS Account (to access S3)
 
-Command | Action
-------- | -------
-`make build` | Build ingest/server code
-`make ingest` | Ingest data for use by server
-`make ingest-docker` | Ingest via docker
-`make server` | Start a test server at localhost:8777
-`make image` | Generate a Docker image for deployment
+## Getting Started
+
+To provision a VM and fetch our pre-ingested demo data:
+
+```bash
+$ ./scripts/setup
+$ vagrant ssh
+```
+
+This will download data into `./service/geotrellis/data/chatta-demo`. See the [ingest](#ingesting-data) sections for information about ingesting data manually using either the [local filesystem](#local-ingest) or [geodocker](geodocker-ingest).
+
+## Scripts
+
+Helper and development scripts are located in the `./scripts` directory at the root of this project. These scripts are designed to encapsulate and perform commonly used actions such as starting a development server, accessing a development console, or running tests.
+
+| Script Name             | Purpose                                                      |
+|-------------------------|--------------------------------------------------------------|
+| `update`                | Pulls/builds necessary containers                            |
+| `setup`                 | Provisions the VM, fetch ingest data.                        |
+| `server`                | Starts a development server that listens at http://localhost:8777. Use the `--geodocker` flag to run the server with an accumulo backend.                       |
+| `console`               | Gives access to a running container via `docker-compose run`. Use the `--geodocker` flag to run with an accumulo backend |
+| `test`                  | Runs tests for project                                 |
+| `cibuild`               | Invoked by CI server and makes use of `test`.                |
+| `cipublish`             | Build JAR and publish container images to container image repositories.    |
+
+## Testing
+
+Run all the tests:
+
+```bash
+$ ./scripts/test
+```
 
 ## Details
 
@@ -77,18 +99,28 @@ that polygon would be returned.
 This service takes layers, weights and a polygon.
 It will compute a weighted summary of the area under the polygon.
 
-## Running Demo with [GeoDocker Cluster](https://github.com/geodocker/geodocker)
+## Ingesting Data
 
 Quick clarification:
 
 * Ingest requires Spark usage.
 * Server works without Spark (uses GeoTrellis Collections API).
 
-This description is a bit more generic, and describes dependent Spark server run.
+This section includes instructions on how to do local filesystem and Geodocker ingests to either the local filesystem, or to Accumulo (using [Geodocker](https://github.com/geodocker/geodocker)).
 
-To compile and run this demo, we prepared an
-[environment](https://github.com/geodocker/geodocker). To run cluster we
-have a slightly-modified [docker-compose.yml](docker-compose.yml) file:
+### Local ingest
+In the event that you need to run a local ingest, the `gt-chatta-ingest` container will run a `spark-submit` job that writes ingest data to the local filesystem. Make sure the Chatta Demo JAR has been built, then run the container:
+
+```bash
+$ docker-compose run --rm gt-chatta assembly
+$ docker-compose build gt-chatta-ingest
+$ docker-compose run --rm gt-chatta-ingest
+```
+
+Data will be installed into `./service/geotrellis/data/chatta-demo`, which is mounted at `/data/chatta-demo` inside of the `gt-chatta` container.
+
+### Geodocker Ingests
+To simulate running this demo in a distibuted environment, we prepared a Geodocker cluster including Hadoop, Accumulo and Spark. The application is configured for the geodocker setup using the `application.conf` file in the `geodocker/` folder. ***Make sure you build an accumulo-configured JAR with `make build-geodocker` before attempting a Geodocker ingest.*** 
 
 * To run cluster:
   ```bash
@@ -100,62 +132,22 @@ have a slightly-modified [docker-compose.yml](docker-compose.yml) file:
   * Accumulo [http://localhost:50095/](http://localhost:50095/)
   * Spark [http://localhost:8080/](http://localhost:8080/)
 
-  To check containers status is possible using following command:
+To check containers status, use the following command:
 
-  ```bash
-  docker ps -a | grep geodocker
-  ```
+```bash
+docker-compose -f docker-compose.geodocker.yml ps
+```
 
- More information avaible in a [GeoDocker cluster](https://github.com/geodocker/geodocker) repo
 
 * Install and run this demo using [GeoDocker cluster](https://github.com/geodocker/geodocker)
+  
+  * Running a Geodocker ingest will require more memory for the Vagrant VM. Before running an ingest, set `GT_CHATTA_VM_MEMORY=6144` (or a higher value) and run `vagrant reload`.
 
-  * Modify [application.conf](geotrellis/src/main/resource/application.conf) (working conf example for GeoDocker cluster):
-
-    ```conf
-      geotrellis {
-        port = 8777
-        server.static-path = "../static"
-        hostname = "spark-master"
-        backend  = "accumulo"
-      }
-
-      accumulo {
-        instance   = "accumulo"
-        user       = "root"
-        password   = "GisPwd"
-        zookeepers = "zookeeper"
-      }
-    ```
-
-  * Modify [backend-profiles.json](geotrellis/conf/backend-profiles.json) (working conf example for GeoDocker cluster):
-
-    ```json
-      {
-        "name": "accumulo-local",
-        "type": "accumulo",
-        "zookeepers": "zookeeper",
-        "instance": "accumulo",
-        "user": "root",
-        "password": "GisPwd"
-      }
-    ```
-
-  * Copy everything into spark master container:
-
+  * Build the accumulo-configured geotrellis JAR, run an ingest, then start the server.
     ```bash
-      cd ./geotrellis; ./sbt assembly && cd ../ # build the assembly
-      docker exec geotrellischattademo_spark-master_1 mkdir -p /data/geotrellis/target/scala-2.11/
-      docker cp $PWD/geotrellis/conf geotrellischattademo_spark-master_1:/data/geotrellis/conf
-      docker cp $PWD/geotrellis/data/arg_wm geotrellischattademo_spark-master_1:/data/
-      docker cp $PWD/geotrellis/target/scala-2.11/geotrellis-chatta-demo-assembly-0.1-SNAPSHOT.jar geotrellischattademo_spark-master_1:/data/geotrellis/target/scala-2.11/
-      docker cp $PWD/Makefile geotrellischattademo_spark-master_1:/data/
+      make build-geodocker
+      make ingest-geodocker
+      ./scripts/server --geodocker
     ```
 
-    ```bash
-      docker exec -it geotrellischattademo_spark-master_1 bash
-      cd /data/; make ingest  # to ingest data into accumulo
-      cd /data/; make server  # to run the server
-    ```
-
-  This demo would be installed into `/data` directory, inside spark master container.
+The demo catalog will be available through the accumulo backend. More information avaible is available in the [GeoDocker cluster](https://github.com/geodocker/geodocker) repo.
