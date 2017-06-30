@@ -1,0 +1,49 @@
+#!/bin/bash
+
+set -e
+
+if [[ -n "${GT_CHATTA_DEBUG}" ]]; then
+    set -x
+fi
+
+if [[ -n "${TRAVIS_COMMIT}" ]]; then
+    VERSION="${TRAVIS_COMMIT:0:7}"
+else
+    VERSION="$(git rev-parse --short HEAD)"
+fi
+
+function usage() {
+    echo -n \
+"Usage: $(basename "$0")
+Publish images to Amazon ECR
+"
+}
+
+if [ "${BASH_SOURCE[0]}" = "${0}" ]; then
+    if [ "${1:-}" = "--help" ]; then
+        usage
+    else
+
+        if [[ -n "${AWS_ECR_ENDPOINT}" ]]; then
+
+            echo "Building geotrellis-service JAR..."
+            docker-compose run --rm gt-chatta assembly
+
+            VERSION="${VERSION}" \
+            docker-compose -f docker-compose.yml \
+                -f docker-compose.test.yml build \
+                gt-chatta
+
+            # aws ecr get-login includes a deprecated flag
+            eval $(aws ecr get-login --no-include-email)
+            docker tag "gt-chatta:${VERSION}" \
+                "${AWS_ECR_ENDPOINT}/gt-chatta:${VERSION}"
+
+            docker push "${AWS_ECR_ENDPOINT}/gt-chatta:${VERSION}"
+        else
+            echo "ERROR: No AWS_ECR_ENDPOINT variable defined."
+            exit 1
+        fi
+
+    fi
+fi
