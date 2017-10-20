@@ -1,1 +1,2 @@
 *.tiff filter=lfs diff=lfs merge=lfs -text
+service/geotrellis/data filter=lfs diff=lfs merge=lfs -text
