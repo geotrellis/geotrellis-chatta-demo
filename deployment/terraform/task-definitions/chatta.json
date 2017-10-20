@@ -1,23 +1,3 @@
-[
-    {
-        "name": "gt-chatta",
-        "image": "${chatta_image}",
-        "cpu": 10,
-        "memory": 2048,
-        "essential": true,
-        "portMappings": [
-            {
-                "containerPort": 8777,
-                "hostPort": 0
-            }
-        ],
-        "logConfiguration": {
-            "logDriver": "awslogs",
-            "options": {
-                "awslogs-group": "log${chatta_environment}ChattaDemo",
-                "awslogs-region": "${chatta_region}",
-                "awslogs-stream-prefix": "chatta-demo"
-            }
-        }
-    }
-]
+version https://git-lfs.github.com/spec/v1
+oid sha256:9d5e9b4b23914b17cb719c2db609c4ac710c54ff33f42948ed4621474584f6ad
+size 580

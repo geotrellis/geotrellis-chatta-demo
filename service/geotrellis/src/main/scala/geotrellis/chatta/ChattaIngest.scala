@@ -1,19 +1,3 @@
-package geotrellis.chatta
-
-import geotrellis.raster.Tile
-import geotrellis.spark.SpatialKey
-import geotrellis.spark.etl.Etl
-import geotrellis.spark._
-import geotrellis.spark.util.SparkUtils
-import geotrellis.vector.ProjectedExtent
-
-import org.apache.spark.SparkConf
-
-object ChattaIngest extends App {
-  implicit val sc = SparkUtils.createSparkContext("GeoTrellis ETL SinglebandIngest", new SparkConf(true))
-  try {
-    Etl.ingest[ProjectedExtent, SpatialKey, Tile](args)
-  } finally {
-    sc.stop()
-  }
-}
+version https://git-lfs.github.com/spec/v1
+oid sha256:3c30558fc3457bae2ce378547c656308a0e84724df4fe8bfe08532c952eda65c
+size 505

@@ -1,7 +1,3 @@
-version: '2.1'
-services:
-  gt-chatta:
-    image: gt-chatta:${VERSION}
-    build:
-      context: ./service
-      dockerfile: Dockerfile
+version https://git-lfs.github.com/spec/v1
+oid sha256:4f911ec18a90fc3eea4a83cde91ed4f9ef7481b7da9dd73ed902b8f297122d1b
+size 134

@@ -1,31 +1,3 @@
-#!/bin/bash
-
-
-set -e
-
-if [[ -n "${GT_CHATTA_DEBUG}" ]]; then
-    set -x
-fi
-
-DIR="$(dirname "$0")"
-
-function usage() {
-    echo -n \
-"Usage: $(basename "$0") COMMAND OPTION[S]
-Deploy AWS infrastructure using Terraform.
-This script is only for use with Travis CI.
-"
-}
-
-if [ "${BASH_SOURCE[0]}" = "${0}" ]; then
-    if [ "${1:-}" = "--help" ]; then
-        usage
-        exit 0
-    fi
-    pushd "${DIR}/../"
-    ./scripts/update
-    ./scripts/cipublish
-    ./scripts/infra plan
-    ./scripts/infra apply
-    popd
-fi
+version https://git-lfs.github.com/spec/v1
+oid sha256:1cf4928d304abfdc78dcf553383a5521f1d4dfb4dbbfe3d9a9f43f36ccf2bc39
+size 512

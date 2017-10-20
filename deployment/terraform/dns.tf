@@ -1,27 +1,3 @@
-#
-# Public DNS resources
-#
-
-resource "aws_route53_record" "origin" {
-  zone_id = "${data.aws_route53_zone.external.id}"
-  name    = "chatta-origin.${data.aws_route53_zone.external.name}"
-  type    = "A"
-
-  alias {
-    name                   = "${lower(module.chatta_ecs_service.lb_dns_name)}"
-    zone_id                = "${module.chatta_ecs_service.lb_zone_id}"
-    evaluate_target_health = true
-  }
-}
-
-resource "aws_route53_record" "cloudfront" {
-  zone_id = "${data.aws_route53_zone.external.id}"
-  name    = "chatta.${data.aws_route53_zone.external.name}"
-  type    = "A"
-
-  alias {
-    name                   = "${aws_cloudfront_distribution.cdn.domain_name}"
-    zone_id                = "${aws_cloudfront_distribution.cdn.hosted_zone_id}"
-    evaluate_target_health = false
-  }
-}
+version https://git-lfs.github.com/spec/v1
+oid sha256:85f60d4fe3c6878b452bcd3b6c7242f524831e1c1115803223875570cf4e2349
+size 788

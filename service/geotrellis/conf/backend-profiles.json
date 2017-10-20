@@ -1,24 +1,3 @@
-{
-  "backend-profiles": [
-    {
-      "name": "accumulo-local",
-      "type": "accumulo",
-      "zookeepers": "localhost",
-      "instance": "gis",
-      "user": "root",
-      "password": "secret"
-    },
-    {
-      "name": "cassandra-local",
-      "type": "cassandra",
-      "allowRemoteDCsForLocalConsistencyLevel": false,
-      "localDc": "datacenter1",
-      "usedHostsPerRemoteDc": 0,
-      "hosts": "localhost",
-      "replicationStrategy": "SimpleStrategy",
-      "replicationFactor": 1,
-      "user": "",
-      "password": ""
-    }
-  ]
-}
+version https://git-lfs.github.com/spec/v1
+oid sha256:701ccf44ee8c63d6815feda7692602ef98f4e145ec1dc39b171627f1d95af0c7
+size 546

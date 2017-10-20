@@ -1,4 +1,3 @@
----
-dependencies:
-  - { role: azavea.pip }
-  - { role: azavea.docker }
+version https://git-lfs.github.com/spec/v1
+oid sha256:25930edca1e5e67818a7ec9f7ea7173f9e8cbffa133ecf2cd41fd4bdc833fef7
+size 70

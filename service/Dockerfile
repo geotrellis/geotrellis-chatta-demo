@@ -1,10 +1,3 @@
-FROM openjdk:8-jre
-
-COPY geotrellis/target/scala-2.11/geotrellis-chatta-demo-assembly-0.1-SNAPSHOT.jar /opt/
-COPY geotrellis/data/chatta-demo /data/chatta-demo
-COPY static/ /static
-
-EXPOSE 8777
-
-ENTRYPOINT ["java"] 
-CMD ["-cp", "/opt/geotrellis-chatta-demo-assembly-0.1-SNAPSHOT.jar", "geotrellis.chatta.Main"]
+version https://git-lfs.github.com/spec/v1
+oid sha256:78dc1c9b0a7f81c6676331723d3f66fcc05538088dff22adbd17ba6a8ab25100
+size 311

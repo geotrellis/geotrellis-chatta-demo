@@ -1,9 +1,3 @@
----
-
-- name: Install docker-compose
-  pip: name=docker-compose version={{ docker_compose_version }}
-
-- name: Add Ansible user to Docker group
-  user: name=vagrant
-        groups=docker
-        append=yes
+version https://git-lfs.github.com/spec/v1
+oid sha256:83dc8059c60df6e1749af08afe1852f2fb04cc210aac523a5026e10f06f94006
+size 204

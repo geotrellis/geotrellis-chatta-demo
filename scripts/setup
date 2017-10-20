@@ -1,24 +1,3 @@
-#!/bin/bash
-
-set -e
-
-if [[ -n "${GT_CHATTA_DEBUG}" ]]; then
-    set -x
-fi
-
-
-function usage() {
-    echo -n \
-"Usage: $(basename "$0")
-Turn up vagrant development environment
-"
-}
-
-if [ "${BASH_SOURCE[0]}" = "${0}" ]; then
-    if [ "${1:-}" = "--help" ]; then
-        usage
-    else
-        vagrant up --provision
-        vagrant ssh -c "cd /home/vagrant/geotrellis-chatta-demo && ./scripts/update"
-    fi
-fi
+version https://git-lfs.github.com/spec/v1
+oid sha256:8fca01ff92fefc5ed400493c0bd8fa1ac357be6ca2f2bd8e256f3ef2fb6b5f4c
+size 407

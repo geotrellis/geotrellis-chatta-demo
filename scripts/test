@@ -1,27 +1,3 @@
-#!/bin/bash
-set -e
-
-if [[ -n "${GT_CHATTA_DEBUG}" ]]; then
-    set -x
-fi
-
-function usage() {
-    echo -n \
-"Usage: $(basename "$0")
-Run various test suites.
-"
-}
-
-if [ "${BASH_SOURCE[0]}" = "${0}" ]
-then
-    if [ "${1:-}" = "--help" ]
-    then
-        usage
-    else
-        echo "Updating Scala dependencies"
-        docker-compose run --rm --no-deps gt-chatta update
-
-        echo "Running tests"
-        docker-compose run --rm gt-chatta test
-    fi
-fi
+version https://git-lfs.github.com/spec/v1
+oid sha256:21068a725f541013ad2eec3f10eec5f0365f28e64be6900040a592e67b8c9972
+size 455
