@@ -1,6 +1,3 @@
-addSbtPlugin("com.eed3si9n" % "sbt-assembly" % "0.14.4")
-
-addSbtPlugin("net.virtual-void" % "sbt-dependency-graph" % "0.8.2")
-
-addSbtPlugin("com.timushev.sbt" % "sbt-updates" % "0.3.0")
-
+version https://git-lfs.github.com/spec/v1
+oid sha256:2417e153744e18995ccabe657ce039e50fe8cfce121e418f44b82616a3f99c63
+size 187

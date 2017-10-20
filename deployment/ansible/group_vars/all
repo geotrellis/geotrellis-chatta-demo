@@ -1,5 +1,3 @@
-terraform_version: "0.9.6"
-awscli_version: "1.11.*"
-aws_profile: "geotrellis-site"
-docker_version: "17.*"
-docker_compose_version: "1.13.*"
+version https://git-lfs.github.com/spec/v1
+oid sha256:70b951e29ca679650b2a5916f22cd72528ccaae2b6a3a502695d2b07f10282ca
+size 138

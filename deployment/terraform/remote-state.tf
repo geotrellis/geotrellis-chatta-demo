@@ -1,13 +1,3 @@
-data "terraform_remote_state" "core" {
-  backend = "s3"
-
-  config {
-    region = "${var.aws_region}"
-    bucket = "${var.remote_state_bucket}"
-    key    = "terraform/core/state"
-  }
-}
-
-data "aws_route53_zone" "external" {
-  zone_id = "${data.terraform_remote_state.core.public_hosted_zone_id}"
-}
+version https://git-lfs.github.com/spec/v1
+oid sha256:25d4fba5f75c542a9ee919d9d92561085b3305e62a11fa4ed01ee6cf3e42019f
+size 297

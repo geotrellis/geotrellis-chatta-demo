@@ -1,14 +1,3 @@
-- src: azavea.pip
-  version: 1.0.0
-
-- src: azavea.terraform
-  version: 0.3.1
-
-- src: azavea.aws-cli
-  version: 0.1.0
-
-- src: azavea.python-security
-  version: 0.1.0
-
-- src: azavea.docker
-  version: 4.0.0
+version https://git-lfs.github.com/spec/v1
+oid sha256:6c3f144187778a9029afd65ddccef8f139a2e49ebd135a6438f9354ec2e3e54a
+size 204

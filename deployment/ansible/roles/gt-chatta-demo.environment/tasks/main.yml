@@ -1,3 +1,3 @@
----
-- name: Set Environment variable for AWS profile
-  lineinfile: dest=/etc/environment regexp=^AWS_PROFILE line="AWS_PROFILE={{ aws_profile }}"
+version https://git-lfs.github.com/spec/v1
+oid sha256:183976fee4e69db21e370a7b0259a9c88a459e383026a7fc270dd4edf60f70b5
+size 145

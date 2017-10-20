@@ -1,12 +1,3 @@
-package geotrellis.kryo
-
-import org.apache.spark.SparkConf
-import org.apache.avro.Schema
-import org.apache.avro.Schema.{Field, Type}
-
-object AvroRegistrator {
-  def apply(conf: SparkConf) =
-    conf.registerKryoClasses(
-      new Field("a", Schema.create(Type.NULL), null, null).order.getClass +: classOf[org.apache.avro.Schema].getDeclaredClasses
-    )
-}
+version https://git-lfs.github.com/spec/v1
+oid sha256:a1f35aa4d32b09f518438bc7c7688c28e29f10b0b3da24a421e8940ee536ce64
+size 356

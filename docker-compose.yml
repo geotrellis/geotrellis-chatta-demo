@@ -1,24 +1,3 @@
-version: '2.1'
-services:
-  gt-chatta:
-    image: openjdk:8-jre
-    entrypoint:
-      - ./sbt
-    command:
-      - runMain geotrellis.chatta.Main
-    ports: 
-      - 8777:8777
-    working_dir: /opt/geotrellis
-    volumes:
-      - "${HOME}/.ivy2:/root/.ivy2"
-      - "${HOME}/.m2:/root/.m2"
-      - "${HOME}/.sbt:/root/.sbt"
-      - "./service/geotrellis/:/opt/geotrellis"
-      - "./service/static:/static"
-      - "./service/geotrellis/data:/data/"
-  gt-chatta-ingest:
-    build:
-      context: ./service
-      dockerfile: Dockerfile.ingest
-    volumes:
-      - "./service/geotrellis/data:/data/"
+version https://git-lfs.github.com/spec/v1
+oid sha256:05f0162d785d5f96e8cfc1cbdade7a7fe4b78e7ac8fd6eec5f38b900685dd483
+size 596

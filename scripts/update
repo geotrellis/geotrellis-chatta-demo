@@ -1,31 +1,3 @@
-#!/bin/bash
-
-set -e
-
-if [[ -n "${GT_CHATTA_DEBUG}" ]]; then
-    set -x
-fi
-
-DIR="$(dirname "$0")"
-function usage() {
-    echo -n \
-"Usage: $(basename "$0")
-Updates files/libraries necessary for development
-"
-}
-
-if [ "${BASH_SOURCE[0]}" = "${0}" ]; then
-    if [ "${1:-}" = "--help" ]; then
-        usage
-    else
-        echo "Updating SBT dependencies..."
-        docker-compose run --rm gt-chatta update
-
-        echo "Downloading ingnest data..."
-        pushd "${DIR}/../service/geotrellis/data/"
-        aws s3 cp s3://geotrellis-chatta-demo/ingest-data.zip .
-        unzip -oq ingest-data.zip
-        rm ingest-data.zip
-        popd
-    fi
-fi
+version https://git-lfs.github.com/spec/v1
+oid sha256:01fb9ec914deb00a763d44071984781bfd4ed269b362918aca76bc9d5f22af8d
+size 647
