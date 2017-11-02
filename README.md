@@ -16,6 +16,8 @@ the tile ingest process and demo server to query ingested data.
 To provision a VM and fetch our pre-ingested demo data:
 
 ```bash
+# Add a geotrellis-site AWS profile
+$ aws --profile geotrellis-site configure
 $ ./scripts/setup
 $ vagrant ssh
 ```
