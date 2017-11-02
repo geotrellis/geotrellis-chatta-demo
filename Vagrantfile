@@ -2,6 +2,12 @@
 # vi: set ft=ruby :
 
 ANSIBLE_VERSION = "2.3.1.0"
+MOUNT_OPTIONS = if Vagrant::Util::Platform.linux? then
+                  ['rw', 'vers=4', 'tcp', 'nolock']
+                else
+                  ['vers=3', 'udp']
+                end
+
 Vagrant.configure("2") do |config|
 
     # Ubuntu 14.04 LTS
@@ -20,7 +26,9 @@ Vagrant.configure("2") do |config|
     end
 
     config.vm.synced_folder "~/.aws", "/home/vagrant/.aws"
-    config.vm.synced_folder "./", "/home/vagrant/geotrellis-chatta-demo", type: "nfs"
+    config.vm.synced_folder "./", "/home/vagrant/geotrellis-chatta-demo", type: "rsync",
+       rsync__exclude: ["deployment/ansible/roles/azavea*/"],
+       rsync__args: ["--verbose", "--archive", "-z"]
 
     # Provisioning
     # Ansible is installed automatically by Vagrant.
