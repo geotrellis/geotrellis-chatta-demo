@@ -7,6 +7,7 @@ MOUNT_OPTIONS = if Vagrant::Util::Platform.linux? then
                 else
                   ['vers=3', 'udp']
                 end
+VAGRANT_HOME_DIR = "/home/vagrant/geotrellis-chatta-demo"
 
 Vagrant.configure("2") do |config|
 
@@ -25,14 +26,15 @@ Vagrant.configure("2") do |config|
         vb.cpus = 2
     end
 
+    config.vm.synced_folder "./", "/vagrant", disabled: true
     config.vm.synced_folder "~/.aws", "/home/vagrant/.aws"
-    config.vm.synced_folder "./", "/home/vagrant/geotrellis-chatta-demo", type: "rsync",
-       rsync__exclude: ["deployment/ansible/roles/azavea*/"],
-       rsync__args: ["--verbose", "--archive", "-z"]
+    config.vm.synced_folder "./", "#{VAGRANT_HOME_DIR}", type: "nfs", mount_options: MOUNT_OPTIONS
+
 
     # Provisioning
     # Ansible is installed automatically by Vagrant.
     config.vm.provision "ansible_local" do |ansible|
+        ansible.provisioning_path = "#{VAGRANT_HOME_DIR}"
         ansible.install = true
         ansible.install_mode = :pip
         ansible.version = "#{ANSIBLE_VERSION}"
@@ -43,7 +45,7 @@ Vagrant.configure("2") do |config|
 
     config.vm.provision "shell" do |s|
         s.path = 'deployment/vagrant/cd_shared_folder.sh'
-        s.args = "/home/vagrant/geotrellis-chatta-demo"
+        s.args = "#{VAGRANT_HOME_DIR}"
     end
 
 end
