@@ -21,8 +21,9 @@ $ aws --profile geotrellis-site configure
 $ ./scripts/setup
 $ vagrant ssh
 ```
-
 This will download data into `./service/geotrellis/data/chatta-demo`. See the [ingest](#ingesting-data) sections for information about ingesting data manually using either the [local filesystem](#local-ingest) or [geodocker](geodocker-ingest).
+
+***NOTE:*** due to transient permissions issues with `NFS` and Vagrant shared folders on Linux hosts, this project uses `rsync` shared folders. In order to continuously sync your changes into the VM, open this project in another shell window/tab, and run `vagrant rsync-auto`.
 
 ## Scripts
 

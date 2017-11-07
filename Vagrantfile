@@ -2,11 +2,6 @@
 # vi: set ft=ruby :
 
 ANSIBLE_VERSION = "2.3.1.0"
-MOUNT_OPTIONS = if Vagrant::Util::Platform.linux? then
-                  ['rw', 'vers=4', 'tcp', 'nolock']
-                else
-                  ['vers=3', 'udp']
-                end
 
 Vagrant.configure("2") do |config|
 
@@ -25,7 +20,11 @@ Vagrant.configure("2") do |config|
         vb.cpus = 2
     end
 
-    config.vm.synced_folder "./", "/vagrant",  type: "nfs", mount_options: MOUNT_OPTIONS
+    config.vm.synced_folder "./", "/vagrant",  type: "rsync",
+        rsync__exclude: ["deployment/ansible/roles/azavea.*/",
+                         "service/geotrellis/target/",
+                         "service/geotrellis/project/target"],
+        rsync__args: ["--verbose", "--archive", "-z"]
     config.vm.synced_folder "~/.aws", "/home/vagrant/.aws"
 
 
