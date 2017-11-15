@@ -27,6 +27,7 @@ resolvers ++= Seq(
 libraryDependencies ++= Seq(
   "org.locationtech.geotrellis" %% "geotrellis-spark-etl" % gtVersion,
   "com.typesafe.akka" %% "akka-actor" % akkaActorVersion,
+  "com.typesafe.akka" %% "akka-stream" % akkaActorVersion,
   "com.typesafe.akka" %% "akka-http-core" % akkaHttpVersion,
   "com.typesafe.akka" %% "akka-http" % akkaHttpVersion,
   "com.typesafe.akka" %% "akka-http-spray-json" % akkaHttpVersion,
