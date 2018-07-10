@@ -15,3 +15,10 @@ ingest-geodocker: service/geotrellis/${JAR}
 		--input "file:///data/geotrellis/conf/input.json" \
 		--output "file:///data/geotrellis/conf/output-accumulo.json" \
 		--backend-profiles "file:///data/geotrellis/conf/backend-profiles.json"
+
+ingest:
+	spark-submit --class geotrellis.chatta.ChattaIngest \
+		/Users/daunnc/subversions/git/github/geotrellis-chatta-demo/service/geotrellis/${JAR} \
+		--input "file:///Users/daunnc/subversions/git/github/geotrellis-chatta-demo/service/geotrellis/conf/input.json" \
+		--output "file:///Users/daunnc/subversions/git/github/geotrellis-chatta-demo/service/geotrellis/conf/output.json" \
+		--backend-profiles "/Users/daunnc/subversions/git/github/geotrellis-chatta-demo/service/geotrellis/conf/backend-profiles.json"

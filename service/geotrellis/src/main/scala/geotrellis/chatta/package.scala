@@ -46,9 +46,9 @@ package object chatta {
         val instance = BaseCassandraInstance(
           config.getStringList("cassandra.hosts").toList,
           config.getString("cassandra.user"),
-          config.getString("cassandra.password"),
-          config.getString("cassandra.replicationStrategy"),
-          config.getInt("cassandra.replicationFactor")
+          config.getString("cassandra.password")
+          // config.getString("cassandra.replicationStrategy"),
+          // config.getInt("cassandra.replicationFactor")
         )
 
         (CassandraLayerReader(instance), CassandraValueReader(instance), CassandraAttributeStore(instance))
@@ -95,9 +95,9 @@ package object chatta {
         val instance = BaseCassandraInstance(
           config.getStringList("cassandra.hosts").toList,
           config.getString("cassandra.user"),
-          config.getString("cassandra.password"),
-          config.getString("cassandra.replicationStrategy"),
-          config.getInt("cassandra.replicationFactor")
+          config.getString("cassandra.password")
+          // config.getString("cassandra.replicationStrategy"),
+          // config.getInt("cassandra.replicationFactor")
         )
 
         (CassandraCollectionLayerReader(instance), CassandraValueReader(instance), CassandraAttributeStore(instance))

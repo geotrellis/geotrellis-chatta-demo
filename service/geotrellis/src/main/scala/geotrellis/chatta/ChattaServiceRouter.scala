@@ -1,11 +1,16 @@
 package geotrellis.chatta
 
+import geotrellis.proj4.util.UTM
 import geotrellis.proj4.{LatLng, WebMercator}
 import geotrellis.raster._
 import geotrellis.raster.render._
 import geotrellis.services._
 import geotrellis.spark._
 import geotrellis.spark.io._
+import geotrellis.spark.tiling.ZoomedLayoutScheme.EARTH_CIRCUMFERENCE
+import geotrellis.spark.tiling._
+import geotrellis.util.Haversine
+import geotrellis.vector._
 import geotrellis.vector.io.json.Implicits._
 import geotrellis.vector.Polygon
 import geotrellis.vector.reproject._
@@ -40,7 +45,8 @@ trait ChattaServiceRouter extends Directives with AkkaSystem.LoggerExecutor with
       pathPrefix("tms")(tms) ~
         path("colors")(colors) ~
         path("breaks")(breaks) ~
-        path("sum")(sum)
+        path("sum")(sum) ~
+        path("wo")(wo)
     } ~
       pathEndOrSingleSlash {
         getFromFile(staticPath + "/index.html")
@@ -241,51 +247,100 @@ trait ChattaServiceRouter extends Directives with AkkaSystem.LoggerExecutor with
       }
     }
 
-  /*path("wo") {
-   parameters('service, 'request, 'version, 'format, 'bbox, 'height.as[Int], 'width.as[Int], 'layers, 'weights,
+  def wo =
+    parameters('service, 'request, 'version, 'format, 'bbox, 'height.as[Int], 'width.as[Int], 'layers, 'weights,
      'palette ? "ff0000,ffff00,00ff00,0000ff", 'colors.as[Int] ? 4, 'breaks, 'colorRamp ? "blue-to-red", 'mask ? "") {
-     (_, _, _, _, bbox, cols, rows, layersString, weightsString, palette, colors, breaksString, colorRamp, mask) => {
-       val extent = Extent.fromString(bbox)
-       val re = RasterExtent(extent, cols, rows)
-       val zoomLevel = ???
-       catalog.reader[SpatialKey](LayerId(layer, zoomLevel), FilterSet[
-       val layers = layersString.split(",")
-       val weights = weightsString.split(",").map(_.toInt)
-       val model = Model.weightedOverlay(layers,weights,re)
-       val overlay =
-         if (mask.isEmpty) model
-         else {
-           GeoJsonReader.parse(mask) match {
-             case Some(geomArray) if geomArray.length == 1 =>
-               val transformed =
-                 geomArray.head.mapGeom { g =>
-                   Transformer.transform(g, Projections.LatLong, Projections.WebMercator)
-                 }
-               model.mask(transformed)
-             case _ =>
-               throw new Exception(s"Invalid GeoJSON: $mask")
-           }
-         }
-       val breaks = breaksString.split(",").map(_.toInt)
-       val ramp = {
-         val cr = ColorRampMap.getOrElse(colorRamp, ColorRamps.BlueToRed)
-         if (cr.toArray.length < breaks.length) cr.interpolate(breaks.length)
-         else cr
-       }
-       val png: ValueSource[Png] = overlay.renderPng(ramp, breaks)
-       png.run match {
-         case process.Complete(img, h) =>
-           respondWithMediaType(MediaTypes.`image/png`) {
-             complete(img)
-           }
-         case process.Error(message,trace) =>
-           println(message)
-           println(trace)
-           println(re)
-           failWith(new RuntimeException(message))
-       }
-     }
-   }
- } ~*/
+      (_, _, _, _, bbox, cols, rows, layersParam, weightsParam, palette, colors, breaksString, colorRamp, maskz) => {
+        val extent = Extent.fromString(bbox)
+        val re = RasterExtent(extent, cols, rows)
+        val scheme = ZoomedLayoutScheme(crs = WebMercator, tileSize = math.max(cols, rows), resolutionThreshold = 0.5)
 
+        // wondering why there is a need to zoom out (?)
+        // val LayoutLevel(zoom, layout) = scheme.zoomOut(scheme.levelFor(re.extent, re.cellSize))
+        val LayoutLevel(zoom, layout) = scheme.levelFor(re.extent, re.cellSize)
+        val layers = layersParam.split(",")
+        val weights = weightsParam.split(",").map(_.toInt)
+        val breaks = breaksString.split(",").map(_.toInt)
+        val key = layout.mapTransform(extent.center)
+
+        complete {
+          Future {
+            val maskTile =
+              timedCreate(
+                "tms",
+                "ChattaServiceRouter(263)::maskTile start",
+                "ChattaServiceRouter(264)::maskTile end") {
+                tileReader.reader[SpatialKey, Tile](LayerId("mask", zoom)).read(key).convert(ShortConstantNoDataCellType).mutable
+              }
+
+            val (extSeq, tileSeq) =
+              timedCreate(
+                "tms",
+                "ChattaServiceRouter(271)::(extSeq, tileSeq) start",
+                "ChattaServiceRouter(272)::(extSeq, tileSeq) end") {
+                layers.zip(weights)
+                  .map { case (l, weight) =>
+                    getMetaData(LayerId(l, zoom)).mapTransform(key) ->
+                      tileReader.reader[SpatialKey, Tile](LayerId(l, zoom)).read(key).convert(ShortConstantNoDataCellType) * weight
+                  }.toSeq.unzip
+              }
+
+            val extent =
+              timedCreate(
+                "tms",
+                "ChattaServiceRouter(283)::extent start",
+                "ChattaServiceRouter(284)::extent end") {
+                extSeq.reduce(_ combine _)
+              }
+
+            val tileAdd =
+              timedCreate(
+                "tms",
+                "ChattaServiceRouter(291)::tileAdd start",
+                "ChattaServiceRouter(292)::tileAdd end") {
+                tileSeq.localAdd
+              }
+
+            val tileMap =
+              timedCreate(
+                "tms",
+                "ChattaServiceRouter(299)::tileMap start",
+                "ChattaServiceRouter(300)::tileMap end") {
+                tileAdd.map(i => if (i == 0) NODATA else i)
+              }
+
+            val tile = timedCreate(
+              "tms",
+              "ChattaServiceRouter(306)::tile start",
+              "ChattaServiceRouter(307)::tile end") {
+              tileMap.localMask(maskTile, NODATA, NODATA)
+            }
+
+            val maskedTile =
+              if (maskz.isEmpty) tile
+              else {
+                val poly =
+                  maskz
+                    .parseGeoJson[Polygon]
+                    .reproject(LatLng, WebMercator)
+
+                tile.mask(extent, poly.geom)
+              }
+
+            val ramp = ColorRampMap.getOrElse(colorRamp, ColorRamps.BlueToRed).toColorMap(breaks)
+
+            val bytes =
+              timedCreate(
+                "tms",
+                "ChattaServiceRouter(327)::result start",
+                "ChattaServiceRouter(328)::result end") {
+                maskedTile.renderPng(ramp).bytes
+              }
+
+            printBuffer("wo")
+            HttpResponse(entity = HttpEntity(ContentType(MediaTypes.`image/png`), bytes))
+          }
+        }
+      }
+    }
 }

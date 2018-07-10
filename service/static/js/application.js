@@ -92,11 +92,11 @@ var weightedOverlay = (function() {
                     geoJson = GJ.fromPolygon(polygon);
                 }
 
-				WOLayer = new L.tileLayer(server + 
-                    'gt/tms/{z}/{x}/{y}?layers={layers}' +
-                     '&weights={weights}&breaks={breaks}&colorRamp={colorRamp}&mask={mask}', {
+                WOLayer = new L.TileLayer.WMS(server + "gt/wo", {
+                    layers: 'default',
                     format: 'image/png',
                     breaks: breaks,
+                    tileSize: 512,
                     transparent: true,
                     layers: layerNames,
                     weights: getWeights(),
@@ -104,6 +104,19 @@ var weightedOverlay = (function() {
                     mask: encodeURIComponent(geoJson),
                     attribution: 'Azavea'
                 });
+
+				// WOLayer = new L.tileLayer(server + 
+                //    'gt/tms/{z}/{x}/{y}?layers={layers}' +
+                //     '&weights={weights}&breaks={breaks}&colorRamp={colorRamp}&mask={mask}', {
+                //    format: 'image/png',
+                //    breaks: breaks,
+                //    transparent: true,
+                //    layers: layerNames,
+                //    weights: getWeights(),
+                //    colorRamp: colorRamp,
+                //    mask: encodeURIComponent(geoJson),
+                //    attribution: 'Azavea'
+                //});
                 				
                 WOLayer.setOpacity(opacity);
                 WOLayer.addTo(map);

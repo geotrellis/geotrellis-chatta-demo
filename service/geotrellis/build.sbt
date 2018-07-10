@@ -16,7 +16,7 @@ publishMavenStyle := true
 publishArtifact in Test := false
 pomIncludeRepository := { _ => false }
 
-val gtVersion        = "1.1.0-RC2"
+val gtVersion        = "2.0.0-SNAPSHOT"
 val akkaActorVersion = "2.4.17"
 val akkaHttpVersion  = "10.0.3"
 

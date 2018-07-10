@@ -5,10 +5,6 @@
     "profile": "accumulo-local"
   },
   "reprojectMethod": "buffered",
-  "cellSize": {
-    "width": 256.0,
-    "height": 256.0
-  },
   "tileSize": 256,
   "pyramid": true,
   "resampleMethod": "nearest-neighbor",
