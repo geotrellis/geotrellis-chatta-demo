@@ -25,6 +25,10 @@ variable "cdn_price_class" {
   default = "PriceClass_200"
 }
 
+variable "cloudwatch_log_retention_days" {
+  default = "30"
+}
+
 variable "ecs_autoscaling_role_name" {
   default = "AWSServiceRoleForApplicationAutoScaling_ECSService"
 }
