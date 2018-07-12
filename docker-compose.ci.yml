@@ -1,0 +1,14 @@
+version: '2.1'
+services:
+  terraform:
+    image: "quay.io/azavea/terraform:0.9.6"
+    volumes:
+      - ~/.aws:/root/.aws
+      - ./:/usr/local/src
+    environment:
+      - AWS_PROFILE=${AWS_PROFILE:-geotrellis}
+      - TRAVIS_COMMIT=${TRAVIS_COMMIT}
+      - GT_CHATTA_DEBUG=1
+      - GT_CHATTA_SETTINGS_BUCKET=${GT_CHATTA_SETTINGS_BUCKET:-geotrellis-site-production-config-us-east-1}
+    working_dir: /usr/local/src
+    entrypoint: bash
