@@ -28,3 +28,4 @@ ingest-data.zip
 deployment/terraform/.terraform
 *.tfplan
 *.tfstate*
+*.tfvars
