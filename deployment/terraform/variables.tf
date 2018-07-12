@@ -25,6 +25,10 @@ variable "cdn_price_class" {
   default = "PriceClass_200"
 }
 
+variable "ecs_autoscaling_role_name" {
+  default = "AWSServiceRoleForApplicationAutoScaling_ECSService"
+}
+
 variable "ssl_certificate_arn" {}
 
 variable "chatta_ecs_desired_count" {
