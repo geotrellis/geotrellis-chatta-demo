@@ -25,9 +25,7 @@ variable "cdn_price_class" {
   default = "PriceClass_200"
 }
 
-variable "ssl_certificate_arn" {
-  default = "arn:aws:acm:us-east-1:896538046175:certificate/a416c2af-00dd-4afd-8c71-dd32edefa839"
-}
+variable "ssl_certificate_arn" {}
 
 variable "chatta_ecs_desired_count" {
   default = "1"
