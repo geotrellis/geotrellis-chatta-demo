@@ -16,18 +16,23 @@ publishMavenStyle := true
 publishArtifact in Test := false
 pomIncludeRepository := { _ => false }
 
-val gtVersion        = "1.1.0-RC2"
-val akkaActorVersion = "2.4.17"
-val akkaHttpVersion  = "10.0.3"
+val gtVersion        = "1.2.0-RC1"
+val akkaActorVersion = "2.5.6"
+val akkaHttpVersion  = "10.0.10"
+
+resolvers ++= Seq(
+  "locationtech-releases" at "https://repo.locationtech.org/content/groups/releases"
+)
 
 libraryDependencies ++= Seq(
   "org.locationtech.geotrellis" %% "geotrellis-spark-etl" % gtVersion,
   "com.typesafe.akka" %% "akka-actor" % akkaActorVersion,
+  "com.typesafe.akka" %% "akka-stream" % akkaActorVersion,
   "com.typesafe.akka" %% "akka-http-core" % akkaHttpVersion,
   "com.typesafe.akka" %% "akka-http" % akkaHttpVersion,
   "com.typesafe.akka" %% "akka-http-spray-json" % akkaHttpVersion,
-  "org.apache.spark"  %% "spark-core"    % "2.1.0",
-  "org.apache.hadoop"  % "hadoop-client" % "2.7.3"
+  "org.apache.spark"  %% "spark-core"    % "2.1.1",
+  "org.apache.hadoop"  % "hadoop-client" % "2.8.2"
 )
 
 assemblyShadeRules in assembly := {

@@ -37,7 +37,7 @@ package object chatta {
       case "hbase" => {
         val instance = HBaseInstance(
           config.getString("hbase.zookeepers").split(","),
-          config.getString("accumulo.master")
+          config.getString("hbase.master")
         )
 
         (HBaseLayerReader(instance), HBaseValueReader(instance), HBaseAttributeStore(instance))
@@ -86,7 +86,7 @@ package object chatta {
       case "hbase" => {
         val instance = HBaseInstance(
           config.getString("hbase.zookeepers").split(","),
-          config.getString("accumulo.master")
+          config.getString("hbase.master")
         )
 
         (HBaseCollectionLayerReader(instance), HBaseValueReader(instance), HBaseAttributeStore(instance))

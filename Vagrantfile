@@ -2,6 +2,7 @@
 # vi: set ft=ruby :
 
 ANSIBLE_VERSION = "2.3.1.0"
+
 Vagrant.configure("2") do |config|
 
     # Ubuntu 14.04 LTS
@@ -19,8 +20,13 @@ Vagrant.configure("2") do |config|
         vb.cpus = 2
     end
 
+    config.vm.synced_folder "./", "/vagrant",  type: "rsync",
+        rsync__exclude: ["deployment/ansible/roles/azavea.*/",
+                         "service/geotrellis/target/",
+                         "service/geotrellis/project/target"],
+        rsync__args: ["--verbose", "--archive", "-z"]
     config.vm.synced_folder "~/.aws", "/home/vagrant/.aws"
-    config.vm.synced_folder "./", "/home/vagrant/geotrellis-chatta-demo", type: "nfs"
+
 
     # Provisioning
     # Ansible is installed automatically by Vagrant.
@@ -35,7 +41,7 @@ Vagrant.configure("2") do |config|
 
     config.vm.provision "shell" do |s|
         s.path = 'deployment/vagrant/cd_shared_folder.sh'
-        s.args = "/home/vagrant/geotrellis-chatta-demo"
+        s.args = "/vagrant"
     end
 
 end

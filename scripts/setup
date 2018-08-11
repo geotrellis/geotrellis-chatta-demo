@@ -18,7 +18,7 @@ if [ "${BASH_SOURCE[0]}" = "${0}" ]; then
     if [ "${1:-}" = "--help" ]; then
         usage
     else
-        vagrant up --provision
-        vagrant ssh -c "cd /home/vagrant/geotrellis-chatta-demo && ./scripts/update"
+        #vagrant up --provision
+        vagrant ssh -c "cd /vagrant && ./scripts/update"
     fi
 fi
